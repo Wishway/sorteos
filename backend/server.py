@@ -231,7 +231,10 @@ async def get_current_user(request: Request) -> User:
         raise HTTPException(status_code=401, detail="Sesión inválida")
     
     # Check expiration
-    if session['expires_at'] < datetime.now(timezone.utc):
+    expires_at = session['expires_at']
+    if isinstance(expires_at, str):
+        expires_at = datetime.fromisoformat(expires_at)
+    if expires_at < datetime.now(timezone.utc):
         raise HTTPException(status_code=401, detail="Sesión expirada")
     
     # Get user
