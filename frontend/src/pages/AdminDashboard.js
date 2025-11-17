@@ -25,22 +25,11 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
-  // Form state para crear sorteo
   const [formData, setFormData] = useState({
-    titulo: '',
-    descripcion: '',
-    precio_boleto: '',
-    cantidad_minima_boletos: '',
-    cantidad_total_boletos: '',
-    tipo: 'unico',
-    porcentaje_comision: '10',
-    fecha_inicio: '',
-    fecha_cierre: '',
-    color_primario: '#4F46E5',
-    color_secundario: '#06B6D4',
-    reglas: '',
-    imagenes: [],
-    etapas: []
+    titulo: '', descripcion: '', precio_boleto: '', cantidad_minima_boletos: '',
+    cantidad_total_boletos: '', tipo: 'unico', porcentaje_comision: '10',
+    fecha_inicio: '', fecha_cierre: '', color_primario: '#4F46E5',
+    color_secundario: '#06B6D4', reglas: '', imagenes: [], etapas: []
   });
 
   const [etapaForm, setEtapaForm] = useState({ numero: 1, porcentaje: '', premio: '' });
@@ -84,34 +73,24 @@ const AdminDashboard = () => {
       toast.error('Completa todos los campos de la etapa');
       return;
     }
-
     const nuevaEtapa = {
       numero: formData.etapas.length + 1,
       porcentaje: parseFloat(etapaForm.porcentaje),
       premio: etapaForm.premio,
       completado: false
     };
-
-    setFormData(prev => ({
-      ...prev,
-      etapas: [...prev.etapas, nuevaEtapa]
-    }));
-
+    setFormData(prev => ({ ...prev, etapas: [...prev.etapas, nuevaEtapa] }));
     setEtapaForm({ numero: formData.etapas.length + 2, porcentaje: '', premio: '' });
     toast.success('Etapa agregada');
   };
 
   const eliminarEtapa = (index) => {
-    setFormData(prev => ({
-      ...prev,
-      etapas: prev.etapas.filter((_, i) => i !== index)
-    }));
+    setFormData(prev => ({ ...prev, etapas: prev.etapas.filter((_, i) => i !== index) }));
     toast.success('Etapa eliminada');
   };
 
   const handleCrearSorteo = async (e) => {
     e.preventDefault();
-
     try {
       const sorteoData = {
         ...formData,
@@ -122,28 +101,15 @@ const AdminDashboard = () => {
         fecha_inicio: new Date(formData.fecha_inicio).toISOString(),
         fecha_cierre: new Date(formData.fecha_cierre).toISOString()
       };
-
       await axios.post(`${API}/sorteos`, sorteoData, { withCredentials: true });
       toast.success('¡Sorteo creado exitosamente!');
       setShowCreateModal(false);
       fetchData();
-      
-      // Reset form
       setFormData({
-        titulo: '',
-        descripcion: '',
-        precio_boleto: '',
-        cantidad_minima_boletos: '',
-        cantidad_total_boletos: '',
-        tipo: 'unico',
-        porcentaje_comision: '10',
-        fecha_inicio: '',
-        fecha_cierre: '',
-        color_primario: '#4F46E5',
-        color_secundario: '#06B6D4',
-        reglas: '',
-        imagenes: [],
-        etapas: []
+        titulo: '', descripcion: '', precio_boleto: '', cantidad_minima_boletos: '',
+        cantidad_total_boletos: '', tipo: 'unico', porcentaje_comision: '10',
+        fecha_inicio: '', fecha_cierre: '', color_primario: '#4F46E5',
+        color_secundario: '#06B6D4', reglas: '', imagenes: [], etapas: []
       });
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al crear sorteo');
@@ -152,14 +118,11 @@ const AdminDashboard = () => {
 
   const ejecutarSorteo = async (sorteoId, etapaNumero = null) => {
     if (!window.confirm('¿Estás seguro de ejecutar este sorteo?')) return;
-
     try {
-      const response = await axios.post(
-        `${API}/admin/ejecutar-sorteo`,
+      await axios.post(`${API}/admin/ejecutar-sorteo`, 
         { sorteo_id: sorteoId, etapa_numero: etapaNumero },
         { withCredentials: true }
       );
-      
       toast.success('¡Sorteo ejecutado exitosamente!');
       fetchData();
     } catch (error) {
@@ -169,11 +132,7 @@ const AdminDashboard = () => {
 
   const cambiarRoleUsuario = async (userId, newRole) => {
     try {
-      await axios.put(
-        `${API}/admin/usuario/${userId}/role?role=${newRole}`,
-        {},
-        { withCredentials: true }
-      );
+      await axios.put(`${API}/admin/usuario/${userId}/role?role=${newRole}`, {}, { withCredentials: true });
       toast.success('Role actualizado exitosamente');
       fetchData();
     } catch (error) {
@@ -181,20 +140,13 @@ const AdminDashboard = () => {
     }
   };
 
-  const sorteosActivos = sorteos.filter(s => s.estado === 'activo').length;
-  const totalUsuarios = usuarios.length;
-  const totalVendedores = usuarios.filter(u => u.role === 'vendedor').length;
-
   return (
     <div className="min-h-screen gradient-background">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-xl">
-                A
-              </div>
+              <div className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-xl">A</div>
               <div>
                 <h1 className="text-2xl font-bold">Panel de Administración</h1>
                 <p className="text-sm text-gray-600">{user?.email}</p>
@@ -202,12 +154,10 @@ const AdminDashboard = () => {
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => navigate('/')} data-testid="home-btn">
-                <Home className="w-4 h-4 mr-2" />
-                Inicio
+                <Home className="w-4 h-4 mr-2" />Inicio
               </Button>
               <Button variant="outline" onClick={handleLogout} data-testid="logout-btn">
-                <LogOut className="w-4 h-4 mr-2" />
-                Salir
+                <LogOut className="w-4 h-4 mr-2" />Salir
               </Button>
             </div>
           </div>
@@ -215,7 +165,6 @@ const AdminDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <Card className="sorteo-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -223,10 +172,9 @@ const AdminDashboard = () => {
               <Trophy className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{sorteosActivos}</div>
+              <div className="text-2xl font-bold">{sorteos.filter(s => s.estado === 'activo').length}</div>
             </CardContent>
           </Card>
-
           <Card className="sorteo-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Sorteos</CardTitle>
@@ -236,29 +184,26 @@ const AdminDashboard = () => {
               <div className="text-2xl font-bold">{sorteos.length}</div>
             </CardContent>
           </Card>
-
           <Card className="sorteo-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Usuarios</CardTitle>
               <Users className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalUsuarios}</div>
+              <div className="text-2xl font-bold">{usuarios.length}</div>
             </CardContent>
           </Card>
-
           <Card className="sorteo-card">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Vendedores</CardTitle>
               <DollarSign className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{totalVendedores}</div>
+              <div className="text-2xl font-bold">{usuarios.filter(u => u.role === 'vendedor').length}</div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
         <Tabs defaultValue="sorteos" className="space-y-4">
           <TabsList>
             <TabsTrigger value="sorteos" data-testid="tab-sorteos">Sorteos</TabsTrigger>
@@ -271,193 +216,83 @@ const AdminDashboard = () => {
               <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
                 <DialogTrigger asChild>
                   <Button data-testid="crear-sorteo-btn">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Crear Sorteo
+                    <Plus className="w-4 h-4 mr-2" />Crear Sorteo
                   </Button>
                 </DialogTrigger>
                 <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
                     <DialogTitle>Crear Nuevo Sorteo</DialogTitle>
-                    <DialogDescription>
-                      Completa los datos para crear un nuevo sorteo
-                    </DialogDescription>
+                    <DialogDescription>Completa los datos para crear un nuevo sorteo</DialogDescription>
                   </DialogHeader>
                   
                   <form onSubmit={handleCrearSorteo} className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
                       <div className="col-span-2">
                         <Label htmlFor="titulo">Título del Sorteo</Label>
-                        <Input
-                          id="titulo"
-                          name="titulo"
-                          value={formData.titulo}
-                          onChange={handleInputChange}
-                          required
-                          data-testid="titulo-input"
-                        />
+                        <Input id="titulo" name="titulo" value={formData.titulo} onChange={handleInputChange} required data-testid="titulo-input" />
                       </div>
-
                       <div className="col-span-2">
                         <Label htmlFor="descripcion">Descripción</Label>
-                        <Textarea
-                          id="descripcion"
-                          name="descripcion"
-                          value={formData.descripcion}
-                          onChange={handleInputChange}
-                          rows={3}
-                          required
-                        />
+                        <Textarea id="descripcion" name="descripcion" value={formData.descripcion} onChange={handleInputChange} rows={3} required />
                       </div>
-
                       <div>
                         <Label htmlFor="precio_boleto">Precio por Boleto ($)</Label>
-                        <Input
-                          id="precio_boleto"
-                          name="precio_boleto"
-                          type="number"
-                          step="0.01"
-                          value={formData.precio_boleto}
-                          onChange={handleInputChange}
-                          required
-                        />
+                        <Input id="precio_boleto" name="precio_boleto" type="number" step="0.01" value={formData.precio_boleto} onChange={handleInputChange} required />
                       </div>
-
                       <div>
                         <Label htmlFor="porcentaje_comision">Comisión Vendedor (%)</Label>
-                        <Input
-                          id="porcentaje_comision"
-                          name="porcentaje_comision"
-                          type="number"
-                          step="0.1"
-                          value={formData.porcentaje_comision}
-                          onChange={handleInputChange}
-                          required
-                        />
+                        <Input id="porcentaje_comision" name="porcentaje_comision" type="number" step="0.1" value={formData.porcentaje_comision} onChange={handleInputChange} required />
                       </div>
-
                       <div>
                         <Label htmlFor="cantidad_minima_boletos">Boletos Mínimos</Label>
-                        <Input
-                          id="cantidad_minima_boletos"
-                          name="cantidad_minima_boletos"
-                          type="number"
-                          value={formData.cantidad_minima_boletos}
-                          onChange={handleInputChange}
-                          required
-                        />
+                        <Input id="cantidad_minima_boletos" name="cantidad_minima_boletos" type="number" value={formData.cantidad_minima_boletos} onChange={handleInputChange} required />
                       </div>
-
                       <div>
                         <Label htmlFor="cantidad_total_boletos">Boletos Totales</Label>
-                        <Input
-                          id="cantidad_total_boletos"
-                          name="cantidad_total_boletos"
-                          type="number"
-                          value={formData.cantidad_total_boletos}
-                          onChange={handleInputChange}
-                          required
-                        />
+                        <Input id="cantidad_total_boletos" name="cantidad_total_boletos" type="number" value={formData.cantidad_total_boletos} onChange={handleInputChange} required />
                       </div>
-
                       <div>
                         <Label htmlFor="fecha_inicio">Fecha Inicio</Label>
-                        <Input
-                          id="fecha_inicio"
-                          name="fecha_inicio"
-                          type="datetime-local"
-                          value={formData.fecha_inicio}
-                          onChange={handleInputChange}
-                          required
-                        />
+                        <Input id="fecha_inicio" name="fecha_inicio" type="datetime-local" value={formData.fecha_inicio} onChange={handleInputChange} required />
                       </div>
-
                       <div>
                         <Label htmlFor="fecha_cierre">Fecha Cierre</Label>
-                        <Input
-                          id="fecha_cierre"
-                          name="fecha_cierre"
-                          type="datetime-local"
-                          value={formData.fecha_cierre}
-                          onChange={handleInputChange}
-                          required
-                        />
+                        <Input id="fecha_cierre" name="fecha_cierre" type="datetime-local" value={formData.fecha_cierre} onChange={handleInputChange} required />
                       </div>
-
                       <div>
                         <Label htmlFor="tipo">Tipo de Sorteo</Label>
                         <Select value={formData.tipo} onValueChange={(value) => setFormData(prev => ({ ...prev, tipo: value }))}>
-                          <SelectTrigger>
-                            <SelectValue />
-                          </SelectTrigger>
+                          <SelectTrigger><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="unico">Sorteo Único</SelectItem>
                             <SelectItem value="etapas">Sorteo por Etapas</SelectItem>
                           </SelectContent>
                         </Select>
                       </div>
-
-                      <div>
-                        <Label htmlFor="color_primario">Color Primario</Label>
-                        <Input
-                          id="color_primario"
-                          name="color_primario"
-                          type="color"
-                          value={formData.color_primario}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-
-                      <div>
-                        <Label htmlFor="color_secundario">Color Secundario</Label>
-                        <Input
-                          id="color_secundario"
-                          name="color_secundario"
-                          type="color"
-                          value={formData.color_secundario}
-                          onChange={handleInputChange}
-                        />
-                      </div>
                     </div>
 
                     {formData.tipo === 'etapas' && (
                       <div className="border-t pt-4">
                         <h3 className="font-semibold mb-3">Etapas</h3>
-                        
                         {formData.etapas.map((etapa, index) => (
                           <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-gray-50 rounded">
                             <span className="flex-1">Etapa {etapa.numero}: {etapa.premio} ({etapa.porcentaje}%)</span>
-                            <Button type="button" variant="destructive" size="sm" onClick={() => eliminarEtapa(index)}>
-                              Eliminar
-                            </Button>
+                            <Button type="button" variant="destructive" size="sm" onClick={() => eliminarEtapa(index)}>Eliminar</Button>
                           </div>
                         ))}
-
                         <div className="flex gap-2 mt-3">
-                          <Input
-                            placeholder="Porcentaje (ej: 25)"
-                            type="number"
-                            value={etapaForm.porcentaje}
-                            onChange={(e) => setEtapaForm(prev => ({ ...prev, porcentaje: e.target.value }))}
-                          />
-                          <Input
-                            placeholder="Premio (ej: iPhone 15)"
-                            value={etapaForm.premio}
-                            onChange={(e) => setEtapaForm(prev => ({ ...prev, premio: e.target.value }))}
-                          />
-                          <Button type="button" onClick={agregarEtapa}>
-                            Agregar
-                          </Button>
+                          <Input placeholder="% (ej: 25)" type="number" value={etapaForm.porcentaje} 
+                            onChange={(e) => setEtapaForm(prev => ({ ...prev, porcentaje: e.target.value }))} />
+                          <Input placeholder="Premio" value={etapaForm.premio} 
+                            onChange={(e) => setEtapaForm(prev => ({ ...prev, premio: e.target.value }))} />
+                          <Button type="button" onClick={agregarEtapa}>Agregar</Button>
                         </div>
                       </div>
                     )}
 
                     <div className="flex justify-end gap-2">
-                      <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>
-                        Cancelar
-                      </Button>
-                      <Button type="submit" data-testid="submit-sorteo-btn">
-                        Crear Sorteo
-                      </Button>
+                      <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
+                      <Button type="submit" data-testid="submit-sorteo-btn">Crear Sorteo</Button>
                     </div>
                   </form>
                 </DialogContent>
@@ -472,7 +307,6 @@ const AdminDashboard = () => {
               <Card className="p-12 text-center">
                 <Trophy className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-xl font-semibold mb-2">No hay sorteos creados</h3>
-                <p className="text-gray-600">Crea tu primer sorteo para comenzar</p>
               </Card>
             ) : (
               <div className="grid gap-4">
@@ -485,47 +319,30 @@ const AdminDashboard = () => {
                             <h3 className="text-xl font-bold">{sorteo.titulo}</h3>
                             <span className={`px-2 py-1 rounded text-xs font-semibold ${
                               sorteo.estado === 'activo' ? 'bg-green-100 text-green-700' :
-                              sorteo.estado === 'completado' ? 'bg-blue-100 text-blue-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
-                              {sorteo.estado}
-                            </span>
-                            <span className="px-2 py-1 rounded text-xs bg-purple-100 text-purple-700">
-                              {sorteo.tipo === 'etapas' ? 'Por Etapas' : 'Único'}
-                            </span>
+                              sorteo.estado === 'completado' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                            }`}>{sorteo.estado}</span>
                           </div>
                           <p className="text-sm text-gray-600 mb-2">{sorteo.descripcion}</p>
                           <div className="flex gap-4 text-sm text-gray-600">
                             <span>Precio: {formatCurrency(sorteo.precio_boleto)}</span>
                             <span>Vendidos: {sorteo.cantidad_vendida}/{sorteo.cantidad_total_boletos}</span>
                             <span>Progreso: {sorteo.progreso_porcentaje.toFixed(1)}%</span>
-                            <span>Cierre: {formatDate(sorteo.fecha_cierre)}</span>
                           </div>
                           {sorteo.tipo === 'etapas' && sorteo.etapas.length > 0 && (
                             <div className="mt-3 flex gap-2">
                               {sorteo.etapas.map((etapa) => (
-                                <Button
-                                  key={etapa.numero}
-                                  size="sm"
-                                  variant={etapa.completado ? 'secondary' : 'default'}
+                                <Button key={etapa.numero} size="sm" variant={etapa.completado ? 'secondary' : 'default'}
                                   onClick={() => !etapa.completado && ejecutarSorteo(sorteo.id, etapa.numero)}
-                                  disabled={etapa.completado}
-                                  data-testid={`ejecutar-etapa-${sorteo.id}-${etapa.numero}`}
-                                >
-                                  <Play className="w-3 h-3 mr-1" />
-                                  Etapa {etapa.numero} {etapa.completado ? '✓' : ''}
+                                  disabled={etapa.completado} data-testid={`ejecutar-etapa-${sorteo.id}-${etapa.numero}`}>
+                                  <Play className="w-3 h-3 mr-1" />Etapa {etapa.numero} {etapa.completado ? '✓' : ''}
                                 </Button>
                               ))}
                             </div>
                           )}
                         </div>
                         {sorteo.estado === 'activo' && (
-                          <Button
-                            onClick={() => ejecutarSorteo(sorteo.id)}
-                            data-testid={`ejecutar-sorteo-${sorteo.id}`}
-                          >
-                            <Play className="w-4 h-4 mr-2" />
-                            Ejecutar Final
+                          <Button onClick={() => ejecutarSorteo(sorteo.id)} data-testid={`ejecutar-sorteo-${sorteo.id}`}>
+                            <Play className="w-4 h-4 mr-2" />Ejecutar Final
                           </Button>
                         )}
                       </div>
@@ -538,7 +355,6 @@ const AdminDashboard = () => {
 
           <TabsContent value="usuarios" className="space-y-4">
             <h2 className="text-2xl font-bold mb-4">Gestión de Usuarios</h2>
-            
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -552,26 +368,13 @@ const AdminDashboard = () => {
                         <div className="flex-1">
                           <h3 className="text-lg font-bold">{usuario.name}</h3>
                           <p className="text-sm text-gray-600">{usuario.email}</p>
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                              usuario.role === 'admin' ? 'bg-red-100 text-red-700' :
-                              usuario.role === 'vendedor' ? 'bg-blue-100 text-blue-700' :
-                              'bg-gray-100 text-gray-700'
-                            }`}>
-                              {usuario.role}
-                            </span>
-                            {usuario.link_unico && (
-                              <span className="text-xs text-gray-600">Link: {usuario.link_unico}</span>
-                            )}
-                          </div>
+                          <span className={`inline-block mt-2 px-2 py-1 rounded text-xs font-semibold ${
+                            usuario.role === 'admin' ? 'bg-red-100 text-red-700' :
+                            usuario.role === 'vendedor' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                          }`}>{usuario.role}</span>
                         </div>
-                        <Select
-                          value={usuario.role}
-                          onValueChange={(value) => cambiarRoleUsuario(usuario.id, value)}
-                        >
-                          <SelectTrigger className="w-40">
-                            <SelectValue />
-                          </SelectTrigger>
+                        <Select value={usuario.role} onValueChange={(value) => cambiarRoleUsuario(usuario.id, value)}>
+                          <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
                           <SelectContent>
                             <SelectItem value="usuario">Usuario</SelectItem>
                             <SelectItem value="vendedor">Vendedor</SelectItem>
