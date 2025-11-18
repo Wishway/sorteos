@@ -855,6 +855,79 @@ async def update_user_role(user_id: str, role: UserRole, request: Request):
     
     return {"message": "Role actualizado exitosamente"}
 
+@api_router.put("/admin/usuario/{user_id}/bloquear")
+async def bloquear_usuario(user_id: str, request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden bloquear usuarios")
+    
+    result = await db.users.update_one(
+        {'id': user_id},
+        {'$set': {'bloqueado': True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    return {"message": "Usuario bloqueado exitosamente"}
+
+@api_router.put("/admin/usuario/{user_id}/desbloquear")
+async def desbloquear_usuario(user_id: str, request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden desbloquear usuarios")
+    
+    result = await db.users.update_one(
+        {'id': user_id},
+        {'$set': {'bloqueado': False}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    return {"message": "Usuario desbloqueado exitosamente"}
+
+@api_router.delete("/admin/usuario/{user_id}")
+async def eliminar_usuario(user_id: str, request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden eliminar usuarios")
+    
+    # Check if user has active tickets
+    boletos_count = await db.boletos.count_documents({'usuario_id': user_id})
+    if boletos_count > 0:
+        raise HTTPException(status_code=400, detail="No se puede eliminar un usuario con boletos comprados")
+    
+    result = await db.users.delete_one({'id': user_id})
+    
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    # Also delete sessions
+    await db.user_sessions.delete_many({'user_id': user_id})
+    
+    return {"message": "Usuario eliminado exitosamente"}
+
+@api_router.get("/admin/buscar-usuario")
+async def buscar_usuario(request: Request, email: str):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden buscar usuarios")
+    
+    user_doc = await db.users.find_one({'email': {'$regex': email, '$options': 'i'}}, {"_id": 0, "password_hash": 0})
+    
+    if not user_doc:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado")
+    
+    if isinstance(user_doc.get('created_at'), str):
+        user_doc['created_at'] = datetime.fromisoformat(user_doc['created_at'])
+    
+    # Get boletos count
+    boletos_count = await db.boletos.count_documents({'usuario_id': user_doc['id']})
+    user_doc['boletos_count'] = boletos_count
+    
+    return user_doc
+
 @api_router.get("/admin/boletos-pendientes")
 async def get_boletos_pendientes(request: Request, sorteo_id: Optional[str] = None):
     admin = await get_current_user(request)
