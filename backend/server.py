@@ -210,7 +210,7 @@ class SorteoCreate(BaseModel):
 
 class BoletoCompra(BaseModel):
     sorteo_id: str
-    numero_boleto: int
+    numeros_boletos: List[int]
     metodo_pago: MetodoPago
     vendedor_link: Optional[str] = None
     comprobante_url: Optional[str] = None
