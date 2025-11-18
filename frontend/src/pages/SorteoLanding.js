@@ -438,11 +438,16 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                         </DialogHeader>
                         <div className="space-y-4">
                           <div className="p-4 bg-blue-50 rounded-lg">
-                            {sorteo.datos_bancarios ? (
-                              <>
-                                <pre className="text-sm whitespace-pre-wrap font-mono">
-                                  {sorteo.datos_bancarios}
-                                </pre>
+                            {configuracionAdmin ? (
+                              <div className="text-sm space-y-1">
+                                <p><span className="font-semibold">Banco:</span> {configuracionAdmin.banco}</p>
+                                <p><span className="font-semibold">Tipo de cuenta:</span> {configuracionAdmin.tipo_cuenta}</p>
+                                <p><span className="font-semibold">Número de cuenta:</span> {configuracionAdmin.numero_cuenta}</p>
+                                <p><span className="font-semibold">Titular:</span> {configuracionAdmin.nombre_titular}</p>
+                                <p><span className="font-semibold">Cédula/RUC:</span> {configuracionAdmin.cedula_ruc}</p>
+                                <p className="text-lg font-bold mt-2">
+                                  <span className="font-semibold">Monto a transferir:</span> {formatCurrency(sorteo.precio_boleto * cantidad)}
+                                </p>
                                 <Button 
                                   variant="outline" 
                                   size="sm" 
@@ -450,16 +455,11 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                                   onClick={copyDatosBancarios}
                                 >
                                   <Copy className="w-4 h-4 mr-2" />
-                                  Copiar
+                                  Copiar datos
                                 </Button>
-                              </>
+                              </div>
                             ) : (
-                              <p className="text-sm">
-                                Banco: Banco del Pichincha<br />
-                                Cuenta: 1234567890<br />
-                                Beneficiario: WishWay EC<br />
-                                Monto: {formatCurrency(sorteo.precio_boleto)}
-                              </p>
+                              <p className="text-sm">Cargando datos bancarios...</p>
                             )}
                           </div>
 
