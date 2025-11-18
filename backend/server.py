@@ -159,6 +159,18 @@ class Comision(BaseModel):
     estado: ComisionEstado = ComisionEstado.PENDIENTE
     fecha: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class ConfiguracionAdmin(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    nombre_titular: str
+    banco: str
+    tipo_cuenta: str
+    numero_cuenta: str
+    cedula_ruc: str
+    correo_pagos: str
+    numero_whatsapp: str
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
 # ============ REQUEST/RESPONSE MODELS ============
 class RegisterRequest(BaseModel):
     email: EmailStr
