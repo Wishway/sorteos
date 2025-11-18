@@ -164,6 +164,8 @@ class RegisterRequest(BaseModel):
     email: EmailStr
     password: str
     name: str
+    cedula: str
+    celular: str
 
 class LoginRequest(BaseModel):
     email: EmailStr
