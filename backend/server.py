@@ -900,6 +900,76 @@ async def rechazar_boleto(boleto_id: str, request: Request):
     
     return {"message": "Boleto rechazado y eliminado"}
 
+@api_router.get("/admin/configuracion")
+async def get_configuracion_admin(request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden ver configuración")
+    
+    config = await db.configuracion_admin.find_one({}, {"_id": 0})
+    if not config:
+        # Create default config
+        default_config = ConfiguracionAdmin(
+            nombre_titular="WishWay EC",
+            banco="Banco del Pichincha",
+            tipo_cuenta="Corriente",
+            numero_cuenta="1234567890",
+            cedula_ruc="1234567890001",
+            correo_pagos="pagos@wishway.com",
+            numero_whatsapp="+593987654321"
+        )
+        config_dict = default_config.model_dump()
+        config_dict['updated_at'] = config_dict['updated_at'].isoformat()
+        await db.configuracion_admin.insert_one(config_dict)
+        return default_config
+    
+    if isinstance(config.get('updated_at'), str):
+        config['updated_at'] = datetime.fromisoformat(config['updated_at'])
+    
+    return ConfiguracionAdmin(**config)
+
+@api_router.put("/admin/configuracion")
+async def update_configuracion_admin(config: ConfiguracionAdmin, request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden actualizar configuración")
+    
+    config.updated_at = datetime.now(timezone.utc)
+    config_dict = config.model_dump()
+    config_dict['updated_at'] = config_dict['updated_at'].isoformat()
+    
+    # Upsert
+    await db.configuracion_admin.update_one(
+        {},
+        {'$set': config_dict},
+        upsert=True
+    )
+    
+    return {"message": "Configuración actualizada exitosamente"}
+
+@api_router.get("/configuracion-publica")
+async def get_configuracion_publica():
+    """Endpoint público para obtener datos bancarios y WhatsApp"""
+    config = await db.configuracion_admin.find_one({}, {"_id": 0})
+    if not config:
+        return {
+            "nombre_titular": "WishWay EC",
+            "banco": "Banco del Pichincha",
+            "tipo_cuenta": "Corriente",
+            "numero_cuenta": "1234567890",
+            "cedula_ruc": "1234567890001",
+            "numero_whatsapp": "+593987654321"
+        }
+    
+    return {
+        "nombre_titular": config.get("nombre_titular", ""),
+        "banco": config.get("banco", ""),
+        "tipo_cuenta": config.get("tipo_cuenta", ""),
+        "numero_cuenta": config.get("numero_cuenta", ""),
+        "cedula_ruc": config.get("cedula_ruc", ""),
+        "numero_whatsapp": config.get("numero_whatsapp", "")
+    }
+
 # ============ VENDEDOR ENDPOINTS ============
 @api_router.get("/vendedor/mis-ventas")
 async def get_mis_ventas(request: Request):
