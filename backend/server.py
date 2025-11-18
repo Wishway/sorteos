@@ -117,6 +117,8 @@ class Sorteo(BaseModel):
     progreso_porcentaje: float = 0.0
     landing_slug: str
     reglas: Optional[str] = None
+    compra_minima: int = 1
+    datos_bancarios: Optional[str] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Boleto(BaseModel):
