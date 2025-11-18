@@ -8,6 +8,7 @@ import '@/App.css';
 import Home from '@/pages/Home';
 import Login from '@/pages/Login';
 import Register from '@/pages/Register';
+import CompletarDatos from '@/pages/CompletarDatos';
 import SorteoLanding from '@/pages/SorteoLanding';
 import UsuarioDashboard from '@/pages/UsuarioDashboard';
 import VendedorDashboard from '@/pages/VendedorDashboard';
