@@ -799,6 +799,76 @@ async def update_user_role(user_id: str, role: UserRole, request: Request):
     
     return {"message": "Role actualizado exitosamente"}
 
+@api_router.get("/admin/boletos-pendientes")
+async def get_boletos_pendientes(request: Request, sorteo_id: Optional[str] = None):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden ver boletos pendientes")
+    
+    query = {'pago_confirmado': False}
+    if sorteo_id:
+        query['sorteo_id'] = sorteo_id
+    
+    boletos = await db.boletos.find(query, {"_id": 0}).to_list(1000)
+    
+    # Get user info for each boleto
+    for boleto in boletos:
+        if isinstance(boleto['fecha_compra'], str):
+            boleto['fecha_compra'] = datetime.fromisoformat(boleto['fecha_compra'])
+        
+        user_doc = await db.users.find_one({'id': boleto['usuario_id']}, {"_id": 0, "password_hash": 0})
+        boleto['usuario'] = user_doc
+        
+        sorteo_doc = await db.sorteos.find_one({'id': boleto['sorteo_id']}, {"_id": 0})
+        boleto['sorteo'] = {'titulo': sorteo_doc.get('titulo', ''), 'id': sorteo_doc.get('id', '')}
+    
+    return boletos
+
+@api_router.put("/admin/boleto/{boleto_id}/aprobar")
+async def aprobar_boleto(boleto_id: str, request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden aprobar boletos")
+    
+    result = await db.boletos.update_one(
+        {'id': boleto_id},
+        {'$set': {'pago_confirmado': True}}
+    )
+    
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Boleto no encontrado")
+    
+    return {"message": "Boleto aprobado exitosamente"}
+
+@api_router.put("/admin/boleto/{boleto_id}/rechazar")
+async def rechazar_boleto(boleto_id: str, request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden rechazar boletos")
+    
+    # Get boleto to update sorteo count
+    boleto_doc = await db.boletos.find_one({'id': boleto_id})
+    if not boleto_doc:
+        raise HTTPException(status_code=404, detail="Boleto no encontrado")
+    
+    # Delete boleto
+    await db.boletos.delete_one({'id': boleto_id})
+    
+    # Update sorteo count
+    sorteo_doc = await db.sorteos.find_one({'id': boleto_doc['sorteo_id']})
+    if sorteo_doc:
+        nueva_cantidad = max(0, sorteo_doc['cantidad_vendida'] - 1)
+        nuevo_progreso = (nueva_cantidad / sorteo_doc['cantidad_total_boletos']) * 100
+        await db.sorteos.update_one(
+            {'id': sorteo_doc['id']},
+            {'$set': {
+                'cantidad_vendida': nueva_cantidad,
+                'progreso_porcentaje': nuevo_progreso
+            }}
+        )
+    
+    return {"message": "Boleto rechazado y eliminado"}
+
 # ============ VENDEDOR ENDPOINTS ============
 @api_router.get("/vendedor/mis-ventas")
 async def get_mis_ventas(request: Request):
