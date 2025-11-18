@@ -28,8 +28,10 @@ function App() {
             <Route path="/completar-datos" element={<CompletarDatos />} />
             <Route path="/sorteo/:slug" element={<SorteoLanding />} />
             <Route path="/usuario" element={<UsuarioDashboard />} />
+            <Route path="/usuario/perfil" element={<PerfilUsuario />} />
             <Route path="/vendedor" element={<VendedorDashboard />} />
             <Route path="/admin" element={<AdminDashboard />} />
+            <Route path="/admin/perfil" element={<PerfilAdmin />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
           <Toaster position="top-right" richColors />
