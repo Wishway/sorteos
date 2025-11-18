@@ -147,6 +147,59 @@ const AdminDashboard = () => {
     }
   };
 
+  const fetchBoletosPendientes = async () => {
+    setLoadingPendientes(true);
+    try {
+      const response = await axios.get(`${API}/admin/boletos-pendientes`, { withCredentials: true });
+      setBoletosPendientes(response.data);
+    } catch (error) {
+      console.error('Error al cargar boletos pendientes:', error);
+    } finally {
+      setLoadingPendientes(false);
+    }
+  };
+
+  const handleAprobarBoleto = async (boletoId) => {
+    try {
+      await axios.put(`${API}/admin/boleto/${boletoId}/aprobar`, {}, { withCredentials: true });
+      toast.success('Boleto aprobado exitosamente');
+      fetchBoletosPendientes();
+      fetchData();
+    } catch (error) {
+      toast.error('Error al aprobar boleto');
+    }
+  };
+
+  const handleRechazarBoleto = async (boletoId) => {
+    if (!window.confirm('¿Estás seguro de rechazar este boleto? Se eliminará permanentemente.')) return;
+    try {
+      await axios.put(`${API}/admin/boleto/${boletoId}/rechazar`, {}, { withCredentials: true });
+      toast.success('Boleto rechazado');
+      fetchBoletosPendientes();
+      fetchData();
+    } catch (error) {
+      toast.error('Error al rechazar boleto');
+    }
+  };
+
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    if (passwordNueva !== passwordConfirm) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    try {
+      await axios.put(`${API}/auth/cambiar-password?password_actual=${passwordActual}&password_nueva=${passwordNueva}`, {}, { withCredentials: true });
+      toast.success('Contraseña cambiada exitosamente');
+      setShowChangePassword(false);
+      setPasswordActual('');
+      setPasswordNueva('');
+      setPasswordConfirm('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al cambiar contraseña');
+    }
+  };
+
   return (
     <div className="min-h-screen gradient-background">
       <div className="bg-white shadow-sm border-b">
