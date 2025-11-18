@@ -638,6 +638,10 @@ async def get_numeros_disponibles(sorteo_id: str):
 async def comprar_boletos(data: BoletoCompra, request: Request):
     user = await get_current_user(request)
     
+    # Check if user is blocked
+    if user.bloqueado:
+        raise HTTPException(status_code=403, detail="Tu cuenta ha sido bloqueada. Contacta al administrador")
+    
     # Check if user has complete data
     if not user.datos_completos or not user.cedula or not user.celular:
         raise HTTPException(status_code=400, detail="Debes completar tus datos (cédula y celular) antes de comprar")
