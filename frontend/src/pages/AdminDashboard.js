@@ -213,6 +213,37 @@ const AdminDashboard = () => {
               </div>
             </div>
             <div className="flex gap-2">
+              <Dialog open={showChangePassword} onOpenChange={setShowChangePassword}>
+                <DialogTrigger asChild>
+                  <Button variant="outline" data-testid="change-password-btn">
+                    <Key className="w-4 h-4 mr-2" />
+                    Cambiar Contraseña
+                  </Button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Cambiar Contraseña</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleChangePassword} className="space-y-4">
+                    <div>
+                      <Label htmlFor="password-actual">Contraseña Actual</Label>
+                      <Input id="password-actual" type="password" value={passwordActual} onChange={(e) => setPasswordActual(e.target.value)} required />
+                    </div>
+                    <div>
+                      <Label htmlFor="password-nueva">Nueva Contraseña</Label>
+                      <Input id="password-nueva" type="password" value={passwordNueva} onChange={(e) => setPasswordNueva(e.target.value)} required />
+                    </div>
+                    <div>
+                      <Label htmlFor="password-confirm">Confirmar Nueva Contraseña</Label>
+                      <Input id="password-confirm" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} required />
+                    </div>
+                    <div className="flex gap-2 justify-end">
+                      <Button type="button" variant="outline" onClick={() => setShowChangePassword(false)}>Cancelar</Button>
+                      <Button type="submit">Cambiar Contraseña</Button>
+                    </div>
+                  </form>
+                </DialogContent>
+              </Dialog>
               <Button variant="outline" onClick={() => navigate('/')} data-testid="home-btn">
                 <Home className="w-4 h-4 mr-2" />Inicio
               </Button>
