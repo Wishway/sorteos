@@ -584,14 +584,48 @@ const AdminDashboard = () => {
                             </div>
                           )}
                           
-                          <Button
-                            className="w-full bg-green-600 hover:bg-green-700"
-                            onClick={() => handleAprobarBoleto(boleto.id)}
-                            data-testid={`aprobar-boleto-${boleto.id}`}
-                          >
-                            <CheckCircle className="w-4 h-4 mr-2" />
-                            Aprobar
-                          </Button>
+                          <Dialog>
+                            <DialogTrigger asChild>
+                              <Button
+                                className="w-full bg-green-600 hover:bg-green-700"
+                                onClick={() => setBoletoAprobar(boleto.id)}
+                                data-testid={`aprobar-boleto-${boleto.id}`}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Aprobar
+                              </Button>
+                            </DialogTrigger>
+                            <DialogContent>
+                              <DialogHeader>
+                                <DialogTitle>Aprobar Boleto</DialogTitle>
+                              </DialogHeader>
+                              <div className="space-y-4">
+                                <p className="text-sm text-gray-600">
+                                  Ingresa el número de comprobante bancario para aprobar este boleto
+                                </p>
+                                <div>
+                                  <Label htmlFor="numero-comprobante">Número de Comprobante *</Label>
+                                  <Input
+                                    id="numero-comprobante"
+                                    value={numeroComprobante}
+                                    onChange={(e) => setNumeroComprobante(e.target.value)}
+                                    placeholder="Ej: 123456789"
+                                    required
+                                  />
+                                </div>
+                                <div className="flex gap-2 justify-end">
+                                  <DialogTrigger asChild>
+                                    <Button variant="outline">Cancelar</Button>
+                                  </DialogTrigger>
+                                  <DialogTrigger asChild>
+                                    <Button onClick={handleAprobarBoleto}>
+                                      Aprobar Boleto
+                                    </Button>
+                                  </DialogTrigger>
+                                </div>
+                              </div>
+                            </DialogContent>
+                          </Dialog>
                           
                           <Button
                             variant="destructive"
