@@ -137,9 +137,21 @@ const SorteoLanding = () => {
   };
 
   const copyDatosBancarios = () => {
-    if (sorteo?.datos_bancarios) {
-      navigator.clipboard.writeText(sorteo.datos_bancarios);
+    if (configuracionAdmin) {
+      const datos = `Banco: ${configuracionAdmin.banco}
+Tipo: ${configuracionAdmin.tipo_cuenta}
+Cuenta: ${configuracionAdmin.numero_cuenta}
+Titular: ${configuracionAdmin.nombre_titular}
+Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
+      navigator.clipboard.writeText(datos);
       toast.success('Datos bancarios copiados');
+    }
+  };
+
+  const abrirWhatsApp = () => {
+    if (configuracionAdmin?.numero_whatsapp) {
+      const mensaje = encodeURIComponent(`Hola, realicé una compra de boleto(s) para el sorteo: ${sorteo.titulo}`);
+      window.open(`https://wa.me/${configuracionAdmin.numero_whatsapp.replace(/\D/g, '')}?text=${mensaje}`, '_blank');
     }
   };
 
