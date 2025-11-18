@@ -595,17 +595,40 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     if sorteo.estado != SorteoEstado.ACTIVO:
         raise HTTPException(status_code=400, detail="El sorteo no está activo")
     
-    # Check if number is available
-    existing_boleto = await db.boletos.find_one({
-        'sorteo_id': sorteo.id,
-        'numero_boleto': data.numero_boleto
-    })
-    if existing_boleto:
-        raise HTTPException(status_code=400, detail="Ese número ya ha sido comprado, elige otro")
+    # Validate all numbers
+    numeros_invalidos = []
+    numeros_ocupados = []
     
-    # Validate number range
-    if data.numero_boleto < 1 or data.numero_boleto > sorteo.cantidad_total_boletos:
-        raise HTTPException(status_code=400, detail=f"El número debe estar entre 1 y {sorteo.cantidad_total_boletos}")
+    for numero in data.numeros_boletos:
+        # Validate range
+        if numero < 1 or numero > sorteo.cantidad_total_boletos:
+            numeros_invalidos.append(numero)
+            continue
+        
+        # Check if already taken (including pending ones from last 24 hours)
+        hace_24h = datetime.now(timezone.utc) - timedelta(hours=24)
+        existing = await db.boletos.find_one({
+            'sorteo_id': sorteo.id,
+            'numero_boleto': numero,
+            '$or': [
+                {'pago_confirmado': True},
+                {'fecha_compra': {'$gte': hace_24h}}
+            ]
+        })
+        if existing:
+            numeros_ocupados.append(numero)
+    
+    if numeros_invalidos:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Los siguientes números no están en el rango válido (1-{sorteo.cantidad_total_boletos}): {', '.join(map(str, numeros_invalidos))}"
+        )
+    
+    if numeros_ocupados:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Los siguientes números ya están ocupados o reservados: {', '.join(map(str, numeros_ocupados))}"
+        )
     
     # Get vendedor if link provided
     vendedor_id = None
@@ -619,46 +642,43 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     if sorteo.tipo == SorteoTipo.ETAPAS:
         etapas_participantes = [e.numero for e in sorteo.etapas]
     
-    # For transferencia, set as PENDIENTE
-    estado_inicial = BoletoEstado.ACTIVO if data.metodo_pago == MetodoPago.PAYPHONE else BoletoEstado.ACTIVO
+    # Create boletos
+    boletos_creados = []
     pago_confirmado = data.metodo_pago == MetodoPago.PAYPHONE
     
-    # If transferencia, status should be different
-    if data.metodo_pago == MetodoPago.TRANSFERENCIA:
-        estado_inicial = BoletoEstado.ACTIVO  # We'll use pago_confirmado=False to mark as pending
-        pago_confirmado = False
-    
-    boleto = Boleto(
-        sorteo_id=sorteo.id,
-        usuario_id=user.id,
-        vendedor_id=vendedor_id,
-        numero_boleto=data.numero_boleto,
-        metodo_pago=data.metodo_pago,
-        precio_pagado=sorteo.precio_boleto,
-        etapas_participantes=etapas_participantes,
-        estado=estado_inicial,
-        pago_confirmado=pago_confirmado,
-        comprobante_url=data.comprobante_url
-    )
-    
-    boleto_dict = boleto.model_dump()
-    boleto_dict['fecha_compra'] = boleto_dict['fecha_compra'].isoformat()
-    await db.boletos.insert_one(boleto_dict)
-    
-    # Create comision if vendedor
-    if vendedor_id:
-        comision = Comision(
-            vendedor_id=vendedor_id,
+    for numero in data.numeros_boletos:
+        boleto = Boleto(
             sorteo_id=sorteo.id,
-            boleto_id=boleto.id,
-            monto=sorteo.precio_boleto * (sorteo.porcentaje_comision / 100)
+            usuario_id=user.id,
+            vendedor_id=vendedor_id,
+            numero_boleto=numero,
+            metodo_pago=data.metodo_pago,
+            precio_pagado=sorteo.precio_boleto,
+            etapas_participantes=etapas_participantes,
+            estado=BoletoEstado.ACTIVO,
+            pago_confirmado=pago_confirmado,
+            comprobante_url=data.comprobante_url
         )
-        comision_dict = comision.model_dump()
-        comision_dict['fecha'] = comision_dict['fecha'].isoformat()
-        await db.comisiones.insert_one(comision_dict)
+        
+        boleto_dict = boleto.model_dump()
+        boleto_dict['fecha_compra'] = boleto_dict['fecha_compra'].isoformat()
+        await db.boletos.insert_one(boleto_dict)
+        boletos_creados.append(boleto)
+        
+        # Create comision if vendedor
+        if vendedor_id:
+            comision = Comision(
+                vendedor_id=vendedor_id,
+                sorteo_id=sorteo.id,
+                boleto_id=boleto.id,
+                monto=sorteo.precio_boleto * (sorteo.porcentaje_comision / 100)
+            )
+            comision_dict = comision.model_dump()
+            comision_dict['fecha'] = comision_dict['fecha'].isoformat()
+            await db.comisiones.insert_one(comision_dict)
     
     # Update sorteo
-    nueva_cantidad = sorteo.cantidad_vendida + 1
+    nueva_cantidad = sorteo.cantidad_vendida + len(data.numeros_boletos)
     nuevo_progreso = (nueva_cantidad / sorteo.cantidad_total_boletos) * 100
     
     await db.sorteos.update_one(
@@ -669,10 +689,13 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
         }}
     )
     
+    cantidad_boletos = len(data.numeros_boletos)
+    total = sorteo.precio_boleto * cantidad_boletos
+    
     return {
-        "message": "Boleto comprado exitosamente" + (" - Pendiente de aprobación" if not pago_confirmado else ""),
-        "boleto": boleto_dict,
-        "total": sorteo.precio_boleto,
+        "message": f"{cantidad_boletos} boleto(s) comprado(s) exitosamente" + (" - Pendiente de aprobación" if not pago_confirmado else ""),
+        "boletos": [b.model_dump() for b in boletos_creados],
+        "total": total,
         "metodo_pago": data.metodo_pago,
         "pendiente_aprobacion": not pago_confirmado
     }
