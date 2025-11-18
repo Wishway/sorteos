@@ -270,18 +270,33 @@ const UsuarioDashboard = () => {
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
+                          <div className="flex items-center gap-2 mb-3">
                             <Badge>Boleto #{boleto.numero_boleto}</Badge>
                             <Badge variant={boleto.pago_confirmado ? 'default' : 'secondary'}>
                               {boleto.pago_confirmado ? 'Confirmado' : 'Pendiente'}
                             </Badge>
                           </div>
+                          
+                          {boleto.sorteo && (
+                            <div className="mb-2">
+                              <p className="font-semibold text-lg">{boleto.sorteo.titulo}</p>
+                              <p className="text-xs text-gray-500">Código: {boleto.sorteo.landing_slug}</p>
+                            </div>
+                          )}
+                          
                           <p className="text-sm text-gray-600 mb-1">
                             Método: {boleto.metodo_pago}
                           </p>
                           <p className="text-sm text-gray-600">
                             Comprado: {formatDateTime(boleto.fecha_compra)}
                           </p>
+                          
+                          {boleto.numero_comprobante && (
+                            <p className="text-sm text-green-700 mt-2 font-semibold">
+                              Comprobante: {boleto.numero_comprobante}
+                            </p>
+                          )}
+                          
                           {boleto.etapas_participantes.length > 0 && (
                             <p className="text-sm text-gray-600 mt-2">
                               Participa en {boleto.etapas_participantes.length} etapa(s)
