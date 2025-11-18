@@ -540,6 +540,61 @@ async def get_sorteo(sorteo_id: str):
     
     return Sorteo(**sorteo_doc)
 
+@api_router.put("/admin/sorteo/{sorteo_id}")
+async def update_sorteo(sorteo_id: str, data: SorteoCreate, request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden editar sorteos")
+    
+    # Check if sorteo exists
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    # Check if sorteo has tickets
+    boletos_count = await db.boletos.count_documents({'sorteo_id': sorteo_id})
+    if boletos_count > 0:
+        raise HTTPException(status_code=400, detail="No se puede editar un sorteo con boletos vendidos")
+    
+    # Update sorteo
+    update_data = data.model_dump()
+    update_data['fecha_inicio'] = update_data['fecha_inicio'].isoformat()
+    update_data['fecha_cierre'] = update_data['fecha_cierre'].isoformat()
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': update_data}
+    )
+    
+    return {"message": "Sorteo actualizado exitosamente"}
+
+@api_router.delete("/admin/sorteo/{sorteo_id}")
+async def eliminar_sorteo(sorteo_id: str, request: Request):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden eliminar sorteos")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    # Check status
+    if sorteo_doc['estado'] == 'activo':
+        # Check if has tickets
+        boletos_count = await db.boletos.count_documents({'sorteo_id': sorteo_id})
+        if boletos_count > 0:
+            raise HTTPException(status_code=400, detail="No se puede eliminar un sorteo activo con boletos vendidos")
+    
+    # Delete sorteo
+    await db.sorteos.delete_one({'id': sorteo_id})
+    
+    # Also delete related boletos and comisiones if no tickets (safety check)
+    await db.boletos.delete_many({'sorteo_id': sorteo_id})
+    await db.comisiones.delete_many({'sorteo_id': sorteo_id})
+    await db.ganadores.delete_many({'sorteo_id': sorteo_id})
+    
+    return {"message": "Sorteo eliminado exitosamente"}
+
 @api_router.get("/sorteos/slug/{slug}", response_model=Sorteo)
 async def get_sorteo_by_slug(slug: str):
     sorteo_doc = await db.sorteos.find_one({'landing_slug': slug}, {"_id": 0})
