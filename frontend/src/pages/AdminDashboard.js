@@ -299,6 +299,9 @@ const AdminDashboard = () => {
           <TabsList>
             <TabsTrigger value="sorteos" data-testid="tab-sorteos">Sorteos</TabsTrigger>
             <TabsTrigger value="usuarios" data-testid="tab-usuarios">Usuarios</TabsTrigger>
+            <TabsTrigger value="pendientes" data-testid="tab-pendientes">
+              Boletos Pendientes {boletosPendientes.length > 0 && `(${boletosPendientes.length})`}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="sorteos" className="space-y-4">
