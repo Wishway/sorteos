@@ -881,14 +881,20 @@ async def get_boletos_pendientes(request: Request, sorteo_id: Optional[str] = No
     return boletos
 
 @api_router.put("/admin/boleto/{boleto_id}/aprobar")
-async def aprobar_boleto(boleto_id: str, request: Request):
+async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Request):
     admin = await get_current_user(request)
     if admin.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Solo admins pueden aprobar boletos")
     
+    if not numero_comprobante or numero_comprobante.strip() == "":
+        raise HTTPException(status_code=400, detail="El número de comprobante es obligatorio")
+    
     result = await db.boletos.update_one(
         {'id': boleto_id},
-        {'$set': {'pago_confirmado': True}}
+        {'$set': {
+            'pago_confirmado': True,
+            'numero_comprobante': numero_comprobante.strip()
+        }}
     )
     
     if result.matched_count == 0:
