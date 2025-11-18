@@ -330,6 +330,33 @@ const UsuarioDashboard = () => {
           </TabsContent>
 
           <TabsContent value="historial" className="space-y-4">
+            {/* Filtro por fechas */}
+            <div className="flex gap-2 mb-4">
+              <Button
+                variant={filtroFecha === 'todos' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroFecha('todos')}
+              >
+                Todos
+              </Button>
+              <Button
+                variant={filtroFecha === '30dias' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroFecha('30dias')}
+              >
+                <CalendarIcon className="w-4 h-4 mr-1" />
+                Últimos 30 días
+              </Button>
+              <Button
+                variant={filtroFecha === '90dias' ? 'default' : 'outline'}
+                size="sm"
+                onClick={() => setFiltroFecha('90dias')}
+              >
+                <CalendarIcon className="w-4 h-4 mr-1" />
+                Últimos 90 días
+              </Button>
+            </div>
+
             {loading ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -340,7 +367,7 @@ const UsuarioDashboard = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {boletos.map((boleto) => (
+                {filtrarBoletosPorFecha(boletos).map((boleto) => (
                   <Card key={boleto.id} className="sorteo-card">
                     <CardContent className="p-6">
                       <div className="flex items-start justify-between">
