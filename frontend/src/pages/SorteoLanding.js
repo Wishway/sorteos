@@ -412,7 +412,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-lg font-semibold">Total:</span>
                         <span className="text-2xl font-bold" style={{ color: sorteo.color_primario }}>
-                          {formatCurrency(sorteo.precio_boleto)}
+                          {formatCurrency(sorteo.precio_boleto * cantidad)}
                         </span>
                       </div>
                       
@@ -420,7 +420,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                         className="w-full mb-2"
                         style={{ backgroundColor: sorteo.color_primario }}
                         onClick={() => setShowDatosBancarios(true)}
-                        disabled={!numeroBoleto}
+                        disabled={numerosBoletos.some(n => !n)}
                         data-testid="ver-datos-bancarios-btn"
                       >
                         Ver Datos Bancarios
