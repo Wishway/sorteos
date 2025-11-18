@@ -134,6 +134,7 @@ class Boleto(BaseModel):
     etapa_ganada: Optional[int] = None
     transaction_id: Optional[str] = None
     pago_confirmado: bool = False
+    comprobante_url: Optional[str] = None
 
 class Ganador(BaseModel):
     model_config = ConfigDict(extra="ignore")
