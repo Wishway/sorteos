@@ -644,6 +644,99 @@ const AdminDashboard = () => {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="aprobados" className="space-y-4">
+            <h2 className="text-2xl font-bold mb-4">Boletos Aprobados</h2>
+            
+            <Card className="mb-4">
+              <CardContent className="p-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label>Filtrar por Sorteo</Label>
+                    <Select value={sorteoFiltroAprobados} onValueChange={(value) => {
+                      setSorteoFiltroAprobados(value);
+                      fetchBoletosAprobados(value, numeroBoletoFiltro);
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Todos los sorteos" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="">Todos los sorteos</SelectItem>
+                        {sorteos.map(sorteo => (
+                          <SelectItem key={sorteo.id} value={sorteo.id}>{sorteo.titulo}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label>Número de Boleto</Label>
+                    <div className="flex gap-2">
+                      <Input
+                        type="number"
+                        placeholder="Buscar por número"
+                        value={numeroBoletoFiltro}
+                        onChange={(e) => setNumeroBoletoFiltro(e.target.value)}
+                      />
+                      <Button onClick={() => fetchBoletosAprobados(sorteoFiltroAprobados, numeroBoletoFiltro)}>
+                        Buscar
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+            
+            {loadingAprobados ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : boletosAprobados.length === 0 ? (
+              <Card className="p-12 text-center">
+                <p className="text-gray-600">No hay boletos aprobados con los filtros seleccionados</p>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {boletosAprobados.map((boleto) => (
+                  <Card key={boleto.id} className="sorteo-card">
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge variant="default">Boleto #{boleto.numero_boleto}</Badge>
+                            <Badge className="bg-green-100 text-green-700">Aprobado</Badge>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-sm font-semibold">Sorteo:</span>
+                              <p className="text-gray-700">{boleto.sorteo?.titulo}</p>
+                              <p className="text-xs text-gray-500">Código: {boleto.sorteo?.landing_slug}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Usuario:</span>
+                              <p className="text-gray-700">{boleto.usuario?.name} ({boleto.usuario?.email})</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Comprobante:</span>
+                              <p className="text-green-700 font-bold">{boleto.numero_comprobante || 'N/A'}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Fecha de compra:</span>
+                              <p className="text-gray-700">{formatDateTime(boleto.fecha_compra)}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Monto:</span>
+                              <p className="text-lg font-bold text-primary">{formatCurrency(boleto.precio_pagado)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
     </div>
