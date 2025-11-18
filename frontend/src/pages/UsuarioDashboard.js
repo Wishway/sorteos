@@ -55,6 +55,54 @@ const UsuarioDashboard = () => {
 
   const boletosActivos = boletos.filter(b => b.estado === 'activo' || b.estado === 'ganador');
   const boletosGanadores = boletos.filter(b => b.estado === 'ganador' || b.etapa_ganada !== null);
+  
+  const handleChangePassword = async (e) => {
+    e.preventDefault();
+    
+    if (passwordNueva !== passwordConfirm) {
+      toast.error('Las contraseñas no coinciden');
+      return;
+    }
+    
+    if (passwordNueva.length < 6) {
+      toast.error('La contraseña debe tener al menos 6 caracteres');
+      return;
+    }
+    
+    setChangingPassword(true);
+    
+    try {
+      await axios.put(
+        `${API}/auth/cambiar-password?password_actual=${passwordActual}&password_nueva=${passwordNueva}`,
+        {},
+        { withCredentials: true }
+      );
+      toast.success('Contraseña cambiada exitosamente');
+      setShowChangePassword(false);
+      setPasswordActual('');
+      setPasswordNueva('');
+      setPasswordConfirm('');
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al cambiar contraseña');
+    } finally {
+      setChangingPassword(false);
+    }
+  };
+  
+  const filtrarBoletosPorFecha = (boletosList) => {
+    if (filtroFecha === 'todos') return boletosList;
+    
+    const ahora = new Date();
+    const hace30Dias = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
+    const hace90Dias = new Date(ahora.getTime() - 90 * 24 * 60 * 60 * 1000);
+    
+    return boletosList.filter(b => {
+      const fecha = new Date(b.fecha_compra);
+      if (filtroFecha === '30dias') return fecha >= hace30Dias;
+      if (filtroFecha === '90dias') return fecha >= hace90Dias;
+      return true;
+    });
+  };
 
   return (
     <div className="min-h-screen gradient-background">
