@@ -60,7 +60,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      await register(email, password, name);
+      await register(email, password, name, cedula, celular);
       toast.success('¡Cuenta creada! Por favor inicia sesión.');
       navigate('/login');
     } catch (error) {
