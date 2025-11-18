@@ -42,7 +42,15 @@ const Home = () => {
           <p className="text-lg sm:text-xl text-gray-700 mb-8 max-w-2xl mx-auto">
             Participa en sorteos emocionantes y gana premios increíbles. Tu próximo sueño está a un boleto de distancia.
           </p>
-          {!user && (
+          {user ? (
+            <div className="flex gap-4 justify-center">
+              <Link to={user.role === 'admin' ? '/admin' : user.role === 'vendedor' ? '/vendedor' : '/usuario'}>
+                <Button className="btn-primary" size="lg" data-testid="go-to-panel-btn">
+                  Ir a Mi Panel
+                </Button>
+              </Link>
+            </div>
+          ) : (
             <div className="flex gap-4 justify-center">
               <Link to="/login">
                 <Button className="btn-primary" size="lg" data-testid="hero-login-btn">
