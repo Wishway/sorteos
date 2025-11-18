@@ -427,6 +427,40 @@ async def logout(request: Request, response: Response):
     response.delete_cookie(key='session_token', path='/')
     return {"message": "Sesión cerrada"}
 
+@api_router.put("/auth/completar-datos")
+async def completar_datos(request: Request, cedula: str, celular: str):
+    user = await get_current_user(request)
+    
+    # Validate cedula and celular are not taken by other users
+    existing_cedula = await db.users.find_one({'cedula': cedula, 'id': {'$ne': user.id}})
+    if existing_cedula:
+        raise HTTPException(status_code=400, detail="La cédula ya está registrada")
+    
+    existing_celular = await db.users.find_one({'celular': celular, 'id': {'$ne': user.id}})
+    if existing_celular:
+        raise HTTPException(status_code=400, detail="El celular ya está registrado")
+    
+    await db.users.update_one(
+        {'id': user.id},
+        {'$set': {'cedula': cedula, 'celular': celular, 'datos_completos': True}}
+    )
+    
+    return {"message": "Datos completados exitosamente"}
+
+@api_router.put("/auth/cambiar-password")
+async def cambiar_password(request: Request, password_actual: str, password_nueva: str):
+    user = await get_current_user(request)
+    
+    if not user.password_hash or not verify_password(password_actual, user.password_hash):
+        raise HTTPException(status_code=400, detail="Contraseña actual incorrecta")
+    
+    await db.users.update_one(
+        {'id': user.id},
+        {'$set': {'password_hash': hash_password(password_nueva)}}
+    )
+    
+    return {"message": "Contraseña cambiada exitosamente"}
+
 # ============ SORTEOS ENDPOINTS ============
 @api_router.post("/sorteos", response_model=Sorteo)
 async def create_sorteo(data: SorteoCreate, request: Request):
