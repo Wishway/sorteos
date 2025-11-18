@@ -876,7 +876,39 @@ async def get_boletos_pendientes(request: Request, sorteo_id: Optional[str] = No
         boleto['usuario'] = user_doc
         
         sorteo_doc = await db.sorteos.find_one({'id': boleto['sorteo_id']}, {"_id": 0})
-        boleto['sorteo'] = {'titulo': sorteo_doc.get('titulo', ''), 'id': sorteo_doc.get('id', '')}
+        boleto['sorteo'] = {'titulo': sorteo_doc.get('titulo', ''), 'id': sorteo_doc.get('id', ''), 'landing_slug': sorteo_doc.get('landing_slug', '')}
+    
+    return boletos
+
+@api_router.get("/admin/boletos-aprobados")
+async def get_boletos_aprobados(request: Request, sorteo_id: Optional[str] = None, numero_boleto: Optional[int] = None):
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden ver boletos aprobados")
+    
+    query = {'pago_confirmado': True}
+    if sorteo_id:
+        query['sorteo_id'] = sorteo_id
+    if numero_boleto:
+        query['numero_boleto'] = numero_boleto
+    
+    boletos = await db.boletos.find(query, {"_id": 0}).to_list(1000)
+    
+    # Get user and sorteo info for each boleto
+    for boleto in boletos:
+        if isinstance(boleto['fecha_compra'], str):
+            boleto['fecha_compra'] = datetime.fromisoformat(boleto['fecha_compra'])
+        
+        user_doc = await db.users.find_one({'id': boleto['usuario_id']}, {"_id": 0, "password_hash": 0})
+        boleto['usuario'] = user_doc
+        
+        sorteo_doc = await db.sorteos.find_one({'id': boleto['sorteo_id']}, {"_id": 0})
+        if sorteo_doc:
+            boleto['sorteo'] = {
+                'titulo': sorteo_doc.get('titulo', ''),
+                'id': sorteo_doc.get('id', ''),
+                'landing_slug': sorteo_doc.get('landing_slug', '')
+            }
     
     return boletos
 
