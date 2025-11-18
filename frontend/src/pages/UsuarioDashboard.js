@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
-import { Ticket, Trophy, LogOut, Home, Key, Calendar as CalendarIcon } from 'lucide-react';
+import { Ticket, Trophy, LogOut, Home, Key, Calendar as CalendarIcon, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
