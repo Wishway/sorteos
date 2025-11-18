@@ -15,6 +15,8 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [cedula, setCedula] = useState('');
+  const [celular, setCelular] = useState('');
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
