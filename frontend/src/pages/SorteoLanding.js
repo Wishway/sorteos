@@ -60,6 +60,28 @@ const SorteoLanding = () => {
     }
   };
 
+  const fetchConfiguracion = async () => {
+    try {
+      const response = await axios.get(`${API}/configuracion-publica`);
+      setConfiguracionAdmin(response.data);
+    } catch (error) {
+      console.error('Error al cargar configuración:', error);
+    }
+  };
+
+  const handleCantidadChange = (nuevaCantidad) => {
+    const num = parseInt(nuevaCantidad) || 1;
+    setCantidad(num);
+    const nuevosNumeros = Array(num).fill('').map((_, i) => numerosBoletos[i] || '');
+    setNumerosBoletos(nuevosNumeros);
+  };
+
+  const handleNumeroChange = (index, valor) => {
+    const nuevosNumeros = [...numerosBoletos];
+    nuevosNumeros[index] = valor;
+    setNumerosBoletos(nuevosNumeros);
+  };
+
   const handleComprar = async () => {
     if (!user) {
       toast.error('Debes iniciar sesión para comprar boletos');
