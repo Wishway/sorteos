@@ -173,6 +173,10 @@ const UsuarioDashboard = () => {
                   </form>
                 </DialogContent>
               </Dialog>
+              <Button variant="outline" onClick={() => navigate('/usuario/perfil')} data-testid="perfil-btn">
+                <User className="w-4 h-4 mr-2" />
+                Mi Perfil
+              </Button>
               <Button variant="outline" onClick={() => navigate('/')} data-testid="home-btn">
                 <Home className="w-4 h-4 mr-2" />
                 Inicio
