@@ -89,14 +89,17 @@ const SorteoLanding = () => {
       return;
     }
 
-    if (!numeroBoleto) {
-      toast.error('Debes ingresar un número de boleto');
+    // Validate all numbers are filled
+    const numerosValidos = numerosBoletos.filter(n => n.trim() !== '').map(n => parseInt(n));
+    if (numerosValidos.length !== cantidad) {
+      toast.error('Debes ingresar todos los números de boleto');
       return;
     }
 
-    const numero = parseInt(numeroBoleto);
-    if (!numerosDisponibles.includes(numero)) {
-      toast.error('Ese número ya ha sido comprado, elige otro');
+    // Check for duplicates
+    const duplicados = numerosValidos.filter((n, i) => numerosValidos.indexOf(n) !== i);
+    if (duplicados.length > 0) {
+      toast.error(`Números duplicados: ${duplicados.join(', ')}`);
       return;
     }
 
@@ -107,7 +110,7 @@ const SorteoLanding = () => {
         `${API}/boletos/comprar`,
         {
           sorteo_id: sorteo.id,
-          numero_boleto: numero,
+          numeros_boletos: numerosValidos,
           metodo_pago: 'transferencia',
           vendedor_link: vendedorLink,
           comprobante_url: comprobanteUrl
@@ -117,7 +120,8 @@ const SorteoLanding = () => {
 
       toast.success(response.data.message);
       setShowDatosBancarios(false);
-      setNumeroBoleto('');
+      setCantidad(1);
+      setNumerosBoletos(['']);
       setComprobanteUrl('');
       fetchSorteoData();
     } catch (error) {
@@ -125,7 +129,7 @@ const SorteoLanding = () => {
         toast.error('Debes completar tus datos antes de comprar');
         navigate('/completar-datos');
       } else {
-        toast.error(error.response?.data?.detail || 'Error al comprar boleto');
+        toast.error(error.response?.data?.detail || 'Error al comprar boletos');
       }
     } finally {
       setComprando(false);
