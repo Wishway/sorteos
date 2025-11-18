@@ -13,6 +13,8 @@ import SorteoLanding from '@/pages/SorteoLanding';
 import UsuarioDashboard from '@/pages/UsuarioDashboard';
 import VendedorDashboard from '@/pages/VendedorDashboard';
 import AdminDashboard from '@/pages/AdminDashboard';
+import PerfilUsuario from '@/pages/PerfilUsuario';
+import PerfilAdmin from '@/pages/PerfilAdmin';
 
 function App() {
   return (
