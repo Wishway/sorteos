@@ -369,20 +369,42 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                 {sorteo.estado === 'activo' && boletosDisponibles > 0 ? (
                   <>
                     <div>
-                      <Label htmlFor="numero_boleto">Número de boleto</Label>
+                      <Label htmlFor="cantidad">¿Cuántos boletos?</Label>
                       <Input
-                        id="numero_boleto"
+                        id="cantidad"
                         type="number"
                         min="1"
-                        max={sorteo.cantidad_total_boletos}
-                        value={numeroBoleto}
-                        onChange={(e) => setNumeroBoleto(e.target.value)}
-                        placeholder="Ej: 42"
+                        max="10"
+                        value={cantidad}
+                        onChange={(e) => handleCantidadChange(e.target.value)}
                         className="w-full"
-                        data-testid="numero-boleto-input"
+                        data-testid="cantidad-input"
                       />
                       <p className="text-xs text-gray-600 mt-1">
-                        Elige un número entre 1 y {sorteo.cantidad_total_boletos}
+                        Máximo 10 boletos por compra
+                      </p>
+                    </div>
+
+                    <div>
+                      <Label>Números de boletos</Label>
+                      <div className="space-y-2">
+                        {numerosBoletos.map((numero, index) => (
+                          <div key={index}>
+                            <Input
+                              type="number"
+                              min="1"
+                              max={sorteo.cantidad_total_boletos}
+                              value={numero}
+                              onChange={(e) => handleNumeroChange(index, e.target.value)}
+                              placeholder={`Número del boleto ${index + 1}`}
+                              className="w-full"
+                              data-testid={`numero-boleto-input-${index}`}
+                            />
+                          </div>
+                        ))}
+                      </div>
+                      <p className="text-xs text-gray-600 mt-1">
+                        Elige números entre 1 y {sorteo.cantidad_total_boletos}
                       </p>
                     </div>
 
