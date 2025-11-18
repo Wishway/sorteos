@@ -78,6 +78,7 @@ class User(BaseModel):
     cedula: Optional[str] = None
     celular: Optional[str] = None
     datos_completos: bool = False
+    bloqueado: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
