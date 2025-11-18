@@ -24,11 +24,13 @@ const SorteoLanding = () => {
   const [sorteo, setSorteo] = useState(null);
   const [ganadores, setGanadores] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [numeroBoleto, setNumeroBoleto] = useState('');
+  const [cantidad, setCantidad] = useState(1);
+  const [numerosBoletos, setNumerosBoletos] = useState(['']);
   const [comprando, setComprando] = useState(false);
   const [showDatosBancarios, setShowDatosBancarios] = useState(false);
   const [numerosDisponibles, setNumerosDisponibles] = useState([]);
   const [comprobanteUrl, setComprobanteUrl] = useState('');
+  const [configuracionAdmin, setConfiguracionAdmin] = useState(null);
   
   const vendedorLink = new URLSearchParams(window.location.search).get('ref');
 
