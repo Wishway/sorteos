@@ -545,6 +545,25 @@ async def get_sorteo_by_slug(slug: str):
     
     return Sorteo(**sorteo_doc)
 
+@api_router.get("/sorteos/{sorteo_id}/numeros-disponibles")
+async def get_numeros_disponibles(sorteo_id: str):
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    # Get all taken numbers
+    boletos = await db.boletos.find({'sorteo_id': sorteo_id}, {"numero_boleto": 1}).to_list(10000)
+    numeros_ocupados = {b['numero_boleto'] for b in boletos}
+    
+    # Generate available numbers
+    numeros_disponibles = [n for n in range(1, sorteo_doc['cantidad_total_boletos'] + 1) if n not in numeros_ocupados]
+    
+    return {
+        "disponibles": numeros_disponibles,
+        "ocupados": list(numeros_ocupados),
+        "total": sorteo_doc['cantidad_total_boletos']
+    }
+
 # ============ BOLETOS ENDPOINTS ============
 @api_router.post("/boletos/comprar")
 async def comprar_boletos(data: BoletoCompra, request: Request):
