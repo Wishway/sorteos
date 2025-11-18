@@ -198,9 +198,10 @@ class SorteoCreate(BaseModel):
 
 class BoletoCompra(BaseModel):
     sorteo_id: str
-    cantidad: int
+    numero_boleto: int
     metodo_pago: MetodoPago
     vendedor_link: Optional[str] = None
+    comprobante_url: Optional[str] = None
 
 class EjecutarSorteoRequest(BaseModel):
     sorteo_id: str
