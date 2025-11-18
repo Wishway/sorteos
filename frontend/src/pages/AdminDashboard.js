@@ -27,10 +27,16 @@ const AdminDashboard = () => {
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [boletosPendientes, setBoletosPendientes] = useState([]);
   const [loadingPendientes, setLoadingPendientes] = useState(false);
+  const [boletosAprobados, setBoletosAprobados] = useState([]);
+  const [loadingAprobados, setLoadingAprobados] = useState(false);
+  const [sorteoFiltroAprobados, setSorteoFiltroAprobados] = useState('');
+  const [numeroBoletoFiltro, setNumeroBoletoFiltro] = useState('');
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [passwordActual, setPasswordActual] = useState('');
   const [passwordNueva, setPasswordNueva] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
+  const [numeroComprobante, setNumeroComprobante] = useState('');
+  const [boletoAprobar, setBoletoAprobar] = useState(null);
 
   const [formData, setFormData] = useState({
     titulo: '', descripcion: '', precio_boleto: '', cantidad_minima_boletos: '',
