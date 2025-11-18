@@ -768,7 +768,7 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
         "pendiente_aprobacion": not pago_confirmado
     }
 
-@api_router.get("/boletos/mis-boletos", response_model=List[Boleto])
+@api_router.get("/boletos/mis-boletos")
 async def get_mis_boletos(request: Request):
     user = await get_current_user(request)
     
@@ -776,6 +776,15 @@ async def get_mis_boletos(request: Request):
     for boleto in boletos:
         if isinstance(boleto['fecha_compra'], str):
             boleto['fecha_compra'] = datetime.fromisoformat(boleto['fecha_compra'])
+        
+        # Get sorteo info
+        sorteo_doc = await db.sorteos.find_one({'id': boleto['sorteo_id']}, {"_id": 0})
+        if sorteo_doc:
+            boleto['sorteo'] = {
+                'titulo': sorteo_doc.get('titulo', ''),
+                'id': sorteo_doc.get('id', ''),
+                'landing_slug': sorteo_doc.get('landing_slug', '')
+            }
     
     return boletos
 
