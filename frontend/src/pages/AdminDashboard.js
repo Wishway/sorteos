@@ -166,14 +166,37 @@ const AdminDashboard = () => {
     }
   };
 
-  const handleAprobarBoleto = async (boletoId) => {
+  const fetchBoletosAprobados = async (sorteoId = '', numeroBoleto = '') => {
+    setLoadingAprobados(true);
     try {
-      await axios.put(`${API}/admin/boleto/${boletoId}/aprobar`, {}, { withCredentials: true });
+      let url = `${API}/admin/boletos-aprobados?`;
+      if (sorteoId) url += `sorteo_id=${sorteoId}&`;
+      if (numeroBoleto) url += `numero_boleto=${numeroBoleto}`;
+      
+      const response = await axios.get(url, { withCredentials: true });
+      setBoletosAprobados(response.data);
+    } catch (error) {
+      console.error('Error al cargar boletos aprobados:', error);
+    } finally {
+      setLoadingAprobados(false);
+    }
+  };
+
+  const handleAprobarBoleto = async () => {
+    if (!numeroComprobante || !numeroComprobante.trim()) {
+      toast.error('El número de comprobante es obligatorio');
+      return;
+    }
+    
+    try {
+      await axios.put(`${API}/admin/boleto/${boletoAprobar}/aprobar?numero_comprobante=${encodeURIComponent(numeroComprobante)}`, {}, { withCredentials: true });
       toast.success('Boleto aprobado exitosamente');
+      setNumeroComprobante('');
+      setBoletoAprobar(null);
       fetchBoletosPendientes();
       fetchData();
     } catch (error) {
-      toast.error('Error al aprobar boleto');
+      toast.error(error.response?.data?.detail || 'Error al aprobar boleto');
     }
   };
 
