@@ -36,6 +36,7 @@ const SorteoLanding = () => {
 
   useEffect(() => {
     fetchSorteoData();
+    fetchConfiguracion();
   }, [slug]);
 
   const fetchSorteoData = async () => {
