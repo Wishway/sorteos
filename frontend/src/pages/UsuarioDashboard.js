@@ -187,6 +187,25 @@ const UsuarioDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Mensaje especial si ganó */}
+        {boletosGanadores.length > 0 && (
+          <Card className="mb-8 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400">
+            <CardContent className="p-6">
+              <div className="flex items-center gap-4">
+                <Trophy className="w-16 h-16 text-yellow-600 flex-shrink-0" />
+                <div>
+                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                    🎉 ¡Felicidades! Tu boleto fue ganador
+                  </h2>
+                  <p className="text-lg text-gray-700">
+                    Has ganado {boletosGanadores.length} premio(s). Revisa la sección "Premios Ganados" para más detalles.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <Card className="sorteo-card">
