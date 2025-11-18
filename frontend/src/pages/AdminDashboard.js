@@ -46,6 +46,7 @@ const AdminDashboard = () => {
       return;
     }
     fetchData();
+    fetchBoletosPendientes();
   }, [user]);
 
   const fetchData = async () => {
