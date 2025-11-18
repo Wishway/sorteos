@@ -245,6 +245,10 @@ const AdminDashboard = () => {
                   </form>
                 </DialogContent>
               </Dialog>
+              <Button variant="outline" onClick={() => navigate('/admin/perfil')} data-testid="perfil-btn">
+                <Settings className="w-4 h-4 mr-2" />
+                Configuración
+              </Button>
               <Button variant="outline" onClick={() => navigate('/')} data-testid="home-btn">
                 <Home className="w-4 h-4 mr-2" />Inicio
               </Button>
