@@ -140,6 +140,30 @@ const Register = () => {
                 data-testid="register-confirm-password-input"
               />
             </div>
+            <div>
+              <Label htmlFor="cedula">Número de Cédula</Label>
+              <Input
+                id="cedula"
+                type="text"
+                placeholder="1234567890"
+                value={cedula}
+                onChange={(e) => setCedula(e.target.value)}
+                required
+                data-testid="register-cedula-input"
+              />
+            </div>
+            <div>
+              <Label htmlFor="celular">Número de Celular</Label>
+              <Input
+                id="celular"
+                type="tel"
+                placeholder="0987654321"
+                value={celular}
+                onChange={(e) => setCelular(e.target.value)}
+                required
+                data-testid="register-celular-input"
+              />
+            </div>
             <Button 
               type="submit" 
               className="w-full btn-primary" 
