@@ -401,9 +401,20 @@ const UsuarioDashboard = () => {
                               {boleto.estado}
                             </Badge>
                           </div>
+                          
+                          {boleto.sorteo && (
+                            <p className="font-semibold text-gray-900 mb-1">{boleto.sorteo.titulo}</p>
+                          )}
+                          
                           <p className="text-sm text-gray-600">
                             {formatDateTime(boleto.fecha_compra)} - {boleto.metodo_pago}
                           </p>
+                          
+                          {boleto.numero_comprobante && (
+                            <p className="text-xs text-green-700 mt-1">
+                              Comp: {boleto.numero_comprobante}
+                            </p>
+                          )}
                         </div>
                         <div className="text-right">
                           <p className="text-xl font-bold">{formatCurrency(boleto.precio_pagado)}</p>
