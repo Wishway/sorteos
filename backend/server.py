@@ -263,16 +263,29 @@ async def require_role(required_roles: List[UserRole]):
 # ============ AUTH ENDPOINTS ============
 @api_router.post("/auth/register")
 async def register(data: RegisterRequest):
-    # Check if user exists
-    existing = await db.users.find_one({'email': data.email})
-    if existing:
+    # Check if email exists
+    existing_email = await db.users.find_one({'email': data.email})
+    if existing_email:
         raise HTTPException(status_code=400, detail="El email ya está registrado")
+    
+    # Check if cedula exists
+    existing_cedula = await db.users.find_one({'cedula': data.cedula})
+    if existing_cedula:
+        raise HTTPException(status_code=400, detail="La cédula ya está registrada")
+    
+    # Check if celular exists
+    existing_celular = await db.users.find_one({'celular': data.celular})
+    if existing_celular:
+        raise HTTPException(status_code=400, detail="El celular ya está registrado")
     
     # Create user
     user = User(
         email=data.email,
         name=data.name,
         password_hash=hash_password(data.password),
+        cedula=data.cedula,
+        celular=data.celular,
+        datos_completos=True,
         verification_token=str(uuid.uuid4())
     )
     
@@ -282,7 +295,7 @@ async def register(data: RegisterRequest):
     
     # TODO: Send verification email
     
-    return {"message": "Usuario registrado. Revisa tu email para verificar tu cuenta.", "user_id": user.id}
+    return {"message": "Usuario registrado exitosamente.", "user_id": user.id}
 
 @api_router.post("/auth/login")
 async def login(data: LoginRequest, response: Response):
