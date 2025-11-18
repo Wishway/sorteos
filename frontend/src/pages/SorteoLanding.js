@@ -6,9 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
-import { Calendar, DollarSign, Trophy, Users, CheckCircle, Clock } from 'lucide-react';
+import { Calendar, DollarSign, Trophy, CheckCircle, Clock, AlertCircle, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -21,9 +24,11 @@ const SorteoLanding = () => {
   const [sorteo, setSorteo] = useState(null);
   const [ganadores, setGanadores] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [cantidad, setCantidad] = useState(1);
-  const [metodoPago, setMetodoPago] = useState('payphone');
+  const [numeroBoleto, setNumeroBoleto] = useState('');
   const [comprando, setComprando] = useState(false);
+  const [showDatosBancarios, setShowDatosBancarios] = useState(false);
+  const [numerosDisponibles, setNumerosDisponibles] = useState([]);
+  const [comprobanteUrl, setComprobanteUrl] = useState('');
   
   const vendedorLink = new URLSearchParams(window.location.search).get('ref');
 
@@ -40,6 +45,10 @@ const SorteoLanding = () => {
       
       setSorteo(sorteoRes.data);
       setGanadores(ganadoresRes.data);
+      
+      // Fetch available numbers
+      const numerosRes = await axios.get(`${API}/sorteos/${sorteoRes.data.id}/numeros-disponibles`);
+      setNumerosDisponibles(numerosRes.data.disponibles);
     } catch (error) {
       console.error('Error al cargar sorteo:', error);
       toast.error('Error al cargar el sorteo');
@@ -55,6 +64,17 @@ const SorteoLanding = () => {
       return;
     }
 
+    if (!numeroBoleto) {
+      toast.error('Debes ingresar un número de boleto');
+      return;
+    }
+
+    const numero = parseInt(numeroBoleto);
+    if (!numerosDisponibles.includes(numero)) {
+      toast.error('Ese número ya ha sido comprado, elige otro');
+      return;
+    }
+
     setComprando(true);
 
     try {
@@ -62,25 +82,35 @@ const SorteoLanding = () => {
         `${API}/boletos/comprar`,
         {
           sorteo_id: sorteo.id,
-          cantidad: cantidad,
-          metodo_pago: metodoPago,
-          vendedor_link: vendedorLink
+          numero_boleto: numero,
+          metodo_pago: 'transferencia',
+          vendedor_link: vendedorLink,
+          comprobante_url: comprobanteUrl
         },
         { withCredentials: true }
       );
 
-      toast.success(`¡${cantidad} boleto(s) comprado(s) exitosamente!`);
-      
-      if (metodoPago === 'efectivo' || metodoPago === 'transferencia') {
-        toast.info('Pendiente de confirmación del administrador');
-      }
-
+      toast.success(response.data.message);
+      setShowDatosBancarios(false);
+      setNumeroBoleto('');
+      setComprobanteUrl('');
       fetchSorteoData();
-      setCantidad(1);
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al comprar boletos');
+      if (error.response?.status === 400 && error.response?.data?.detail?.includes('completar tus datos')) {
+        toast.error('Debes completar tus datos antes de comprar');
+        navigate('/completar-datos');
+      } else {
+        toast.error(error.response?.data?.detail || 'Error al comprar boleto');
+      }
     } finally {
       setComprando(false);
+    }
+  };
+
+  const copyDatosBancarios = () => {
+    if (sorteo?.datos_bancarios) {
+      navigator.clipboard.writeText(sorteo.datos_bancarios);
+      toast.success('Datos bancarios copiados');
     }
   };
 
@@ -109,7 +139,6 @@ const SorteoLanding = () => {
 
   return (
     <div className="min-h-screen gradient-background">
-      {/* Hero con imagen principal */}
       <div className="relative h-96 overflow-hidden">
         {sorteo.imagenes && sorteo.imagenes.length > 0 ? (
           <img 
@@ -139,9 +168,7 @@ const SorteoLanding = () => {
 
       <div className="max-w-6xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Columna Principal */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Progreso del Sorteo */}
             <Card className="sorteo-card" data-testid="progress-card">
               <CardHeader>
                 <CardTitle>Progreso del Sorteo</CardTitle>
@@ -185,7 +212,6 @@ const SorteoLanding = () => {
               </CardContent>
             </Card>
 
-            {/* Etapas (si aplica) */}
             {sorteo.tipo === 'etapas' && sorteo.etapas.length > 0 && (
               <Card className="sorteo-card">
                 <CardHeader>
@@ -233,7 +259,6 @@ const SorteoLanding = () => {
               </Card>
             )}
 
-            {/* Tabs de información */}
             <Tabs defaultValue="descripcion" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="descripcion">Descripción</TabsTrigger>
@@ -270,7 +295,7 @@ const SorteoLanding = () => {
                       </div>
                     ) : (
                       <div className="space-y-4">
-                        {ganadores.map((ganador, index) => (
+                        {ganadores.map((ganador) => (
                           <div key={ganador.id} className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border-2 border-yellow-400">
                             <div className="flex items-center gap-3">
                               <Trophy className="w-8 h-8 text-yellow-600" />
@@ -294,62 +319,116 @@ const SorteoLanding = () => {
             </Tabs>
           </div>
 
-          {/* Columna de compra */}
           <div className="lg:col-span-1">
             <Card className="sorteo-card sticky top-4" data-testid="compra-card">
               <CardHeader>
-                <CardTitle>Comprar Boletos</CardTitle>
+                <CardTitle>Comprar Boleto</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 {sorteo.estado === 'activo' && boletosDisponibles > 0 ? (
                   <>
                     <div>
-                      <label className="text-sm font-medium mb-2 block">Cantidad de boletos</label>
-                      <input
+                      <Label htmlFor="numero_boleto">Número de boleto</Label>
+                      <Input
+                        id="numero_boleto"
                         type="number"
                         min="1"
-                        max={Math.min(boletosDisponibles, 10)}
-                        value={cantidad}
-                        onChange={(e) => setCantidad(parseInt(e.target.value) || 1)}
-                        className="w-full px-4 py-2 border rounded-lg"
-                        data-testid="cantidad-input"
+                        max={sorteo.cantidad_total_boletos}
+                        value={numeroBoleto}
+                        onChange={(e) => setNumeroBoleto(e.target.value)}
+                        placeholder="Ej: 42"
+                        className="w-full"
+                        data-testid="numero-boleto-input"
                       />
                       <p className="text-xs text-gray-600 mt-1">
-                        Disponibles: {boletosDisponibles}
+                        Elige un número entre 1 y {sorteo.cantidad_total_boletos}
                       </p>
-                    </div>
-
-                    <div>
-                      <label className="text-sm font-medium mb-2 block">Método de pago</label>
-                      <select
-                        value={metodoPago}
-                        onChange={(e) => setMetodoPago(e.target.value)}
-                        className="w-full px-4 py-2 border rounded-lg"
-                        data-testid="metodo-pago-select"
-                      >
-                        <option value="payphone">PayPhone</option>
-                        <option value="efectivo">Efectivo</option>
-                        <option value="transferencia">Transferencia</option>
-                      </select>
                     </div>
 
                     <div className="pt-4 border-t">
                       <div className="flex justify-between items-center mb-4">
                         <span className="text-lg font-semibold">Total:</span>
                         <span className="text-2xl font-bold" style={{ color: sorteo.color_primario }}>
-                          {formatCurrency(sorteo.precio_boleto * cantidad)}
+                          {formatCurrency(sorteo.precio_boleto)}
                         </span>
                       </div>
+                      
                       <Button
-                        className="w-full"
+                        className="w-full mb-2"
                         style={{ backgroundColor: sorteo.color_primario }}
-                        onClick={handleComprar}
-                        disabled={comprando}
-                        data-testid="comprar-btn"
+                        onClick={() => setShowDatosBancarios(true)}
+                        disabled={!numeroBoleto}
+                        data-testid="ver-datos-bancarios-btn"
                       >
-                        {comprando ? 'Procesando...' : 'Comprar Ahora'}
+                        Ver Datos Bancarios
                       </Button>
+
+                      <p className="text-xs text-center text-gray-600 mt-2">
+                        Método de pago: Transferencia bancaria
+                      </p>
                     </div>
+
+                    <Dialog open={showDatosBancarios} onOpenChange={setShowDatosBancarios}>
+                      <DialogContent>
+                        <DialogHeader>
+                          <DialogTitle>Datos para Transferencia</DialogTitle>
+                        </DialogHeader>
+                        <div className="space-y-4">
+                          <div className="p-4 bg-blue-50 rounded-lg">
+                            {sorteo.datos_bancarios ? (
+                              <>
+                                <pre className="text-sm whitespace-pre-wrap font-mono">
+                                  {sorteo.datos_bancarios}
+                                </pre>
+                                <Button 
+                                  variant="outline" 
+                                  size="sm" 
+                                  className="mt-2"
+                                  onClick={copyDatosBancarios}
+                                >
+                                  <Copy className="w-4 h-4 mr-2" />
+                                  Copiar
+                                </Button>
+                              </>
+                            ) : (
+                              <p className="text-sm">
+                                Banco: Banco del Pichincha<br />
+                                Cuenta: 1234567890<br />
+                                Beneficiario: WishWay EC<br />
+                                Monto: {formatCurrency(sorteo.precio_boleto)}
+                              </p>
+                            )}
+                          </div>
+
+                          <div className="flex items-start gap-2 p-3 bg-yellow-50 rounded-lg">
+                            <AlertCircle className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" />
+                            <p className="text-sm text-gray-700">
+                              Tu boleto quedará en estado PENDIENTE hasta que el administrador apruebe el pago.
+                            </p>
+                          </div>
+
+                          <div>
+                            <Label htmlFor="comprobante">URL del Comprobante (Opcional)</Label>
+                            <Input
+                              id="comprobante"
+                              type="url"
+                              value={comprobanteUrl}
+                              onChange={(e) => setComprobanteUrl(e.target.value)}
+                              placeholder="https://..."
+                            />
+                          </div>
+
+                          <Button
+                            className="w-full"
+                            onClick={handleComprar}
+                            disabled={comprando}
+                            data-testid="confirmar-compra-btn"
+                          >
+                            {comprando ? 'Procesando...' : 'Confirmar Compra'}
+                          </Button>
+                        </div>
+                      </DialogContent>
+                    </Dialog>
 
                     {vendedorLink && (
                       <p className="text-xs text-center text-gray-600">
