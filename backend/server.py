@@ -1016,6 +1016,48 @@ async def get_mis_ventas(request: Request):
         "comisiones": comisiones
     }
 
+@api_router.post("/admin/limpiar-boletos-expirados")
+async def limpiar_boletos_expirados(request: Request):
+    """Elimina boletos pendientes con más de 24 horas"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden ejecutar limpieza")
+    
+    hace_24h = datetime.now(timezone.utc) - timedelta(hours=24)
+    
+    # Find expired tickets
+    boletos_expirados = await db.boletos.find({
+        'pago_confirmado': False,
+        'fecha_compra': {'$lt': hace_24h}
+    }).to_list(10000)
+    
+    cantidad_eliminados = 0
+    sorteos_actualizados = set()
+    
+    for boleto in boletos_expirados:
+        await db.boletos.delete_one({'id': boleto['id']})
+        cantidad_eliminados += 1
+        sorteos_actualizados.add(boleto['sorteo_id'])
+    
+    # Update sorteo counts
+    for sorteo_id in sorteos_actualizados:
+        boletos_count = await db.boletos.count_documents({'sorteo_id': sorteo_id})
+        sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+        if sorteo_doc:
+            nuevo_progreso = (boletos_count / sorteo_doc['cantidad_total_boletos']) * 100
+            await db.sorteos.update_one(
+                {'id': sorteo_id},
+                {'$set': {
+                    'cantidad_vendida': boletos_count,
+                    'progreso_porcentaje': nuevo_progreso
+                }}
+            )
+    
+    return {
+        "message": f"Se eliminaron {cantidad_eliminados} boleto(s) expirado(s)",
+        "cantidad": cantidad_eliminados
+    }
+
 # ============ ROOT ============
 @api_router.get("/")
 async def root():
