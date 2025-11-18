@@ -482,6 +482,99 @@ const AdminDashboard = () => {
               </div>
             )}
           </TabsContent>
+
+          <TabsContent value="pendientes" className="space-y-4">
+            <h2 className="text-2xl font-bold mb-4">Boletos Pendientes de Aprobación</h2>
+            
+            {loadingPendientes ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : boletosPendientes.length === 0 ? (
+              <Card className="p-12 text-center">
+                <p className="text-gray-600">No hay boletos pendientes de aprobación</p>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {boletosPendientes.map((boleto) => (
+                  <Card key={boleto.id} className="sorteo-card">
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge variant="secondary">Boleto #{boleto.numero_boleto}</Badge>
+                            <Badge className="bg-yellow-100 text-yellow-700">Pendiente</Badge>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-sm font-semibold">Sorteo:</span>
+                              <p className="text-gray-700">{boleto.sorteo?.titulo}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Usuario:</span>
+                              <p className="text-gray-700">{boleto.usuario?.name} ({boleto.usuario?.email})</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Cédula:</span>
+                              <p className="text-gray-700">{boleto.usuario?.cedula}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Celular:</span>
+                              <p className="text-gray-700">{boleto.usuario?.celular}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Fecha de compra:</span>
+                              <p className="text-gray-700">{formatDateTime(boleto.fecha_compra)}</p>
+                            </div>
+                            <div>
+                              <span className="text-sm font-semibold">Monto:</span>
+                              <p className="text-lg font-bold text-primary">{formatCurrency(boleto.precio_pagado)}</p>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col gap-3">
+                          {boleto.comprobante_url && (
+                            <div className="p-3 bg-blue-50 rounded-lg">
+                              <p className="text-sm font-semibold mb-2">Comprobante:</p>
+                              <a 
+                                href={boleto.comprobante_url} 
+                                target="_blank" 
+                                rel="noopener noreferrer"
+                                className="text-blue-600 hover:underline text-sm break-all"
+                              >
+                                Ver comprobante
+                              </a>
+                            </div>
+                          )}
+                          
+                          <Button
+                            className="w-full bg-green-600 hover:bg-green-700"
+                            onClick={() => handleAprobarBoleto(boleto.id)}
+                            data-testid={`aprobar-boleto-${boleto.id}`}
+                          >
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            Aprobar
+                          </Button>
+                          
+                          <Button
+                            variant="destructive"
+                            className="w-full"
+                            onClick={() => handleRechazarBoleto(boleto.id)}
+                            data-testid={`rechazar-boleto-${boleto.id}`}
+                          >
+                            <XCircle className="w-4 h-4 mr-2" />
+                            Rechazar
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
     </div>
