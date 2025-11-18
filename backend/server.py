@@ -75,6 +75,9 @@ class User(BaseModel):
     link_unico: Optional[str] = None
     email_verified: bool = False
     verification_token: Optional[str] = None
+    cedula: Optional[str] = None
+    celular: Optional[str] = None
+    datos_completos: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
