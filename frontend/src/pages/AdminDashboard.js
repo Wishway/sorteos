@@ -144,6 +144,30 @@ const AdminDashboard = () => {
     }
   };
 
+  const editarSorteo = (sorteoId) => {
+    toast.info('Redirigiendo a editar sorteo...');
+    navigate(`/admin/sorteo/${sorteoId}/editar`);
+  };
+
+  const eliminarSorteo = async (sorteoId) => {
+    const sorteo = sorteos.find(s => s.id === sorteoId);
+    
+    if (sorteo.cantidad_vendida > 0) {
+      toast.error('No se puede eliminar un sorteo con boletos vendidos');
+      return;
+    }
+
+    if (!window.confirm('¿Estás seguro de eliminar este sorteo? Esta acción no se puede deshacer.')) return;
+    
+    try {
+      await axios.delete(`${API}/admin/sorteo/${sorteoId}`, { withCredentials: true });
+      toast.success('Sorteo eliminado exitosamente');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al eliminar sorteo');
+    }
+  };
+
   const cambiarRoleUsuario = async (userId, newRole) => {
     try {
       await axios.put(`${API}/admin/usuario/${userId}/role?role=${newRole}`, {}, { withCredentials: true });
