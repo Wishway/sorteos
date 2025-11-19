@@ -31,6 +31,7 @@ const SorteoLanding = () => {
   const [numerosDisponibles, setNumerosDisponibles] = useState([]);
   const [comprobanteUrl, setComprobanteUrl] = useState('');
   const [configuracionAdmin, setConfiguracionAdmin] = useState(null);
+  const [otrosSorteos, setOtrosSorteos] = useState([]);
   
   const vendedorLink = new URLSearchParams(window.location.search).get('ref');
 
