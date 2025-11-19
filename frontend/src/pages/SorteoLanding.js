@@ -89,6 +89,12 @@ const SorteoLanding = () => {
       return;
     }
 
+    // Validate minimum purchase quantity
+    if (sorteo.cantidad_minima_boletos && cantidad < sorteo.cantidad_minima_boletos) {
+      toast.error(`Debes comprar al menos ${sorteo.cantidad_minima_boletos} boleto(s)`);
+      return;
+    }
+
     // Validate all numbers are filled
     const numerosValidos = numerosBoletos.filter(n => n.trim() !== '').map(n => parseInt(n));
     if (numerosValidos.length !== cantidad) {
