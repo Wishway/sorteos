@@ -101,3 +101,112 @@
 #====================================================================================================
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
+
+user_problem_statement: "Testing Admin Dashboard functionality for WishWay raffle platform including login, sorteos management, user management, pending tickets approval, and approved tickets filtering"
+
+frontend:
+  - task: "Admin Login Authentication"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/Login.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Initial testing required - need to verify admin login with credentials admin@wishway.com / password123"
+
+  - task: "Admin Dashboard Access and Navigation"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test dashboard access after login and verify proper role-based redirection"
+
+  - task: "Sorteos Tab Management"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test sorteos listing, edit/delete buttons, and create sorteo functionality"
+
+  - task: "Users Tab Management"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test user listing, role selector, block/unblock buttons, delete functionality, and search"
+
+  - task: "Pending Tickets Tab"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test pending tickets display, approve button modal with comprobante field"
+
+  - task: "Approved Tickets Tab"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test approved tickets filtering by sorteo, ticket number search, and display"
+
+  - task: "Create Sorteo Modal"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test create sorteo modal with image/video URL fields and form submission"
+
+metadata:
+  created_by: "testing_agent"
+  version: "1.0"
+  test_sequence: 1
+
+test_plan:
+  current_focus:
+    - "Admin Login Authentication"
+    - "Admin Dashboard Access and Navigation"
+    - "Sorteos Tab Management"
+    - "Users Tab Management"
+    - "Pending Tickets Tab"
+    - "Approved Tickets Tab"
+    - "Create Sorteo Modal"
+  stuck_tasks: []
+  test_all: true
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "Starting comprehensive testing of Admin Dashboard functionality. Will test login, all tabs, and core admin features as requested by user."
