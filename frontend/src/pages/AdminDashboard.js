@@ -501,11 +501,30 @@ const AdminDashboard = () => {
                             </div>
                           )}
                         </div>
-                        {sorteo.estado === 'activo' && (
-                          <Button onClick={() => ejecutarSorteo(sorteo.id)} data-testid={`ejecutar-sorteo-${sorteo.id}`}>
-                            <Play className="w-4 h-4 mr-2" />Ejecutar Final
+                        <div className="flex flex-col gap-2">
+                          {sorteo.estado === 'activo' && (
+                            <Button onClick={() => ejecutarSorteo(sorteo.id)} data-testid={`ejecutar-sorteo-${sorteo.id}`}>
+                              <Play className="w-4 h-4 mr-2" />Ejecutar Final
+                            </Button>
+                          )}
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => editarSorteo(sorteo.id)}
+                            data-testid={`editar-sorteo-${sorteo.id}`}
+                          >
+                            Editar
                           </Button>
-                        )}
+                          <Button 
+                            variant="destructive" 
+                            size="sm"
+                            onClick={() => eliminarSorteo(sorteo.id)}
+                            disabled={sorteo.cantidad_vendida > 0}
+                            data-testid={`eliminar-sorteo-${sorteo.id}`}
+                          >
+                            Eliminar
+                          </Button>
+                        </div>
                       </div>
                     </CardContent>
                   </Card>
