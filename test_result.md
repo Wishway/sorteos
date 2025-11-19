@@ -184,19 +184,16 @@ metadata:
 
 test_plan:
   current_focus:
-    - "Admin Login Authentication"
-    - "Admin Dashboard Access and Navigation"
-    - "Sorteos Tab Management"
-    - "Users Tab Management"
-    - "Pending Tickets Tab"
-    - "Approved Tickets Tab"
-    - "Create Sorteo Modal"
+    - "User Login Authentication"
+    - "User Dashboard Access and Navigation"
+    - "Ticket Information Display"
+    - "Active Tickets Tab"
+    - "History Tab with Date Filters"
+    - "Change Password Functionality"
   stuck_tasks: []
   test_all: true
   test_priority: "high_first"
 
 agent_communication:
   - agent: "testing"
-    message: "Starting comprehensive testing of Admin Dashboard functionality. Will test login, all tabs, and core admin features as requested by user."
-  - agent: "testing"
-    message: "TESTING COMPLETED: All admin dashboard functionality tested successfully. Fixed critical React Select component issue in approved tickets tab. All requested features are working: login, sorteos management, user management, pending/approved tickets, and create sorteo modal with URL fields."
+    message: "Starting comprehensive testing of Usuario Dashboard functionality. Will test user login with usuario@wishway.com/password123, dashboard access, ticket information display, tabs functionality, and navigation buttons as requested by user."
