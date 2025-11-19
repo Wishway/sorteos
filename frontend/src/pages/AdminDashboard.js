@@ -852,7 +852,7 @@ const AdminDashboard = () => {
                         <SelectValue placeholder="Todos los sorteos" />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Todos los sorteos</SelectItem>
+                        <SelectItem value="all">Todos los sorteos</SelectItem>
                         {sorteos.map(sorteo => (
                           <SelectItem key={sorteo.id} value={sorteo.id}>{sorteo.titulo}</SelectItem>
                         ))}
