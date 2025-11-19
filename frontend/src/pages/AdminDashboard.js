@@ -459,8 +459,60 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
+                    <div className="col-span-2 border-t pt-4">
+                      <h3 className="font-semibold mb-3">Imágenes Promocionales</h3>
+                      {formData.imagenes.map((img, index) => (
+                        <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-gray-50 rounded">
+                          <span className="flex-1 text-sm truncate">{img}</span>
+                          <Button type="button" variant="destructive" size="sm" onClick={() => {
+                            setFormData(prev => ({ ...prev, imagenes: prev.imagenes.filter((_, i) => i !== index) }));
+                          }}>Eliminar</Button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2 mt-3">
+                        <Input 
+                          placeholder="URL de imagen (ej: https://...)" 
+                          type="url"
+                          value={imagenUrl} 
+                          onChange={(e) => setImagenUrl(e.target.value)} 
+                        />
+                        <Button type="button" onClick={() => {
+                          if (imagenUrl.trim()) {
+                            setFormData(prev => ({ ...prev, imagenes: [...prev.imagenes, imagenUrl.trim()] }));
+                            setImagenUrl('');
+                          }
+                        }}>Agregar</Button>
+                      </div>
+                    </div>
+
+                    <div className="col-span-2 border-t pt-4">
+                      <h3 className="font-semibold mb-3">Videos Promocionales</h3>
+                      {formData.videos.map((vid, index) => (
+                        <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-gray-50 rounded">
+                          <span className="flex-1 text-sm truncate">{vid}</span>
+                          <Button type="button" variant="destructive" size="sm" onClick={() => {
+                            setFormData(prev => ({ ...prev, videos: prev.videos.filter((_, i) => i !== index) }));
+                          }}>Eliminar</Button>
+                        </div>
+                      ))}
+                      <div className="flex gap-2 mt-3">
+                        <Input 
+                          placeholder="URL de video (YouTube, Google Drive, etc)" 
+                          type="url"
+                          value={videoUrl} 
+                          onChange={(e) => setVideoUrl(e.target.value)} 
+                        />
+                        <Button type="button" onClick={() => {
+                          if (videoUrl.trim()) {
+                            setFormData(prev => ({ ...prev, videos: [...prev.videos, videoUrl.trim()] }));
+                            setVideoUrl('');
+                          }
+                        }}>Agregar</Button>
+                      </div>
+                    </div>
+
                     {formData.tipo === 'etapas' && (
-                      <div className="border-t pt-4">
+                      <div className="col-span-2 border-t pt-4">
                         <h3 className="font-semibold mb-3">Etapas</h3>
                         {formData.etapas.map((etapa, index) => (
                           <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-gray-50 rounded">
