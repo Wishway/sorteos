@@ -557,6 +557,63 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
             </Card>
           </div>
         </div>
+
+        {/* Promotional Banners for Other Active Raffles */}
+        {otrosSorteos.length > 0 && (
+          <div className="mt-16">
+            <h2 className="text-3xl font-bold mb-6 text-center">Otros Sorteos Activos</h2>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {otrosSorteos.map((otroSorteo) => (
+                <Card 
+                  key={otroSorteo.id} 
+                  className="sorteo-card cursor-pointer hover:shadow-lg transition-shadow"
+                  onClick={() => navigate(`/sorteo/${otroSorteo.landing_slug}`)}
+                >
+                  <div className="relative h-48 overflow-hidden rounded-t-lg">
+                    {otroSorteo.imagenes && otroSorteo.imagenes.length > 0 ? (
+                      <img 
+                        src={otroSorteo.imagenes[0]} 
+                        alt={otroSorteo.titulo}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div 
+                        className="w-full h-full flex items-center justify-center"
+                        style={{ backgroundColor: otroSorteo.color_primario }}
+                      >
+                        <Trophy className="w-16 h-16 text-white opacity-30" />
+                      </div>
+                    )}
+                    <div className="absolute top-2 right-2">
+                      <Badge style={{ backgroundColor: otroSorteo.color_secundario }}>
+                        {otroSorteo.tipo === 'etapas' ? 'Por Etapas' : 'Único'}
+                      </Badge>
+                    </div>
+                  </div>
+                  <CardContent className="p-4">
+                    <h3 className="font-bold text-lg mb-2 line-clamp-2">{otroSorteo.titulo}</h3>
+                    <p className="text-sm text-gray-600 mb-3 line-clamp-2">{otroSorteo.descripcion}</p>
+                    <div className="flex justify-between items-center">
+                      <span className="text-sm font-semibold">
+                        {formatCurrency(otroSorteo.precio_boleto)}
+                      </span>
+                      <span className="text-xs text-gray-500">
+                        {otroSorteo.progreso_porcentaje.toFixed(0)}% vendido
+                      </span>
+                    </div>
+                    <Button 
+                      className="w-full mt-3" 
+                      size="sm"
+                      style={{ backgroundColor: otroSorteo.color_primario }}
+                    >
+                      Ver Sorteo
+                    </Button>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
