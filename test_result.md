@@ -102,116 +102,80 @@
 # Testing Data - Main Agent and testing sub agent both should log testing data below this section
 #====================================================================================================
 
-user_problem_statement: "Testing Admin Dashboard functionality for WishWay raffle platform including login, sorteos management, user management, pending tickets approval, and approved tickets filtering"
+user_problem_statement: "Testing Usuario Dashboard functionality for WishWay raffle platform including user login, ticket information display, active tickets tab, history tab with date filters, and navigation buttons"
 
 frontend:
-  - task: "Admin Login Authentication"
+  - task: "User Login Authentication"
     implemented: true
-    working: true
+    working: "NA"
     file: "/app/frontend/src/pages/Login.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "testing"
-        comment: "Initial testing required - need to verify admin login with credentials admin@wishway.com / password123"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: Admin login working correctly with provided credentials. Successfully redirects to /admin dashboard after authentication."
+        comment: "Initial testing required - need to verify user login with credentials usuario@wishway.com / password123 and redirect to /usuario dashboard"
 
-  - task: "Admin Dashboard Access and Navigation"
+  - task: "User Dashboard Access and Navigation"
     implemented: true
-    working: true
-    file: "/app/frontend/src/pages/AdminDashboard.js"
+    working: "NA"
+    file: "/app/frontend/src/pages/UsuarioDashboard.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "testing"
-        comment: "Need to test dashboard access after login and verify proper role-based redirection"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: Dashboard loads correctly with admin header, statistics cards (4 active sorteos, 4 total sorteos, 5 users, 1 vendedor). All navigation buttons (logout, home, profile) are visible and functional."
+        comment: "Need to test dashboard access after login, verify user header with profile info, and test navigation buttons (Mi Perfil, Inicio, Salir, Cambiar Contraseña)"
 
-  - task: "Sorteos Tab Management"
+  - task: "Ticket Information Display"
     implemented: true
-    working: true
-    file: "/app/frontend/src/pages/AdminDashboard.js"
+    working: "NA"
+    file: "/app/frontend/src/pages/UsuarioDashboard.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "testing"
-        comment: "Need to test sorteos listing, edit/delete buttons, and create sorteo functionality"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: Sorteos tab shows 4 sorteos with proper edit/delete buttons. Delete buttons correctly disabled for sorteos with sold tickets (3 disabled). All functionality working as expected."
+        comment: "Need to verify that each ticket shows: sorteo name (sorteo.titulo), sorteo code/ID (sorteo.landing_slug), comprobante number (numero_comprobante), ticket status, purchase date, and paid price"
 
-  - task: "Users Tab Management"
+  - task: "Active Tickets Tab"
     implemented: true
-    working: true
-    file: "/app/frontend/src/pages/AdminDashboard.js"
+    working: "NA"
+    file: "/app/frontend/src/pages/UsuarioDashboard.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "testing"
-        comment: "Need to test user listing, role selector, block/unblock buttons, delete functionality, and search"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: Users tab displays 5 users with role selectors, block/unblock buttons, delete buttons, and search functionality. All controls are properly visible and accessible."
+        comment: "Need to test that active tickets tab shows tickets with 'activo' or 'ganador' status and displays all required ticket information"
 
-  - task: "Pending Tickets Tab"
+  - task: "History Tab with Date Filters"
     implemented: true
-    working: true
-    file: "/app/frontend/src/pages/AdminDashboard.js"
+    working: "NA"
+    file: "/app/frontend/src/pages/UsuarioDashboard.js"
     stuck_count: 0
     priority: "high"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "testing"
-        comment: "Need to test pending tickets display, approve button modal with comprobante field"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: Pending tickets tab shows 20 pending tickets with approve buttons. Modal opens correctly with required 'Número de Comprobante' field. All functionality working properly."
+        comment: "Need to test history tab shows all tickets, verify date filters work (Todos, 30 días, 90 días), and confirm comprobante number is displayed when it exists"
 
-  - task: "Approved Tickets Tab"
+  - task: "Change Password Functionality"
     implemented: true
-    working: true
-    file: "/app/frontend/src/pages/AdminDashboard.js"
-    stuck_count: 0
-    priority: "high"
-    needs_retesting: false
-    status_history:
-      - working: "NA"
-        agent: "testing"
-        comment: "Need to test approved tickets filtering by sorteo, ticket number search, and display"
-      - working: false
-        agent: "testing"
-        comment: "❌ FAILED: React Select component error with empty string value causing tab to not render properly"
-      - working: true
-        agent: "testing"
-        comment: "✅ FIXED & PASSED: Fixed SelectItem empty value issue by changing value='' to value='all'. Tab now loads correctly with sorteo dropdown filter, ticket number input, and search button."
-
-  - task: "Create Sorteo Modal"
-    implemented: true
-    working: true
-    file: "/app/frontend/src/pages/AdminDashboard.js"
+    working: "NA"
+    file: "/app/frontend/src/pages/UsuarioDashboard.js"
     stuck_count: 0
     priority: "medium"
-    needs_retesting: false
+    needs_retesting: true
     status_history:
       - working: "NA"
         agent: "testing"
-        comment: "Need to test create sorteo modal with image/video URL fields and form submission"
-      - working: true
-        agent: "testing"
-        comment: "✅ PASSED: Create Sorteo modal opens correctly with URL input fields for images and videos (no file upload as requested). Modal has proper form fields and can be closed successfully."
+        comment: "Need to test that 'Cambiar Contraseña' button opens modal with password change form and proper validation"
 
 metadata:
   created_by: "testing_agent"
