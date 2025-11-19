@@ -71,6 +71,19 @@ const SorteoLanding = () => {
     }
   };
 
+  const fetchOtrosSorteos = async () => {
+    try {
+      const response = await axios.get(`${API}/sorteos`);
+      // Filter active raffles excluding the current one
+      const activos = response.data.filter(s => 
+        s.estado === 'activo' && s.landing_slug !== slug
+      ).slice(0, 3); // Show max 3 other raffles
+      setOtrosSorteos(activos);
+    } catch (error) {
+      console.error('Error al cargar otros sorteos:', error);
+    }
+  };
+
   const handleCantidadChange = (nuevaCantidad) => {
     const num = parseInt(nuevaCantidad) || 1;
     setCantidad(num);
