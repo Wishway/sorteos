@@ -231,7 +231,7 @@ const AdminDashboard = () => {
     setLoadingAprobados(true);
     try {
       let url = `${API}/admin/boletos-aprobados?`;
-      if (sorteoId) url += `sorteo_id=${sorteoId}&`;
+      if (sorteoId && sorteoId !== 'all') url += `sorteo_id=${sorteoId}&`;
       if (numeroBoleto) url += `numero_boleto=${numeroBoleto}`;
       
       const response = await axios.get(url, { withCredentials: true });
