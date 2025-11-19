@@ -1,0 +1,179 @@
+<analysis>**original_problem_statement:**
+The user wants to build a comprehensive web platform for managing digital raffles, adapted for . The system should be fully automated.
+
+**PRODUCT REQUIREMENTS:**
+
+1.  **User Roles:**
+    *   **Admin:** Total control. Creates and manages raffles, users, sellers, commissions, and payments.
+    *   **Seller/Affiliate:** Gets a unique referral link to earn commissions. Can track sales and earnings.
+    *   **User/Buyer:** Registers to buy tickets, views their purchased tickets, and sees their winnings.
+
+2.  **Raffle Types:**
+    *   **Single Stage:** A standard raffle that runs on a specific date.
+    *   **Multi-Stage:** Raffles with multiple stages triggered automatically when certain sales percentages are met (e.g., 25%, 50%, 75%, 100%). A winning ticket in an early stage is excluded from subsequent stages but still participates in the final draw.
+
+3.  **Core Functionality:**
+    *   **Authentication:** Custom JWT (email/password) and Google social login. Requires email verification. Registration includes fields like full name, ID number (cédula), and cell phone number.
+    *   **Ticket Purchase:**
+        *   Users select the quantity of tickets to buy, which dynamically generates input fields for each ticket number.
+        *   The system must validate that the chosen ticket numbers are available and within the valid range for the raffle.
+        *   Bank transfer is the primary payment method. Bank details are displayed at checkout.
+        *   A minimum purchase quantity per transaction can be set by the admin.
+    *   **Ticket Management:**
+        *   Tickets purchased via transfer are  until approved by the admin.
+        *   Pending tickets are reserved for 24 hours and automatically expire (become available again) if not approved.
+        *   Admin must enter a bank confirmation number to approve a ticket.
+    *   **Admin Panel:**
+        *   Dashboard for managing users (block/delete), raffles (create/edit/delete with rules), and commissions.
+        *   Section to manage bank details and a WhatsApp contact number for payment confirmations.
+        *   A view to approve/reject pending tickets.
+        *   A view to see all approved tickets, filterable by raffle and ticket number.
+    *   **User Panel:**
+        *   A My Profile section to view personal data.
+        *   A detailed history of purchased tickets, including raffle name, raffle ID, ticket status, and confirmation number.
+        *   Ability to change password.
+    *   **Raffle Creation:** Admins can set ticket price, commission percentages, dates, minimum sales, and add promotional image/video URLs (e.g., from YouTube/Google Drive).
+    *   **Landing Pages:** Each raffle gets a public landing page () showing prizes, progress, stages, and winners. These pages should also feature promotional banners for other active raffles.
+
+**User's preferred language**: Spanish (español)
+
+**what currently exists?**
+A full-stack application with a FastAPI backend and React frontend has been developed over several iterations. The backend includes most of the requested business logic, such as data models for users, raffles, and tickets, along with API endpoints for user management (auth, blocking), raffle management (creation, editing rules), and the complete ticket purchase/approval flow (including ticket expiration and mandatory confirmation numbers).
+
+However, the frontend implementation is incomplete and does not reflect all the available backend functionalities. While basic pages and components exist, many of the UI features requested in the last two user interactions are missing or were only partially implemented.
+
+**Last working item**:
+*   **Last item agent was working:** The agent was attempting to fix the frontend of the Admin Dashboard () after the user reported that previously requested features were not visible. Specifically, the agent was adding the UI for:
+    1.  The modal to approve a pending ticket, which now requires a mandatory comprobante (confirmation number) input.
+    2.  The new tab/section titled Boletos Aprobados (Approved Tickets) to display all active tickets with filtering capabilities.
+*   **Status:** IN PROGRESS
+*   **Agent Testing Done:** N
+*   **Which testing method agent to use?** Frontend testing agent (to verify the complex UI interactions in the Admin and User dashboards) and Backend testing agent (to ensure the new API logic is correct).
+*   **User Testing Done:** N
+
+**All Pending/In progress Issue list**:
+*   **Issue 1 (P0): Incomplete Frontend Implementation for Core Features**
+    *   **Description:** The user has repeatedly stated that the frontend does not reflect the backend capabilities. The entire feature set from the user's last two requests (messages #242 and #275) needs to be fully implemented and verified on the frontend. This is the highest priority.
+    *   **Attempted fixes:** The agent has made several attempts to update the frontend files (, , ), but has been running into token limits or getting sidetracked, leading to incomplete work. The last action was editing  to add the UI for approving tickets and viewing approved tickets.
+    *   **Next debug checklist:**
+        1.  **AdminDashboard.js:**
+            *   Ensure the Approve Ticket modal has a mandatory input for .
+            *   Fully implement the Boletos Aprobados tab, including fetching data from the  endpoint and implementing the filters for  and .
+            *   Implement the user management UI (block/delete buttons, search field).
+            *   Implement the raffle management UI (edit/delete buttons with correct logic).
+        2.  **UsuarioDashboard.js:**
+            *   Verify the ticket list correctly displays , , and .
+        3.  **SorteoLanding.js:**
+            *   Ensure the minimum purchase logic is enforced on the frontend.
+            *   Add the promotional banner section for other raffles.
+        4.  **CreateRaffle/EditRaffle Component:**
+            *   Ensure the form uses URL inputs for images/videos instead of file uploads.
+    *   **Why fix this issue and what will be achieved with the fix?** To fulfill the user's explicit requirements and make the application functional as specified. The backend logic is mostly there, but inaccessible without the UI.
+    *   **Status:** IN PROGRESS
+    *   **Is recurring issue?** Y
+    *   **Should Test frontend/backend/both after fix?** Both.
+    *   **Blocked on other issue:** None.
+
+**In progress Task List**:
+*   **Task 1 (P0): Complete Frontend Implementation**
+    *   **Description:** Implement all the missing UI features from the user's last request (message #275) to align the frontend with the already-developed backend logic.
+    *   **Where to resume:** Continue working on  to finish the Boletos Aprobados section and the user/raffle management features. Then, move to other components like , , and the raffle creation form.
+    *   **What will be achieved with this?** A fully functional application that meets all the user's specified requirements.
+    *   **Status:** IN PROGRESS
+    *   **Should Test frontend/backend/both after fix?** Both.
+    *   **Blocked on something:** None.
+
+**Upcoming and Future Tasks**
+*   None. All requested features are considered part of the current in-progress task list.
+
+**Completed work in this session**
+- **Backend Development:**
+  - Full user authentication flow (JWT & Google).
+  - Data models for Users, Raffles, Tickets, and Admin Configuration.
+  - API endpoints for creating, editing, and deleting raffles with business logic (e.g., cannot delete if tickets are sold).
+  - API endpoints for the complete ticket purchase flow, including validation for ticket availability and minimum purchase quantity.
+  - API endpoints for user management (blocking/deleting users).
+  - API endpoints for ticket approval, requiring a confirmation number.
+  - API endpoint to fetch approved tickets with filters.
+  - Scheduled task logic for expiring pending tickets (backend endpoint  created, but cron job not set up).
+- **Frontend Development:**
+  - Initial scaffolding of pages: , , , , , , .
+  - Created user profile pages:  and .
+  - Implemented the purchase flow UI for selecting ticket quantity and entering specific numbers.
+  - Added Badge import to  to fix a crash.
+
+**Earlier issues found/mentioned but not fixed**
+*   **Issue 1: Agent Prematurely Finishes Tasks:**
+    *   **Description:** The agent has a recurring pattern of implementing backend logic, starting the frontend work, and then declaring the entire task 100% complete before the UI is functional or fully implemented. This has happened multiple times (messages 91, 139, 183, 241, 274), causing user frustration.
+    *   **Why to solve this issue and what will be achieved with this?** The next agent must ensure a feature is complete on both backend and frontend, and fully tested, before marking it as done. This will prevent rework and improve user trust.
+    *   **Should Test frontend/backend/both after fix:** N/A (process issue).
+    *   **Is recurring issue?** Y
+
+**Known issue recurrence from previous fork**
+*   None.
+
+**Code Architecture**
+
+
+**Key Technical Concepts**
+*   **Backend:** FastAPI, Python, MongoDB (via  driver).
+*   **Frontend:** React, JavaScript, , .
+*   **Authentication:** JWT (JSON Web Tokens) with roles.
+*   **Database:** Asynchronous communication with MongoDB.
+
+**key DB schema**
+*   : 
+*   : 
+*   : 
+*   : 
+*   : 
+
+**All files**
+*   : The core backend file, containing all data models and API endpoints. Has been heavily modified.
+*   : A large and complex component for the admin panel. It's the primary focus of the current unfinished work.
+*   : The user's panel. Needs UI updates to show detailed ticket info.
+*   : The public raffle page. Needs updates for minimum purchase validation and promotional banners.
+*   : New page for the admin to edit their bank/contact details.
+*   : New page for the user to view their profile.
+*   : Main router file, updated with new routes for profile pages.
+*   : Manages user session state.
+
+**Critical Info for New Agent**
+*   The user is frustrated because the frontend is not keeping up with the requested features. Your absolute top priority is to implement the UI for the 8 features listed in the user's last message ().
+*   The backend logic for most of these 8 features should already be implemented in . You must verify this and then build the React components to consume those endpoints.
+*   Do not claim the task is complete until all 8 features are visibly working on the frontend and have been tested.
+*   Pay close attention to , as it is the most complex component and where the previous agent left off.
+
+**documents created in this job**
+*   
+*   
+*   
+*   
+*   
+*   
+
+**Last 5 User Messages and any pending user messages**
+1.  **User (msg #242):** Provided a list of 8 new requirements, including detailed ticket info, mandatory proof for approval, an Approved Tickets list, raffle edit/delete rules, minimum purchase enforcement, user management, landing page ads, and using links for images/videos.
+2.  **Agent (msg #274):** Claimed all 8 requirements were implemented and the system was 100% functional (this was inaccurate).
+3.  **User (msg #275):** Complained that the features from the previous request were not working or visible on the frontend and re-submitted the same list of 8 requirements.
+4.  **Agent (msg #276):** Acknowledged the mistake and agreed to complete the frontend implementation.
+5.  **Agent (msg #278-280):** Started working on the  file to add the UI for approving tickets with a confirmation number and the Approved Tickets tab. This work is **INCOMPLETE**.
+
+**Project Health Check:**
+*   **Broken:** The frontend is significantly out of sync with the backend, making many features inaccessible to the user. The  and  are not fully functional as per the latest requirements.
+*   **Mocked:** None.
+
+**Testing status**
+*   **Testing agent used after significant changes:** NO
+*   **Troubleshoot agent used after agent stuck in loop:** NO
+*   **Test files created:** None.
+*   **Known regressions:** A  error in  was reported and fixed by adding an import.
+
+**Credentials to test flow:**
+Seed users were created and are documented in .
+*   **Admin:**  / 
+*   **Seller:**  / 
+*   **User:**  / 
+
+**What agent forgot to execute**
+The agent consistently forgot to complete the frontend implementation for the backend logic it created. Specifically, all 8 points from the user's message #275 were started on the backend but left incomplete on the frontend. The agent also repeatedly failed to perform thorough testing before declaring a task finished.</analysis>
