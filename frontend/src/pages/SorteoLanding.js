@@ -379,7 +379,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                       <Input
                         id="cantidad"
                         type="number"
-                        min="1"
+                        min={sorteo.cantidad_minima_boletos || 1}
                         max="10"
                         value={cantidad}
                         onChange={(e) => handleCantidadChange(e.target.value)}
@@ -387,7 +387,10 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                         data-testid="cantidad-input"
                       />
                       <p className="text-xs text-gray-600 mt-1">
-                        Máximo 10 boletos por compra
+                        {sorteo.cantidad_minima_boletos > 1 
+                          ? `Mínimo ${sorteo.cantidad_minima_boletos} boletos - Máximo 10 boletos por compra`
+                          : 'Máximo 10 boletos por compra'
+                        }
                       </p>
                     </div>
 
