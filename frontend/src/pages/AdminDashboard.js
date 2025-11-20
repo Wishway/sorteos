@@ -536,19 +536,160 @@ const AdminDashboard = () => {
 
                     {formData.tipo === 'etapas' && (
                       <div className="col-span-2 border-t pt-4">
-                        <h3 className="font-semibold mb-3">Etapas</h3>
+                        <h3 className="font-semibold mb-3">Configurar Etapas</h3>
+                        
+                        {/* Lista de etapas agregadas */}
                         {formData.etapas.map((etapa, index) => (
-                          <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-gray-50 rounded">
-                            <span className="flex-1">Etapa {etapa.numero}: {etapa.premio} ({etapa.porcentaje}%)</span>
-                            <Button type="button" variant="destructive" size="sm" onClick={() => eliminarEtapa(index)}>Eliminar</Button>
+                          <div key={index} className="mb-4 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex-1">
+                                <p className="font-semibold text-lg">Etapa {etapa.numero}: {etapa.nombre || etapa.premio}</p>
+                                <p className="text-sm text-gray-600">Premio: {etapa.premio}</p>
+                                <p className="text-sm text-gray-600">Se activa al {etapa.porcentaje}% de ventas</p>
+                                {etapa.imagen_urls && etapa.imagen_urls.length > 0 && (
+                                  <p className="text-xs text-blue-600 mt-1">✓ {etapa.imagen_urls.length} imagen(es)</p>
+                                )}
+                                {etapa.video_urls && etapa.video_urls.length > 0 && (
+                                  <p className="text-xs text-purple-600 mt-1">✓ {etapa.video_urls.length} video(s)</p>
+                                )}
+                              </div>
+                              <Button type="button" variant="destructive" size="sm" onClick={() => eliminarEtapa(index)}>
+                                Eliminar
+                              </Button>
+                            </div>
                           </div>
                         ))}
-                        <div className="flex gap-2 mt-3">
-                          <Input placeholder="% (ej: 25)" type="number" value={etapaForm.porcentaje} 
-                            onChange={(e) => setEtapaForm(prev => ({ ...prev, porcentaje: e.target.value }))} />
-                          <Input placeholder="Premio" value={etapaForm.premio} 
-                            onChange={(e) => setEtapaForm(prev => ({ ...prev, premio: e.target.value }))} />
-                          <Button type="button" onClick={agregarEtapa}>Agregar</Button>
+
+                        {/* Formulario para agregar nueva etapa */}
+                        <div className="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                          <h4 className="font-semibold mb-3 text-blue-900">Agregar Nueva Etapa</h4>
+                          
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                              <Label className="text-xs">Nombre de la Etapa (opcional)</Label>
+                              <Input 
+                                placeholder="Ej: Primera Etapa" 
+                                value={etapaForm.nombre} 
+                                onChange={(e) => setEtapaForm(prev => ({ ...prev, nombre: e.target.value }))} 
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Porcentaje de Activación *</Label>
+                              <Input 
+                                placeholder="Ej: 25" 
+                                type="number" 
+                                value={etapaForm.porcentaje} 
+                                onChange={(e) => setEtapaForm(prev => ({ ...prev, porcentaje: e.target.value }))} 
+                              />
+                            </div>
+                          </div>
+
+                          <div className="mb-3">
+                            <Label className="text-xs">Premio de esta Etapa *</Label>
+                            <Input 
+                              placeholder="Ej: iPhone 15 Pro" 
+                              value={etapaForm.premio} 
+                              onChange={(e) => setEtapaForm(prev => ({ ...prev, premio: e.target.value }))} 
+                            />
+                          </div>
+
+                          {/* URLs de imágenes para esta etapa */}
+                          <div className="mb-3">
+                            <Label className="text-xs">Imágenes de esta Etapa (opcional)</Label>
+                            {etapaForm.imagen_urls.map((img, idx) => (
+                              <div key={idx} className="flex items-center gap-2 mb-1">
+                                <span className="flex-1 text-xs truncate bg-white px-2 py-1 rounded">{img}</span>
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="sm" 
+                                  onClick={() => {
+                                    setEtapaForm(prev => ({ 
+                                      ...prev, 
+                                      imagen_urls: prev.imagen_urls.filter((_, i) => i !== idx) 
+                                    }));
+                                  }}
+                                >
+                                  X
+                                </Button>
+                              </div>
+                            ))}
+                            <div className="flex gap-2 mt-1">
+                              <Input 
+                                placeholder="URL de imagen"
+                                type="url"
+                                value={etapaImagenUrl}
+                                onChange={(e) => setEtapaImagenUrl(e.target.value)}
+                                className="text-sm"
+                              />
+                              <Button 
+                                type="button" 
+                                size="sm"
+                                onClick={() => {
+                                  if (etapaImagenUrl.trim()) {
+                                    setEtapaForm(prev => ({ 
+                                      ...prev, 
+                                      imagen_urls: [...prev.imagen_urls, etapaImagenUrl.trim()] 
+                                    }));
+                                    setEtapaImagenUrl('');
+                                  }
+                                }}
+                              >
+                                + Agregar
+                              </Button>
+                            </div>
+                          </div>
+
+                          {/* URLs de videos para esta etapa */}
+                          <div className="mb-3">
+                            <Label className="text-xs">Videos de esta Etapa (opcional)</Label>
+                            {etapaForm.video_urls.map((vid, idx) => (
+                              <div key={idx} className="flex items-center gap-2 mb-1">
+                                <span className="flex-1 text-xs truncate bg-white px-2 py-1 rounded">{vid}</span>
+                                <Button 
+                                  type="button" 
+                                  variant="ghost" 
+                                  size="sm"
+                                  onClick={() => {
+                                    setEtapaForm(prev => ({ 
+                                      ...prev, 
+                                      video_urls: prev.video_urls.filter((_, i) => i !== idx) 
+                                    }));
+                                  }}
+                                >
+                                  X
+                                </Button>
+                              </div>
+                            ))}
+                            <div className="flex gap-2 mt-1">
+                              <Input 
+                                placeholder="URL de video (YouTube, etc)"
+                                type="url"
+                                value={etapaVideoUrl}
+                                onChange={(e) => setEtapaVideoUrl(e.target.value)}
+                                className="text-sm"
+                              />
+                              <Button 
+                                type="button" 
+                                size="sm"
+                                onClick={() => {
+                                  if (etapaVideoUrl.trim()) {
+                                    setEtapaForm(prev => ({ 
+                                      ...prev, 
+                                      video_urls: [...prev.video_urls, etapaVideoUrl.trim()] 
+                                    }));
+                                    setEtapaVideoUrl('');
+                                  }
+                                }}
+                              >
+                                + Agregar
+                              </Button>
+                            </div>
+                          </div>
+
+                          <Button type="button" onClick={agregarEtapa} className="w-full">
+                            Agregar Esta Etapa
+                          </Button>
                         </div>
                       </div>
                     )}
