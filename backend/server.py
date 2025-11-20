@@ -44,9 +44,12 @@ class SorteoTipo(str, Enum):
     UNICO = "unico"
 
 class SorteoEstado(str, Enum):
-    ACTIVO = "activo"
-    PAUSADO = "pausado"
-    COMPLETADO = "completado"
+    DRAFT = "draft"              # Borrador - no visible, 100% editable
+    PUBLISHED = "published"      # Publicado/En Venta - visible, no editable
+    WAITING = "waiting"          # En Espera - pre-sorteo con contador
+    LIVE = "live"                # En Proceso - ejecutándose con animación
+    COMPLETED = "completed"      # Completado - finalizado
+    PAUSADO = "pausado"          # Pausado (legacy, mantener por compatibilidad)
 
 class BoletoEstado(str, Enum):
     ACTIVO = "activo"
