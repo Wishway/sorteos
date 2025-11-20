@@ -114,7 +114,7 @@ class Sorteo(BaseModel):
     porcentaje_comision: float
     fecha_inicio: datetime
     fecha_cierre: datetime
-    estado: SorteoEstado = SorteoEstado.ACTIVO
+    estado: SorteoEstado = SorteoEstado.DRAFT  # Por defecto en borrador
     etapas: List[Etapa] = []
     imagenes: List[str] = []
     videos: List[str] = []
