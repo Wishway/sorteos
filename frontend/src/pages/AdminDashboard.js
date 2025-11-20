@@ -176,13 +176,6 @@ const AdminDashboard = () => {
   };
 
   const eliminarSorteo = async (sorteoId) => {
-    const sorteo = sorteos.find(s => s.id === sorteoId);
-    
-    if (sorteo.cantidad_vendida > 0) {
-      toast.error('No se puede eliminar un sorteo con boletos vendidos');
-      return;
-    }
-
     if (!window.confirm('¿Estás seguro de eliminar este sorteo? Esta acción no se puede deshacer.')) return;
     
     try {
@@ -191,6 +184,52 @@ const AdminDashboard = () => {
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al eliminar sorteo');
+    }
+  };
+
+  const publicarSorteo = async (sorteoId) => {
+    if (!window.confirm('¿Deseas publicar este sorteo? Una vez publicado, no podrá ser editado.')) return;
+    
+    try {
+      await axios.put(`${API}/admin/sorteo/${sorteoId}/publicar`, {}, { withCredentials: true });
+      toast.success('¡Sorteo publicado exitosamente!');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al publicar sorteo');
+    }
+  };
+
+  const pausarSorteo = async (sorteoId) => {
+    try {
+      await axios.put(`${API}/admin/sorteo/${sorteoId}/pausar`, {}, { withCredentials: true });
+      toast.success('Estado actualizado');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al cambiar estado');
+    }
+  };
+
+  const iniciarSorteo = async (sorteoId) => {
+    if (!window.confirm('¿Iniciar el sorteo manualmente ahora?')) return;
+    
+    try {
+      await axios.put(`${API}/admin/sorteo/${sorteoId}/estado?nuevo_estado=live`, {}, { withCredentials: true });
+      toast.success('Sorteo iniciado');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al iniciar sorteo');
+    }
+  };
+
+  const finalizarSorteo = async (sorteoId) => {
+    if (!window.confirm('¿Forzar finalización del sorteo?')) return;
+    
+    try {
+      await axios.put(`${API}/admin/sorteo/${sorteoId}/estado?nuevo_estado=completed`, {}, { withCredentials: true });
+      toast.success('Sorteo finalizado');
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al finalizar sorteo');
     }
   };
 
