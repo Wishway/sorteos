@@ -761,28 +761,108 @@ const AdminDashboard = () => {
                           )}
                         </div>
                         <div className="flex flex-col gap-2">
-                          {sorteo.estado === 'activo' && (
-                            <Button onClick={() => ejecutarSorteo(sorteo.id)} data-testid={`ejecutar-sorteo-${sorteo.id}`}>
-                              <Play className="w-4 h-4 mr-2" />Ejecutar Final
+                          {/* DRAFT: Publicar y Editar */}
+                          {sorteo.estado === 'draft' && (
+                            <>
+                              <Button 
+                                className="bg-green-600 hover:bg-green-700"
+                                size="sm"
+                                onClick={() => publicarSorteo(sorteo.id)}
+                                data-testid={`publicar-sorteo-${sorteo.id}`}
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Publicar
+                              </Button>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => editarSorteo(sorteo.id)}
+                                data-testid={`editar-sorteo-${sorteo.id}`}
+                              >
+                                Editar
+                              </Button>
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => eliminarSorteo(sorteo.id)}
+                                data-testid={`eliminar-sorteo-${sorteo.id}`}
+                              >
+                                Eliminar
+                              </Button>
+                            </>
+                          )}
+
+                          {/* PUBLISHED / ACTIVO: Pausar */}
+                          {(sorteo.estado === 'published' || sorteo.estado === 'activo') && (
+                            <>
+                              <Button 
+                                variant="outline" 
+                                size="sm"
+                                onClick={() => pausarSorteo(sorteo.id)}
+                                data-testid={`pausar-sorteo-${sorteo.id}`}
+                              >
+                                <XCircle className="w-4 h-4 mr-2" />
+                                Pausar Ventas
+                              </Button>
+                            </>
+                          )}
+
+                          {/* PAUSADO: Reactivar */}
+                          {sorteo.estado === 'pausado' && (
+                            <Button 
+                              className="bg-orange-600 hover:bg-orange-700"
+                              size="sm"
+                              onClick={() => pausarSorteo(sorteo.id)}
+                              data-testid={`reactivar-sorteo-${sorteo.id}`}
+                            >
+                              <Play className="w-4 h-4 mr-2" />
+                              Reactivar
                             </Button>
                           )}
-                          <Button 
-                            variant="outline" 
-                            size="sm"
-                            onClick={() => editarSorteo(sorteo.id)}
-                            data-testid={`editar-sorteo-${sorteo.id}`}
-                          >
-                            Editar
-                          </Button>
-                          <Button 
-                            variant="destructive" 
-                            size="sm"
-                            onClick={() => eliminarSorteo(sorteo.id)}
-                            disabled={sorteo.cantidad_vendida > 0}
-                            data-testid={`eliminar-sorteo-${sorteo.id}`}
-                          >
-                            Eliminar
-                          </Button>
+
+                          {/* WAITING: Iniciar manualmente */}
+                          {sorteo.estado === 'waiting' && (
+                            <Button 
+                              className="bg-yellow-600 hover:bg-yellow-700"
+                              size="sm"
+                              onClick={() => iniciarSorteo(sorteo.id)}
+                              data-testid={`iniciar-sorteo-${sorteo.id}`}
+                            >
+                              <Play className="w-4 h-4 mr-2" />
+                              Iniciar Sorteo
+                            </Button>
+                          )}
+
+                          {/* LIVE: Finalizar */}
+                          {sorteo.estado === 'live' && (
+                            <Button 
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => finalizarSorteo(sorteo.id)}
+                              data-testid={`finalizar-sorteo-${sorteo.id}`}
+                            >
+                              Finalizar
+                            </Button>
+                          )}
+
+                          {/* COMPLETED: solo info */}
+                          {sorteo.estado === 'completed' && (
+                            <p className="text-xs text-gray-500 italic">Completado</p>
+                          )}
+
+                          {/* Etapas (si aplica) */}
+                          {sorteo.tipo === 'etapas' && sorteo.etapas && sorteo.etapas.length > 0 && sorteo.estado !== 'draft' && (
+                            <div className="mt-2 pt-2 border-t">
+                              <p className="text-xs font-semibold mb-1">Etapas:</p>
+                              {sorteo.etapas.map((etapa) => (
+                                <div key={etapa.numero} className="flex items-center gap-1 text-xs mb-1">
+                                  <span className={etapa.completado ? 'text-green-600' : 'text-gray-600'}>
+                                    {etapa.completado ? '✓' : '○'} Etapa {etapa.numero}
+                                  </span>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </CardContent>
