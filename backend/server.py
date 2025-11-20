@@ -602,7 +602,7 @@ async def eliminar_sorteo(sorteo_id: str, request: Request):
     if estado == 'draft':
         # DRAFT: se puede eliminar libremente
         pass
-    elif estado == 'completed':
+    elif estado in ['completed', 'completado']:
         # COMPLETED: verificar que han pasado 30 días
         fecha_completado = sorteo_doc.get('fecha_completado')
         if fecha_completado:
@@ -614,8 +614,11 @@ async def eliminar_sorteo(sorteo_id: str, request: Request):
                     status_code=400, 
                     detail=f"Los sorteos completados solo se pueden eliminar después de 30 días. Faltan {30 - dias_transcurridos} días."
                 )
+        else:
+            # Si no tiene fecha_completado, permitir eliminar (sorteos legacy sin fecha)
+            pass
     else:
-        # PUBLISHED, WAITING, LIVE, PAUSADO: no se pueden eliminar
+        # PUBLISHED, WAITING, LIVE, PAUSADO, ACTIVO: no se pueden eliminar
         raise HTTPException(
             status_code=400, 
             detail=f"No se puede eliminar un sorteo en estado {estado}. Solo se pueden eliminar sorteos en DRAFT o COMPLETED (después de 30 días)."
