@@ -95,6 +95,9 @@ class Etapa(BaseModel):
     numero: int
     porcentaje: float
     premio: str
+    nombre: Optional[str] = None  # Nombre de la etapa
+    imagen_urls: List[str] = []   # URLs de imágenes para esta etapa
+    video_urls: List[str] = []    # URLs de videos para esta etapa
     ganador_id: Optional[str] = None
     fecha_sorteo: Optional[datetime] = None
     completado: bool = False
