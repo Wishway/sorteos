@@ -714,18 +714,34 @@ const AdminDashboard = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {sorteos.map((sorteo) => (
-                  <Card key={sorteo.id} className="sorteo-card">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-xl font-bold">{sorteo.titulo}</h3>
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                              sorteo.estado === 'activo' ? 'bg-green-100 text-green-700' :
-                              sorteo.estado === 'completado' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                            }`}>{sorteo.estado}</span>
-                          </div>
+                {sorteos.map((sorteo) => {
+                  // Función para obtener el badge según el estado
+                  const getEstadoBadge = (estado) => {
+                    const badges = {
+                      draft: { bg: 'bg-gray-200', text: 'text-gray-800', label: '📝 BORRADOR' },
+                      published: { bg: 'bg-green-100', text: 'text-green-700', label: '🟢 PUBLICADO' },
+                      waiting: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: '⏳ EN ESPERA' },
+                      live: { bg: 'bg-red-100', text: 'text-red-700', label: '🔴 EN VIVO' },
+                      completed: { bg: 'bg-blue-100', text: 'text-blue-700', label: '✅ COMPLETADO' },
+                      pausado: { bg: 'bg-orange-100', text: 'text-orange-700', label: '⏸️ PAUSADO' },
+                      activo: { bg: 'bg-green-100', text: 'text-green-700', label: '🟢 ACTIVO' }, // legacy
+                    };
+                    return badges[estado] || badges.draft;
+                  };
+                  
+                  const badge = getEstadoBadge(sorteo.estado);
+                  
+                  return (
+                    <Card key={sorteo.id} className="sorteo-card">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="text-xl font-bold">{sorteo.titulo}</h3>
+                              <span className={`px-3 py-1 rounded-full text-xs font-bold ${badge.bg} ${badge.text}`}>
+                                {badge.label}
+                              </span>
+                            </div>
                           <p className="text-sm text-gray-600 mb-2">{sorteo.descripcion}</p>
                           <div className="flex gap-4 text-sm text-gray-600">
                             <span>Precio: {formatCurrency(sorteo.precio_boleto)}</span>
