@@ -797,6 +797,71 @@ async def get_ganadores_sorteo(sorteo_id: str):
             ganador['fecha_sorteo'] = datetime.fromisoformat(ganador['fecha_sorteo'])
     return ganadores
 
+@api_router.get("/ganadores/recientes")
+async def get_ganadores_recientes():
+    """Obtiene ganadores de los últimos 30 días hábiles (calculado como 30 días calendario)"""
+    fecha_limite = datetime.now(timezone.utc) - timedelta(days=30)
+    
+    ganadores = await db.ganadores.find({
+        'fecha_sorteo': {'$gte': fecha_limite}
+    }, {"_id": 0}).to_list(1000)
+    
+    # Enriquecer con info del sorteo, usuario y boleto
+    for ganador in ganadores:
+        if isinstance(ganador['fecha_sorteo'], str):
+            ganador['fecha_sorteo'] = datetime.fromisoformat(ganador['fecha_sorteo'])
+        
+        # Get sorteo info
+        sorteo_doc = await db.sorteos.find_one({'id': ganador['sorteo_id']}, {"_id": 0})
+        if sorteo_doc:
+            ganador['sorteo'] = {
+                'titulo': sorteo_doc.get('titulo', ''),
+                'imagenes': sorteo_doc.get('imagenes', []),
+                'landing_slug': sorteo_doc.get('landing_slug', '')
+            }
+        
+        # Get user info
+        user_doc = await db.users.find_one({'id': ganador['usuario_id']}, {"_id": 0})
+        if user_doc:
+            ganador['usuario'] = {
+                'name': user_doc.get('name', 'Anónimo'),
+                'email': user_doc.get('email', '')
+            }
+        
+        # Get boleto info
+        boleto_doc = await db.boletos.find_one({'id': ganador['boleto_id']}, {"_id": 0})
+        if boleto_doc:
+            ganador['numero_boleto'] = boleto_doc.get('numero_boleto', 0)
+    
+    # Ordenar por fecha descendente (más recientes primero)
+    ganadores.sort(key=lambda x: x['fecha_sorteo'], reverse=True)
+    
+    return ganadores
+
+@api_router.get("/sorteos/{sorteo_id}/participantes")
+async def get_participantes_sorteo(sorteo_id: str):
+    """Obtiene participantes activos de un sorteo para mostrar en animación"""
+    # Solo boletos ACTIVOS (no pendientes ni anulados)
+    boletos = await db.boletos.find({
+        'sorteo_id': sorteo_id,
+        'estado': 'activo',
+        'pago_confirmado': True
+    }, {"_id": 0}).to_list(1000)
+    
+    participantes = []
+    for boleto in boletos:
+        user_doc = await db.users.find_one({'id': boleto['usuario_id']}, {"_id": 0})
+        if user_doc:
+            participantes.append({
+                'nombre': user_doc.get('name', 'Anónimo'),
+                'numero_boleto': boleto.get('numero_boleto', 0)
+            })
+    
+    return {
+        'participantes': participantes,
+        'total': len(participantes)
+    }
+
 # ============ ADMIN ENDPOINTS ============
 @api_router.post("/admin/ejecutar-sorteo")
 async def ejecutar_sorteo(data: EjecutarSorteoRequest, request: Request):
