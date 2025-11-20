@@ -885,9 +885,19 @@ const AdminDashboard = () => {
                             </Button>
                           )}
 
-                          {/* COMPLETED: solo info */}
+                          {/* COMPLETED: Puede eliminarse */}
                           {(sorteo.estado === 'completed' || sorteo.estado === 'completado') && (
-                            <p className="text-xs text-gray-500 italic">Completado</p>
+                            <>
+                              <p className="text-xs text-gray-500 italic mb-2">Sorteo finalizado</p>
+                              <Button 
+                                variant="destructive" 
+                                size="sm"
+                                onClick={() => eliminarSorteo(sorteo.id)}
+                                data-testid={`eliminar-sorteo-${sorteo.id}`}
+                              >
+                                Eliminar
+                              </Button>
+                            </>
                           )}
 
                           {/* Etapas (si aplica) */}
