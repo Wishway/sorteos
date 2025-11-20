@@ -96,17 +96,29 @@ const AdminDashboard = () => {
 
   const agregarEtapa = () => {
     if (!etapaForm.porcentaje || !etapaForm.premio) {
-      toast.error('Completa todos los campos de la etapa');
+      toast.error('Completa al menos porcentaje y premio de la etapa');
       return;
     }
     const nuevaEtapa = {
       numero: formData.etapas.length + 1,
       porcentaje: parseFloat(etapaForm.porcentaje),
       premio: etapaForm.premio,
+      nombre: etapaForm.nombre || `Etapa ${formData.etapas.length + 1}`,
+      imagen_urls: etapaForm.imagen_urls || [],
+      video_urls: etapaForm.video_urls || [],
       completado: false
     };
     setFormData(prev => ({ ...prev, etapas: [...prev.etapas, nuevaEtapa] }));
-    setEtapaForm({ numero: formData.etapas.length + 2, porcentaje: '', premio: '' });
+    setEtapaForm({ 
+      numero: formData.etapas.length + 2, 
+      porcentaje: '', 
+      premio: '', 
+      nombre: '',
+      imagen_urls: [],
+      video_urls: []
+    });
+    setEtapaImagenUrl('');
+    setEtapaVideoUrl('');
     toast.success('Etapa agregada');
   };
 
