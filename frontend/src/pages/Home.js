@@ -27,6 +27,7 @@ const Home = () => {
 
   useEffect(() => {
     fetchSorteos();
+    fetchGanadoresRecientes();
     const interval = setInterval(() => {
       updateCountdowns();
     }, 1000);
