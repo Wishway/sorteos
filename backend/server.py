@@ -49,7 +49,9 @@ class SorteoEstado(str, Enum):
     WAITING = "waiting"          # En Espera - pre-sorteo con contador
     LIVE = "live"                # En Proceso - ejecutándose con animación
     COMPLETED = "completed"      # Completado - finalizado
+    COMPLETADO = "completado"    # Legacy - mismo que completed
     PAUSADO = "pausado"          # Pausado (legacy, mantener por compatibilidad)
+    ACTIVO = "activo"            # Legacy - mismo que published
 
 class BoletoEstado(str, Enum):
     ACTIVO = "activo"
