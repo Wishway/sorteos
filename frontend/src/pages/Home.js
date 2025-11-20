@@ -53,19 +53,57 @@ const Home = () => {
       });
       setSorteosProximos(proximos);
       
-      // Sorteos en proceso (simulado - en producción vendría del backend)
-      // Por ahora mostramos los que están entre inicio y cierre
+      // Sorteos en proceso: 
+      // Para sorteos por etapas: si alguna etapa se está ejecutando o está por ejecutarse
+      // Para sorteos únicos: si ya pasó la fecha de inicio pero no ha cerrado
       const enProceso = activos.filter(s => {
         const fechaInicio = new Date(s.fecha_inicio);
         const fechaCierre = new Date(s.fecha_cierre);
-        return fechaInicio <= ahora && fechaCierre >= ahora && s.progreso_porcentaje >= 50;
+        
+        if (s.tipo === 'etapas' && s.etapas && s.etapas.length > 0) {
+          // Verificar si alguna etapa está lista para ejecutarse
+          return s.etapas.some(etapa => {
+            const progresoActual = s.progreso_porcentaje;
+            return progresoActual >= etapa.porcentaje && !etapa.completado;
+          });
+        } else {
+          // Sorteo único: si ya pasó inicio y está cerca del cierre o tiene buen progreso
+          return fechaInicio <= ahora && fechaCierre >= ahora && s.progreso_porcentaje >= 70;
+        }
       });
+      
       setSorteosEnProceso(enProceso);
+      
+      // Cargar participantes activos para sorteos en proceso
+      for (const sorteo of enProceso) {
+        fetchParticipantes(sorteo.id);
+      }
       
     } catch (error) {
       console.error('Error al cargar sorteos:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchGanadoresRecientes = async () => {
+    try {
+      const response = await axios.get(`${API}/ganadores/recientes`);
+      setGanadoresRecientes(response.data);
+    } catch (error) {
+      console.error('Error al cargar ganadores recientes:', error);
+    }
+  };
+
+  const fetchParticipantes = async (sorteoId) => {
+    try {
+      const response = await axios.get(`${API}/sorteos/${sorteoId}/participantes`);
+      setParticipantesActivos(prev => ({
+        ...prev,
+        [sorteoId]: response.data.participantes
+      }));
+    } catch (error) {
+      console.error('Error al cargar participantes:', error);
     }
   };
 
