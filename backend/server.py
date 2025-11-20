@@ -594,12 +594,30 @@ async def eliminar_sorteo(sorteo_id: str, request: Request):
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    # Check status
-    if sorteo_doc['estado'] == 'activo':
-        # Check if has tickets
-        boletos_count = await db.boletos.count_documents({'sorteo_id': sorteo_id})
-        if boletos_count > 0:
-            raise HTTPException(status_code=400, detail="No se puede eliminar un sorteo activo con boletos vendidos")
+    estado = sorteo_doc['estado']
+    
+    # Reglas de eliminación según estado
+    if estado == 'draft':
+        # DRAFT: se puede eliminar libremente
+        pass
+    elif estado == 'completed':
+        # COMPLETED: verificar que han pasado 30 días
+        fecha_completado = sorteo_doc.get('fecha_completado')
+        if fecha_completado:
+            if isinstance(fecha_completado, str):
+                fecha_completado = datetime.fromisoformat(fecha_completado)
+            dias_transcurridos = (datetime.now(timezone.utc) - fecha_completado).days
+            if dias_transcurridos < 30:
+                raise HTTPException(
+                    status_code=400, 
+                    detail=f"Los sorteos completados solo se pueden eliminar después de 30 días. Faltan {30 - dias_transcurridos} días."
+                )
+    else:
+        # PUBLISHED, WAITING, LIVE, PAUSADO: no se pueden eliminar
+        raise HTTPException(
+            status_code=400, 
+            detail=f"No se puede eliminar un sorteo en estado {estado}. Solo se pueden eliminar sorteos en DRAFT o COMPLETED (después de 30 días)."
+        )
     
     # Delete sorteo
     await db.sorteos.delete_one({'id': sorteo_id})
