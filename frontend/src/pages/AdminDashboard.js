@@ -762,6 +762,7 @@ const AdminDashboard = () => {
                       waiting: { bg: 'bg-yellow-100', text: 'text-yellow-700', label: '⏳ EN ESPERA' },
                       live: { bg: 'bg-red-100', text: 'text-red-700', label: '🔴 EN VIVO' },
                       completed: { bg: 'bg-blue-100', text: 'text-blue-700', label: '✅ COMPLETADO' },
+                      completado: { bg: 'bg-blue-100', text: 'text-blue-700', label: '✅ COMPLETADO' }, // legacy
                       pausado: { bg: 'bg-orange-100', text: 'text-orange-700', label: '⏸️ PAUSADO' },
                       activo: { bg: 'bg-green-100', text: 'text-green-700', label: '🟢 ACTIVO' }, // legacy
                     };
