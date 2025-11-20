@@ -124,16 +124,25 @@ const Home = () => {
     setCountdowns(newCountdowns);
   };
 
-  // Nombres y números simulados para animación
-  const participantesDemo = [
-    'María González', 'Juan Pérez', 'Ana Martínez', 'Carlos Rodríguez',
-    'Laura Silva', 'Diego Morales', 'Sofia López', 'Miguel Ángel',
-    'Valentina Torres', 'Sebastián Castro', 'Isabella Ruiz', 'Mateo Vargas'
-  ];
+  // Función para obtener participantes aleatorios para la animación
+  const obtenerParticipantesAleatorios = (sorteoId, cantidad = 12) => {
+    const participantes = participantesActivos[sorteoId] || [];
+    if (participantes.length === 0) return [];
+    
+    // Mezclar y tomar una muestra
+    const mezclados = [...participantes].sort(() => Math.random() - 0.5);
+    return mezclados.slice(0, cantidad);
+  };
 
-  const numerosDemo = Array.from({ length: 20 }, () => 
-    Math.floor(Math.random() * 1000).toString().padStart(4, '0')
-  );
+  const obtenerNumerosAleatorios = (sorteoId, cantidad = 20) => {
+    const participantes = participantesActivos[sorteoId] || [];
+    if (participantes.length === 0) return [];
+    
+    // Extraer números y mezclar
+    const numeros = participantes.map(p => p.numero_boleto.toString().padStart(4, '0'));
+    const mezclados = [...numeros].sort(() => Math.random() - 0.5);
+    return mezclados.slice(0, cantidad);
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
