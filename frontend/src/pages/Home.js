@@ -446,6 +446,120 @@ const Home = () => {
         </div>
       )}
 
+      {/* SECCIÓN: GANADORES RECIENTES */}
+      {ganadoresRecientes.length > 0 && (
+        <div className="bg-gradient-to-br from-yellow-50 via-amber-50 to-orange-50 py-20 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-white text-lg px-6 py-2 mb-4">
+                🎉 GANADORES RECIENTES
+              </Badge>
+              <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+                ¡Felicitaciones a nuestros ganadores!
+              </h2>
+              <p className="text-lg text-gray-700">
+                Conoce a los afortunados ganadores de los últimos 30 días
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ganadoresRecientes.map((ganador, idx) => (
+                <Card 
+                  key={ganador.id} 
+                  className="overflow-hidden hover:shadow-2xl transition-all duration-300 border-2 border-yellow-400"
+                >
+                  {/* Imagen del sorteo */}
+                  <div className="relative h-48 overflow-hidden">
+                    {ganador.sorteo?.imagenes && ganador.sorteo.imagenes.length > 0 ? (
+                      <img 
+                        src={ganador.sorteo.imagenes[0]} 
+                        alt={ganador.sorteo.titulo}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center">
+                        <Trophy className="w-20 h-20 text-white opacity-50" />
+                      </div>
+                    )}
+                    
+                    {/* Badge de ganador */}
+                    <div className="absolute top-4 left-4">
+                      <Badge className="bg-yellow-500 text-black font-bold text-sm px-4 py-2 shadow-lg">
+                        🏆 GANADOR
+                      </Badge>
+                    </div>
+
+                    {/* Badge de etapa si aplica */}
+                    {ganador.etapa_numero && (
+                      <div className="absolute top-4 right-4">
+                        <Badge className="bg-blue-600 text-white font-bold text-xs px-3 py-1">
+                          Etapa {ganador.etapa_numero}
+                        </Badge>
+                      </div>
+                    )}
+                  </div>
+
+                  <CardContent className="p-6">
+                    {/* Nombre del sorteo */}
+                    <h3 className="font-bold text-xl mb-3 text-gray-900 line-clamp-2">
+                      {ganador.sorteo?.titulo || 'Sorteo'}
+                    </h3>
+
+                    {/* Información del ganador */}
+                    <div className="bg-gradient-to-r from-yellow-100 to-amber-100 rounded-lg p-4 mb-4">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
+                          {ganador.usuario?.name?.[0]?.toUpperCase() || '🎊'}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-sm text-gray-600">Ganador</p>
+                          <p className="font-bold text-gray-900">{ganador.usuario?.name || 'Anónimo'}</p>
+                        </div>
+                      </div>
+                      
+                      {/* Número de boleto ganador */}
+                      <div className="bg-white rounded-lg p-3 mt-2 text-center">
+                        <p className="text-xs text-gray-600 mb-1">Boleto Ganador</p>
+                        <p className="text-3xl font-bold text-yellow-600">
+                          #{ganador.numero_boleto?.toString().padStart(4, '0') || '0000'}
+                        </p>
+                      </div>
+                    </div>
+
+                    {/* Premio */}
+                    <div className="bg-blue-50 rounded-lg p-3 mb-3">
+                      <p className="text-xs text-blue-800 mb-1">Premio</p>
+                      <p className="font-semibold text-blue-900 line-clamp-2">
+                        {ganador.premio}
+                      </p>
+                    </div>
+
+                    {/* Fecha del sorteo */}
+                    <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <Calendar className="w-4 h-4 text-yellow-600" />
+                      <span>Sorteado: {formatDate(ganador.fecha_sorteo)}</span>
+                    </div>
+
+                    {/* Link al sorteo */}
+                    {ganador.sorteo?.landing_slug && (
+                      <Link to={`/sorteo/${ganador.sorteo.landing_slug}`} className="block mt-3">
+                        <Button 
+                          variant="outline" 
+                          className="w-full border-yellow-500 text-yellow-700 hover:bg-yellow-50"
+                          size="sm"
+                        >
+                          Ver Sorteo
+                        </Button>
+                      </Link>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* SECCIÓN: SORTEOS ACTIVOS (E-commerce Premium) */}
       <div className="max-w-7xl mx-auto px-4 py-20">
         <div className="text-center mb-16">
