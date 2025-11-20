@@ -886,7 +886,7 @@ const AdminDashboard = () => {
                           )}
 
                           {/* COMPLETED: solo info */}
-                          {sorteo.estado === 'completed' && (
+                          {(sorteo.estado === 'completed' || sorteo.estado === 'completado') && (
                             <p className="text-xs text-gray-500 italic">Completado</p>
                           )}
 
