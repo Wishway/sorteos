@@ -506,10 +506,18 @@ async def create_sorteo(data: SorteoCreate, request: Request):
     return sorteo
 
 @api_router.get("/sorteos", response_model=List[Sorteo])
-async def get_sorteos(estado: Optional[str] = None):
+async def get_sorteos(estado: Optional[str] = None, incluir_draft: bool = False):
+    """
+    Obtener sorteos. Por defecto, excluye los borradores.
+    - estado: filtrar por estado específico
+    - incluir_draft: si True, incluye borradores (solo para admin)
+    """
     query = {}
     if estado:
         query['estado'] = estado
+    elif not incluir_draft:
+        # Excluir borradores por defecto (solo mostrar published, waiting, live, completed, pausado)
+        query['estado'] = {'$ne': 'draft'}
     
     sorteos = await db.sorteos.find(query, {"_id": 0}).to_list(1000)
     for sorteo in sorteos:
