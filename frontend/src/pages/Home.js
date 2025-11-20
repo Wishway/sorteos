@@ -346,19 +346,25 @@ const Home = () => {
                         👥 Participantes
                       </h4>
                       <div className="space-y-2 h-64 overflow-hidden">
-                        {participantesDemo.map((nombre, i) => (
-                          <div
-                            key={i}
-                            className="text-white text-lg font-medium p-3 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 rounded-lg animate-slide-up"
-                            style={{
-                              animationDelay: `${i * 0.2}s`,
-                              animationDuration: '3s',
-                              animationIterationCount: 'infinite'
-                            }}
-                          >
-                            {nombre}
+                        {obtenerParticipantesAleatorios(sorteo.id).length > 0 ? (
+                          obtenerParticipantesAleatorios(sorteo.id).map((participante, i) => (
+                            <div
+                              key={i}
+                              className="text-white text-lg font-medium p-3 bg-gradient-to-r from-yellow-500/20 to-yellow-600/20 rounded-lg animate-slide-up"
+                              style={{
+                                animationDelay: `${i * 0.2}s`,
+                                animationDuration: '3s',
+                                animationIterationCount: 'infinite'
+                              }}
+                            >
+                              {participante.nombre}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="text-center text-yellow-400/60 py-8">
+                            Cargando participantes...
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
 
@@ -368,18 +374,24 @@ const Home = () => {
                         🎫 Números en Sorteo
                       </h4>
                       <div className="grid grid-cols-4 gap-2 h-64 overflow-hidden">
-                        {numerosDemo.map((num, i) => (
-                          <div
-                            key={i}
-                            className="text-white text-xl font-bold flex items-center justify-center bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-lg animate-bounce-slow"
-                            style={{
-                              animationDelay: `${i * 0.1}s`,
-                              aspectRatio: '1/1'
-                            }}
-                          >
-                            {num}
+                        {obtenerNumerosAleatorios(sorteo.id).length > 0 ? (
+                          obtenerNumerosAleatorios(sorteo.id).map((num, i) => (
+                            <div
+                              key={i}
+                              className="text-white text-xl font-bold flex items-center justify-center bg-gradient-to-br from-yellow-500 to-yellow-700 rounded-lg animate-bounce-slow"
+                              style={{
+                                animationDelay: `${i * 0.1}s`,
+                                aspectRatio: '1/1'
+                              }}
+                            >
+                              {num}
+                            </div>
+                          ))
+                        ) : (
+                          <div className="col-span-4 text-center text-yellow-400/60 py-8">
+                            Cargando números...
                           </div>
-                        ))}
+                        )}
                       </div>
                     </div>
                   </div>
