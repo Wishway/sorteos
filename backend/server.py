@@ -601,6 +601,82 @@ async def eliminar_sorteo(sorteo_id: str, request: Request):
     
     return {"message": "Sorteo eliminado exitosamente"}
 
+@api_router.put("/admin/sorteo/{sorteo_id}/publicar")
+async def publicar_sorteo(sorteo_id: str, request: Request):
+    """Cambiar estado de DRAFT a PUBLISHED"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden publicar sorteos")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] != 'draft':
+        raise HTTPException(status_code=400, detail="Solo se pueden publicar sorteos en borrador")
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'estado': 'published'}}
+    )
+    
+    return {"message": "Sorteo publicado exitosamente"}
+
+@api_router.put("/admin/sorteo/{sorteo_id}/pausar")
+async def pausar_sorteo(sorteo_id: str, request: Request):
+    """Pausar un sorteo publicado"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden pausar sorteos")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] not in ['published', 'pausado']:
+        raise HTTPException(status_code=400, detail="Solo se pueden pausar sorteos publicados")
+    
+    nuevo_estado = 'pausado' if sorteo_doc['estado'] == 'published' else 'published'
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'estado': nuevo_estado}}
+    )
+    
+    return {"message": f"Sorteo {'pausado' if nuevo_estado == 'pausado' else 'reactivado'} exitosamente"}
+
+@api_router.put("/admin/sorteo/{sorteo_id}/estado")
+async def cambiar_estado_sorteo(sorteo_id: str, nuevo_estado: str, request: Request):
+    """Cambiar estado del sorteo manualmente (admin)"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden cambiar estados")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    # Validar transiciones de estado
+    estado_actual = sorteo_doc['estado']
+    estados_validos = ['draft', 'published', 'waiting', 'live', 'completed', 'pausado']
+    
+    if nuevo_estado not in estados_validos:
+        raise HTTPException(status_code=400, detail="Estado no válido")
+    
+    # Reglas de transición
+    if estado_actual == 'draft' and nuevo_estado not in ['published']:
+        raise HTTPException(status_code=400, detail="Desde draft solo se puede publicar")
+    
+    if estado_actual == 'completed':
+        raise HTTPException(status_code=400, detail="No se puede cambiar estado de un sorteo completado")
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'estado': nuevo_estado}}
+    )
+    
+    return {"message": f"Estado cambiado a {nuevo_estado} exitosamente"}
+
 @api_router.get("/sorteos/slug/{slug}", response_model=Sorteo)
 async def get_sorteo_by_slug(slug: str):
     sorteo_doc = await db.sorteos.find_one({'landing_slug': slug}, {"_id": 0})
