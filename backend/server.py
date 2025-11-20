@@ -565,10 +565,12 @@ async def update_sorteo(sorteo_id: str, data: SorteoCreate, request: Request):
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    # Check if sorteo has tickets
-    boletos_count = await db.boletos.count_documents({'sorteo_id': sorteo_id})
-    if boletos_count > 0:
-        raise HTTPException(status_code=400, detail="No se puede editar un sorteo con boletos vendidos")
+    # Solo se puede editar si está en DRAFT
+    if sorteo_doc['estado'] != 'draft':
+        raise HTTPException(
+            status_code=400, 
+            detail="Solo se pueden editar sorteos en estado DRAFT (borrador). Este sorteo ya está publicado."
+        )
     
     # Update sorteo
     update_data = data.model_dump()
