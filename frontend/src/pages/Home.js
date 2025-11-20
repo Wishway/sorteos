@@ -20,6 +20,8 @@ const Home = () => {
   const [sorteos, setSorteos] = useState([]);
   const [sorteosProximos, setSorteosProximos] = useState([]);
   const [sorteosEnProceso, setSorteosEnProceso] = useState([]);
+  const [ganadoresRecientes, setGanadoresRecientes] = useState([]);
+  const [participantesActivos, setParticipantesActivos] = useState({});
   const [loading, setLoading] = useState(true);
   const [countdowns, setCountdowns] = useState({});
 
