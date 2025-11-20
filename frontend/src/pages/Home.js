@@ -265,7 +265,19 @@ const Home = () => {
                     
                     <CardContent className="p-6">
                       <h3 className="font-bold text-xl mb-2 line-clamp-1">{sorteo.titulo}</h3>
-                      <p className="text-sm text-gray-600 mb-4 line-clamp-1">{sorteo.descripcion}</p>
+                      <p className="text-sm text-gray-600 mb-2 line-clamp-1">{sorteo.descripcion}</p>
+                      
+                      {/* Mostrar información de la etapa si aplica */}
+                      {etapaProxima && (
+                        <div className="bg-blue-50 rounded-lg p-2 mb-3">
+                          <p className="text-xs text-blue-800 font-semibold">
+                            🎯 Próxima etapa: {etapaProxima.premio}
+                          </p>
+                          <p className="text-xs text-blue-600">
+                            Se activa al {etapaProxima.porcentaje}% de ventas
+                          </p>
+                        </div>
+                      )}
                       
                       <div className="bg-gray-900 rounded-lg p-4 mb-4">
                         <p className="text-sm text-gray-400 text-center mb-2">Comienza en:</p>
