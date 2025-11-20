@@ -48,7 +48,16 @@ const AdminDashboard = () => {
   const [imagenUrl, setImagenUrl] = useState('');
   const [videoUrl, setVideoUrl] = useState('');
 
-  const [etapaForm, setEtapaForm] = useState({ numero: 1, porcentaje: '', premio: '' });
+  const [etapaForm, setEtapaForm] = useState({ 
+    numero: 1, 
+    porcentaje: '', 
+    premio: '', 
+    nombre: '',
+    imagen_urls: [],
+    video_urls: []
+  });
+  const [etapaImagenUrl, setEtapaImagenUrl] = useState('');
+  const [etapaVideoUrl, setEtapaVideoUrl] = useState('');
 
   useEffect(() => {
     if (!user || user.role !== 'admin') {
