@@ -348,19 +348,39 @@ const Home = () => {
           </div>
 
           <div className="max-w-7xl mx-auto relative z-10">
-            {sorteosEnProceso.map((sorteo, idx) => (
-              <div key={sorteo.id} className={idx > 0 ? 'mt-16' : ''}>
-                <div className="text-center mb-12">
-                  <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black text-lg px-6 py-2 mb-4">
-                    🎉 EN VIVO AHORA
-                  </Badge>
-                  <h2 className="text-4xl lg:text-6xl font-bold text-white mb-4">
-                    Sorteo en Proceso
-                  </h2>
-                  <h3 className="text-2xl lg:text-3xl text-yellow-400 font-semibold">
-                    {sorteo.titulo}
-                  </h3>
-                </div>
+            {sorteosEnProceso.map((sorteo, idx) => {
+              // Determinar qué etapa se está ejecutando
+              let etapaActual = null;
+              if (sorteo.tipo === 'etapas' && sorteo.etapas) {
+                etapaActual = sorteo.etapas.find(e => {
+                  const progresoActual = sorteo.progreso_porcentaje;
+                  return progresoActual >= e.porcentaje && !e.completado;
+                });
+              }
+              
+              return (
+                <div key={sorteo.id} className={idx > 0 ? 'mt-16' : ''}>
+                  <div className="text-center mb-12">
+                    <Badge className="bg-gradient-to-r from-yellow-400 to-yellow-600 text-black text-lg px-6 py-2 mb-4">
+                      🎉 EN VIVO AHORA
+                    </Badge>
+                    <h2 className="text-4xl lg:text-6xl font-bold text-white mb-4">
+                      Sorteo en Proceso
+                    </h2>
+                    {etapaActual && (
+                      <Badge className="bg-blue-600 text-white text-xl px-6 py-2 mb-3">
+                        Etapa {etapaActual.numero}
+                      </Badge>
+                    )}
+                    <h3 className="text-2xl lg:text-3xl text-yellow-400 font-semibold">
+                      {sorteo.titulo}
+                    </h3>
+                    {etapaActual && (
+                      <p className="text-lg text-yellow-200 mt-2">
+                        Premio: {etapaActual.premio}
+                      </p>
+                    )}
+                  </div>
 
                 {/* Animación de nombres y números */}
                 <div className="bg-gradient-to-br from-yellow-400/10 to-yellow-600/10 border-2 border-yellow-500/50 rounded-2xl p-8 backdrop-blur-sm">
