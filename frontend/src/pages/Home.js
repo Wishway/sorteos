@@ -221,6 +221,12 @@ const Home = () => {
               {sorteosProximos.map((sorteo) => {
                 const countdown = countdowns[sorteo.id] || { horas: 0, minutos: 0, segundos: 0, diff: 0 };
                 const esCritico = countdown.diff < 3600000; // Menos de 1 hora
+                
+                // Determinar qué etapa va a iniciar (si es multi-etapa)
+                let etapaProxima = null;
+                if (sorteo.tipo === 'etapas' && sorteo.etapas) {
+                  etapaProxima = sorteo.etapas.find(e => !e.completado);
+                }
 
                 return (
                   <Card 
@@ -245,6 +251,13 @@ const Home = () => {
                         <div className="absolute top-2 right-2">
                           <Badge className="bg-red-600 text-white font-bold text-xs px-3 py-1">
                             ¡URGENTE!
+                          </Badge>
+                        </div>
+                      )}
+                      {etapaProxima && (
+                        <div className="absolute top-2 left-2">
+                          <Badge className="bg-blue-600 text-white font-bold text-xs px-3 py-1">
+                            Etapa {etapaProxima.numero}
                           </Badge>
                         </div>
                       )}
