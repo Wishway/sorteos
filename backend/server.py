@@ -741,6 +741,73 @@ async def cambiar_password(request: Request, password_actual: str, password_nuev
     
     return {"message": "Contraseña cambiada exitosamente"}
 
+# ============ HELPER FUNCTIONS ============
+async def actualizar_progreso_sorteo(sorteo_id: str):
+    """Actualizar cantidad vendida y progreso basado en boletos aprobados"""
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        return
+    
+    # Contar solo boletos aprobados (pago_confirmado=True)
+    boletos_aprobados = await db.boletos.count_documents({
+        'sorteo_id': sorteo_id,
+        'pago_confirmado': True
+    })
+    
+    cantidad_total = sorteo_doc['cantidad_total_boletos']
+    progreso = (boletos_aprobados / cantidad_total) * 100 if cantidad_total > 0 else 0
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {
+            'cantidad_vendida': boletos_aprobados,
+            'progreso_porcentaje': progreso
+        }}
+    )
+    
+    return boletos_aprobados, progreso
+
+async def verificar_transicion_estado(sorteo_id: str):
+    """Verificar y ejecutar transiciones automáticas de estado"""
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        return
+    
+    sorteo = Sorteo(**sorteo_doc)
+    ahora = datetime.now(timezone.utc)
+    estado_actual = sorteo.estado
+    nuevo_estado = None
+    
+    # PUBLISHED → WAITING
+    if estado_actual in [SorteoEstado.PUBLISHED, SorteoEstado.ACTIVO]:
+        # Contar boletos aprobados
+        boletos_aprobados = await db.boletos.count_documents({
+            'sorteo_id': sorteo_id,
+            'pago_confirmado': True
+        })
+        
+        todos_vendidos = boletos_aprobados >= sorteo.cantidad_total_boletos
+        fecha_alcanzada = sorteo.fecha_inicio <= ahora
+        
+        # Si se vendieron todos los boletos O si llegó la fecha de inicio
+        if todos_vendidos or fecha_alcanzada:
+            # Pero solo pasar a WAITING si ambos no se cumplieron aún
+            # Si ambos se cumplen, ir directo a preparar LIVE
+            if todos_vendidos and fecha_alcanzada:
+                # Verificar si ya pasaron 30 minutos desde que se cumplieron ambas condiciones
+                # Por ahora, pasar a WAITING y después a LIVE manualmente
+                nuevo_estado = SorteoEstado.WAITING
+            else:
+                nuevo_estado = SorteoEstado.WAITING
+    
+    # Actualizar estado si cambió
+    if nuevo_estado and nuevo_estado != estado_actual:
+        await db.sorteos.update_one(
+            {'id': sorteo_id},
+            {'$set': {'estado': nuevo_estado}}
+        )
+        logging.info(f"Sorteo {sorteo_id} cambió de estado: {estado_actual} → {nuevo_estado}")
+
 # ============ SORTEOS ENDPOINTS ============
 @api_router.post("/sorteos", response_model=Sorteo)
 async def create_sorteo(data: SorteoCreate, request: Request):
