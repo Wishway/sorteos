@@ -525,8 +525,10 @@ const AdminDashboard = () => {
                 </DialogTrigger>
                 <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
                   <DialogHeader>
-                    <DialogTitle>Crear Nuevo Sorteo</DialogTitle>
-                    <DialogDescription>Completa los datos para crear un nuevo sorteo</DialogDescription>
+                    <DialogTitle>{editingSorteoId ? 'Editar Sorteo (Borrador)' : 'Crear Nuevo Sorteo'}</DialogTitle>
+                    <DialogDescription>
+                      {editingSorteoId ? 'Modifica los datos del sorteo en borrador' : 'Completa los datos para crear un nuevo sorteo'}
+                    </DialogDescription>
                   </DialogHeader>
                   
                   <form onSubmit={handleCrearSorteo} className="space-y-4">
