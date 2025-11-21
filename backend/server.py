@@ -243,13 +243,20 @@ class UserSession(BaseModel):
     expires_at: datetime
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class Premio(BaseModel):
+    nombre: str
+    descripcion: Optional[str] = None
+    imagen_url: Optional[str] = None
+    video_url: Optional[str] = None
+
 class Etapa(BaseModel):
     numero: int
     porcentaje: float
     premio: str
     nombre: Optional[str] = None  # Nombre de la etapa
-    imagen_urls: List[str] = []   # URLs de imágenes para esta etapa
-    video_urls: List[str] = []    # URLs de videos para esta etapa
+    premios: List[Premio] = []    # Lista de premios para esta etapa
+    imagen_urls: List[str] = []   # URLs de imágenes para esta etapa (legacy)
+    video_urls: List[str] = []    # URLs de videos para esta etapa (legacy)
     ganador_id: Optional[str] = None
     fecha_sorteo: Optional[datetime] = None
     completado: bool = False
