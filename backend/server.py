@@ -804,9 +804,15 @@ async def verificar_transicion_estado(sorteo_id: str):
     
     # Actualizar estado si cambió
     if nuevo_estado and nuevo_estado != estado_actual:
+        update_data = {'estado': nuevo_estado}
+        
+        # Guardar timestamp cuando entra en WAITING
+        if nuevo_estado == SorteoEstado.WAITING:
+            update_data['fecha_waiting'] = datetime.now(timezone.utc)
+        
         await db.sorteos.update_one(
             {'id': sorteo_id},
-            {'$set': {'estado': nuevo_estado}}
+            {'$set': update_data}
         )
         logging.info(f"Sorteo {sorteo_id} cambió de estado: {estado_actual} → {nuevo_estado}")
 
