@@ -275,8 +275,9 @@ class Sorteo(BaseModel):
     fecha_cierre: datetime
     estado: SorteoEstado = SorteoEstado.DRAFT  # Por defecto en borrador
     etapas: List[Etapa] = []
-    imagenes: List[str] = []
-    videos: List[str] = []
+    premios: List[Premio] = []    # Premios para sorteo de etapa única
+    imagenes: List[str] = []      # Imágenes promocionales (legacy)
+    videos: List[str] = []        # Videos promocionales (legacy)
     color_primario: str = "#4F46E5"
     color_secundario: str = "#06B6D4"
     cantidad_vendida: int = 0
