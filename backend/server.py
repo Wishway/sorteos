@@ -1228,6 +1228,17 @@ async def ejecutar_liberacion_boletos(request: Request):
     count = await liberar_boletos_expirados()
     return {"message": f"Se liberaron {count} boletos expirados"}
 
+@api_router.post("/admin/limpiar-sorteos-antiguos")
+async def ejecutar_limpieza_sorteos():
+    """Limpiar sorteos completados con más de 30 días (automático)"""
+    resultado = await limpiar_sorteos_completados_antiguos()
+    return {
+        "message": "Limpieza completada",
+        "sorteos_eliminados": resultado['sorteos'],
+        "boletos_eliminados": resultado['boletos'],
+        "ganadores_eliminados": resultado['ganadores']
+    }
+
 @api_router.post("/admin/sorteo/{sorteo_id}/guardar-ganadores")
 async def guardar_ganadores_sorteo(sorteo_id: str, ganadores: List[dict], request: Request):
     """Guardar ganadores del sorteo y marcar como completado"""
