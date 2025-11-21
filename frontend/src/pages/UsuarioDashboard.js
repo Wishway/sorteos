@@ -91,8 +91,9 @@ const UsuarioDashboard = () => {
     navigate('/');
   };
 
-  const boletosActivos = boletos.filter(b => b.estado === 'activo' || b.estado === 'ganador');
-  const boletosGanadores = boletos.filter(b => b.estado === 'ganador' || b.etapa_ganada !== null);
+  const boletosFiltradosData = boletosFiltrados();
+  const boletosActivos = boletosFiltradosData.filter(b => b.estado === 'activo' || b.estado === 'ganador');
+  const boletosGanadores = boletosFiltradosData.filter(b => b.estado === 'ganador' || b.etapa_ganada !== null);
   
   const handleChangePassword = async (e) => {
     e.preventDefault();
