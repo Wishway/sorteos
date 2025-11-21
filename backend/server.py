@@ -1057,6 +1057,42 @@ async def pausar_sorteo(sorteo_id: str, request: Request):
     
     return {"message": f"Sorteo {'pausado' if nuevo_estado == 'pausado' else 'reactivado'} exitosamente"}
 
+@api_router.post("/admin/sorteo/{sorteo_id}/guardar-ganadores")
+async def guardar_ganadores_sorteo(sorteo_id: str, ganadores: List[dict], request: Request):
+    """Guardar ganadores del sorteo y marcar como completado"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden guardar ganadores")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    # Guardar cada ganador
+    for ganador_data in ganadores:
+        ganador = Ganador(
+            sorteo_id=sorteo_id,
+            sorteo_titulo=sorteo_doc['titulo'],
+            usuario_id=ganador_data['usuario_id'],
+            usuario_nombre=ganador_data.get('nombre', ''),
+            usuario_email=ganador_data.get('email', ''),
+            numero_boleto=ganador_data['numero_boleto'],
+            premio=ganador_data.get('premio', 'Premio Principal'),
+            fecha_sorteo=datetime.now(timezone.utc)
+        )
+        
+        ganador_dict = ganador.model_dump()
+        ganador_dict['fecha_sorteo'] = ganador_dict['fecha_sorteo'].isoformat()
+        await db.ganadores.insert_one(ganador_dict)
+    
+    # Marcar sorteo como completado
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'estado': 'completed'}}
+    )
+    
+    return {"message": f"{len(ganadores)} ganador(es) guardado(s) exitosamente", "sorteo_completado": True}
+
 @api_router.put("/admin/sorteo/{sorteo_id}/iniciar-live")
 async def iniciar_sorteo_live(sorteo_id: str, request: Request):
     """Iniciar sorteo en LIVE (solo desde WAITING)"""
