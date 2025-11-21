@@ -201,6 +201,15 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
 
   return (
     <div className="min-h-screen gradient-background">
+      {/* Botón Volver al Inicio */}
+      <div className="max-w-6xl mx-auto px-4 pt-4">
+        <Link to="/">
+          <Button variant="outline" className="mb-4">
+            ← Volver al Inicio
+          </Button>
+        </Link>
+      </div>
+
       <div className="relative h-96 overflow-hidden">
         {sorteo.imagenes && sorteo.imagenes.length > 0 ? (
           <img 
