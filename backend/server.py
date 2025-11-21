@@ -271,13 +271,11 @@ class Sorteo(BaseModel):
     cantidad_total_boletos: int
     tipo: SorteoTipo
     porcentaje_comision: float
-    fecha_inicio: datetime
-    fecha_cierre: datetime
+    fecha_cierre: datetime  # ÚNICA fecha/hora que controla TODO el sorteo
     estado: SorteoEstado = SorteoEstado.DRAFT  # Por defecto en borrador
     etapas: List[Etapa] = []
     premios: List[Premio] = []    # Premios para sorteo de etapa única
-    imagenes: List[str] = []      # Imágenes promocionales (legacy)
-    videos: List[str] = []        # Videos promocionales (legacy)
+    imagenes: List[str] = []      # Imágenes promocionales
     color_primario: str = "#4F46E5"
     color_secundario: str = "#06B6D4"
     cantidad_vendida: int = 0
@@ -288,6 +286,8 @@ class Sorteo(BaseModel):
     datos_bancarios: Optional[str] = None
     fecha_waiting: Optional[datetime] = None  # Cuándo entró en WAITING
     fecha_live: Optional[datetime] = None     # Cuándo inició LIVE
+    fecha_completed: Optional[datetime] = None  # Cuándo se completó
+    ganadores: List[dict] = []  # Lista de ganadores seleccionados
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Boleto(BaseModel):
