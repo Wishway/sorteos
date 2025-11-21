@@ -29,6 +29,7 @@ const HomeComplete = () => {
   const [loading, setLoading] = useState(true);
   const [countdowns, setCountdowns] = useState({});
   const [liveAnimations, setLiveAnimations] = useState({});
+  const [liveParticipants, setLiveParticipants] = useState({}); // Participantes por sorteo
 
   useEffect(() => {
     fetchAllData();
