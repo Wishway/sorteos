@@ -197,7 +197,7 @@ const HomeComplete = () => {
           
           {user ? (
             <div className="flex gap-4 justify-center">
-              <Link to={user.role === 'admin' ? '/admin/dashboard' : user.role === 'vendedor' ? '/vendedor/dashboard' : '/usuario/dashboard'}>
+              <Link to={user.role === 'admin' ? '/admin' : user.role === 'vendedor' ? '/vendedor' : '/usuario'}>
                 <Button 
                   size="lg" 
                   className="bg-gradient-to-r from-yellow-400 to-yellow-600 hover:from-yellow-500 hover:to-yellow-700 text-black font-bold text-lg px-8 py-6 rounded-full shadow-2xl transform hover:scale-105 transition-all"
