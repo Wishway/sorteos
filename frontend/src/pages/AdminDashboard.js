@@ -790,8 +790,13 @@ const AdminDashboard = () => {
                     )}
 
                     <div className="flex justify-end gap-2">
-                      <Button type="button" variant="outline" onClick={() => setShowCreateModal(false)}>Cancelar</Button>
-                      <Button type="submit" data-testid="submit-sorteo-btn">Crear Sorteo</Button>
+                      <Button type="button" variant="outline" onClick={() => {
+                        setShowCreateModal(false);
+                        setEditingSorteoId(null);
+                      }}>Cancelar</Button>
+                      <Button type="submit" data-testid="submit-sorteo-btn">
+                        {editingSorteoId ? 'Guardar Cambios' : 'Crear Sorteo'}
+                      </Button>
                     </div>
                   </form>
                 </DialogContent>
