@@ -702,6 +702,81 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
+                    {/* Sección de Premios para Sorteo Único */}
+                    {formData.tipo === 'unico' && (
+                      <div className="col-span-2 border-t pt-4">
+                        <h3 className="font-semibold mb-3">Premios del Sorteo</h3>
+                        
+                        {/* Lista de premios agregados */}
+                        {formData.premios && formData.premios.length > 0 && (
+                          <div className="mb-4 space-y-2">
+                            {formData.premios.map((premio, index) => (
+                              <div key={index} className="p-3 bg-green-50 rounded-lg border border-green-200 flex items-start justify-between">
+                                <div className="flex-1">
+                                  <p className="font-semibold">{premio.nombre}</p>
+                                  {premio.descripcion && <p className="text-sm text-gray-600">{premio.descripcion}</p>}
+                                  {premio.imagen_url && <p className="text-xs text-blue-600 mt-1">✓ Imagen</p>}
+                                  {premio.video_url && <p className="text-xs text-purple-600 mt-1">✓ Video</p>}
+                                </div>
+                                <Button type="button" variant="destructive" size="sm" onClick={() => eliminarPremio(index)}>
+                                  Eliminar
+                                </Button>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+
+                        {/* Formulario para agregar nuevo premio */}
+                        <div className="bg-green-50 p-4 rounded-lg border border-green-200">
+                          <h4 className="font-semibold mb-3 text-green-900">Agregar Nuevo Premio</h4>
+                          
+                          <div className="grid grid-cols-2 gap-3 mb-3">
+                            <div>
+                              <Label className="text-xs">Nombre del Premio *</Label>
+                              <Input 
+                                placeholder="Ej: iPhone 15 Pro Max" 
+                                value={premioForm.nombre} 
+                                onChange={(e) => setPremioForm(prev => ({ ...prev, nombre: e.target.value }))} 
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">Descripción (opcional)</Label>
+                              <Input 
+                                placeholder="Ej: 256GB color titanio" 
+                                value={premioForm.descripcion} 
+                                onChange={(e) => setPremioForm(prev => ({ ...prev, descripcion: e.target.value }))} 
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-3">
+                            <div>
+                              <Label className="text-xs">URL de Imagen (opcional)</Label>
+                              <Input 
+                                placeholder="https://..." 
+                                type="url"
+                                value={premioForm.imagen_url} 
+                                onChange={(e) => setPremioForm(prev => ({ ...prev, imagen_url: e.target.value }))} 
+                              />
+                            </div>
+                            <div>
+                              <Label className="text-xs">URL de Video (opcional)</Label>
+                              <Input 
+                                placeholder="https://..." 
+                                type="url"
+                                value={premioForm.video_url} 
+                                onChange={(e) => setPremioForm(prev => ({ ...prev, video_url: e.target.value }))} 
+                              />
+                            </div>
+                          </div>
+
+                          <Button type="button" onClick={agregarPremio} className="w-full mt-3">
+                            + Agregar Premio
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+
                     {formData.tipo === 'etapas' && (
                       <div className="col-span-2 border-t pt-4">
                         <h3 className="font-semibold mb-3">Configurar Etapas</h3>
