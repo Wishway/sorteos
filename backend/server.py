@@ -1207,17 +1207,11 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
             comision_dict['fecha'] = comision_dict['fecha'].isoformat()
             await db.comisiones.insert_one(comision_dict)
     
-    # Update sorteo
-    nueva_cantidad = sorteo.cantidad_vendida + len(data.numeros_boletos)
-    nuevo_progreso = (nueva_cantidad / sorteo.cantidad_total_boletos) * 100
-    
-    await db.sorteos.update_one(
-        {'id': sorteo.id},
-        {'$set': {
-            'cantidad_vendida': nueva_cantidad,
-            'progreso_porcentaje': nuevo_progreso
-        }}
-    )
+    # Actualizar progreso del sorteo basado en boletos aprobados
+    # Si el pago es por Payphone, está aprobado automáticamente
+    if pago_confirmado:
+        await actualizar_progreso_sorteo(sorteo.id)
+        await verificar_transicion_estado(sorteo.id)
     
     cantidad_boletos = len(data.numeros_boletos)
     total = sorteo.precio_boleto * cantidad_boletos
