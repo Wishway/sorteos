@@ -948,12 +948,18 @@ async def get_sorteos(estado: Optional[str] = None, incluir_draft: bool = False)
     
     sorteos = await db.sorteos.find(query, {"_id": 0}).to_list(1000)
     for sorteo in sorteos:
-        if isinstance(sorteo['fecha_inicio'], str):
-            sorteo['fecha_inicio'] = datetime.fromisoformat(sorteo['fecha_inicio'])
-        if isinstance(sorteo['fecha_cierre'], str):
+        # Convertir fecha_cierre (única fecha del sorteo)
+        if isinstance(sorteo.get('fecha_cierre'), str):
             sorteo['fecha_cierre'] = datetime.fromisoformat(sorteo['fecha_cierre'])
-        if isinstance(sorteo['created_at'], str):
+        if isinstance(sorteo.get('created_at'), str):
             sorteo['created_at'] = datetime.fromisoformat(sorteo['created_at'])
+        
+        # Mantener compatibilidad: si existe fecha_inicio, usarla como fecha_cierre
+        if 'fecha_inicio' in sorteo and not sorteo.get('fecha_cierre'):
+            if isinstance(sorteo['fecha_inicio'], str):
+                sorteo['fecha_cierre'] = datetime.fromisoformat(sorteo['fecha_inicio'])
+            else:
+                sorteo['fecha_cierre'] = sorteo['fecha_inicio']
         
         # Convert etapas fecha_sorteo
         for etapa in sorteo.get('etapas', []):
