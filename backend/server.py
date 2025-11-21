@@ -891,7 +891,7 @@ async def get_participantes_sorteo(sorteo_id: str):
             if usuario_doc:
                 usuarios_unicos[usuario_id] = {
                     'usuario_id': usuario_id,
-                    'nombre': usuario_doc.get('nombre', ''),
+                    'nombre': usuario_doc.get('name', ''),
                     'email': usuario_doc.get('email', ''),
                     'numeros_boletos': []
                 }
