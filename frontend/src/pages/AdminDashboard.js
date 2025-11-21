@@ -517,7 +517,21 @@ const AdminDashboard = () => {
           <TabsContent value="sorteos" className="space-y-4">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-2xl font-bold">Gestión de Sorteos</h2>
-              <Dialog open={showCreateModal} onOpenChange={setShowCreateModal}>
+              <Dialog open={showCreateModal} onOpenChange={(open) => {
+                setShowCreateModal(open);
+                if (!open) {
+                  // Resetear al cerrar
+                  setEditingSorteoId(null);
+                  setFormData({
+                    titulo: '', descripcion: '', precio_boleto: '', cantidad_minima_boletos: '',
+                    cantidad_total_boletos: '', tipo: 'unico', porcentaje_comision: '10',
+                    fecha_inicio: '', fecha_cierre: '', color_primario: '#4F46E5',
+                    color_secundario: '#06B6D4', reglas: '', imagenes: [], videos: [], etapas: []
+                  });
+                  setImagenUrl('');
+                  setVideoUrl('');
+                }
+              }}>
                 <DialogTrigger asChild>
                   <Button data-testid="crear-sorteo-btn">
                     <Plus className="w-4 h-4 mr-2" />Crear Sorteo
