@@ -344,11 +344,11 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                 <CardContent>
                   <div className="flex flex-col items-center">
                     <p className="text-sm text-gray-600 mb-4">
-                      Fecha: {formatDateTime(sorteo.fecha_inicio)}
+                      Fecha: {formatDateTime(sorteo.fecha_cierre)}
                     </p>
-                    {new Date(sorteo.fecha_inicio) > new Date() ? (
+                    {new Date(sorteo.fecha_cierre) > new Date() ? (
                       <Countdown 
-                        targetDate={sorteo.fecha_inicio} 
+                        targetDate={sorteo.fecha_cierre} 
                         className="justify-center"
                       />
                     ) : (
