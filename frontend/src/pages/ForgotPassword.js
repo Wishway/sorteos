@@ -15,7 +15,6 @@ const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [loading, setLoading] = useState(false);
   const [sent, setSent] = useState(false);
-  const [resetToken, setResetToken] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
