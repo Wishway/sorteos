@@ -217,7 +217,7 @@ const AdminDashboard = () => {
         titulo: '', descripcion: '', precio_boleto: '', cantidad_minima_boletos: '',
         cantidad_total_boletos: '', tipo: 'unico', porcentaje_comision: '10',
         fecha_inicio: '', fecha_cierre: '', color_primario: '#4F46E5',
-        color_secundario: '#06B6D4', reglas: '', imagenes: [], videos: [], etapas: []
+        color_secundario: '#06B6D4', reglas: '', imagenes: [], videos: [], etapas: [], premios: []
       });
       setImagenUrl('');
       setVideoUrl('');
