@@ -1381,12 +1381,18 @@ async def get_sorteo_by_slug(slug: str):
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if isinstance(sorteo_doc['fecha_inicio'], str):
-        sorteo_doc['fecha_inicio'] = datetime.fromisoformat(sorteo_doc['fecha_inicio'])
-    if isinstance(sorteo_doc['fecha_cierre'], str):
+    # Convertir fechas (compatibilidad con sorteos antiguos)
+    if sorteo_doc.get('fecha_cierre') and isinstance(sorteo_doc['fecha_cierre'], str):
         sorteo_doc['fecha_cierre'] = datetime.fromisoformat(sorteo_doc['fecha_cierre'])
-    if isinstance(sorteo_doc['created_at'], str):
+    if sorteo_doc.get('created_at') and isinstance(sorteo_doc['created_at'], str):
         sorteo_doc['created_at'] = datetime.fromisoformat(sorteo_doc['created_at'])
+    
+    # Compatibilidad: si existe fecha_inicio pero no fecha_cierre, usar fecha_inicio
+    if sorteo_doc.get('fecha_inicio') and not sorteo_doc.get('fecha_cierre'):
+        if isinstance(sorteo_doc['fecha_inicio'], str):
+            sorteo_doc['fecha_cierre'] = datetime.fromisoformat(sorteo_doc['fecha_inicio'])
+        else:
+            sorteo_doc['fecha_cierre'] = sorteo_doc['fecha_inicio']
     
     for etapa in sorteo_doc.get('etapas', []):
         if etapa.get('fecha_sorteo') and isinstance(etapa['fecha_sorteo'], str):
