@@ -196,7 +196,6 @@ const AdminDashboard = () => {
         cantidad_minima_boletos: parseInt(formData.cantidad_minima_boletos),
         cantidad_total_boletos: parseInt(formData.cantidad_total_boletos),
         porcentaje_comision: parseFloat(formData.porcentaje_comision),
-        fecha_inicio: new Date(formData.fecha_inicio).toISOString(),
         fecha_cierre: new Date(formData.fecha_cierre).toISOString()
       };
       
