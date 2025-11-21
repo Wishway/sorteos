@@ -93,6 +93,14 @@ const SorteoLanding = () => {
 
   const handleCantidadChange = (nuevaCantidad) => {
     const num = parseInt(nuevaCantidad) || 1;
+    const minimo = sorteo?.cantidad_minima_boletos || 1;
+    
+    // No permitir menos del mínimo
+    if (num < minimo) {
+      toast.error(`La compra mínima es de ${minimo} boletos`);
+      return;
+    }
+    
     setCantidad(num);
     const nuevosNumeros = Array(num).fill('').map((_, i) => numerosBoletos[i] || '');
     setNumerosBoletos(nuevosNumeros);
