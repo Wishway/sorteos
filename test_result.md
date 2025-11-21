@@ -217,3 +217,15 @@ agent_communication:
     message: "Starting comprehensive testing of Usuario Dashboard functionality. Will test user login with usuario@wishway.com/password123, dashboard access, ticket information display, tabs functionality, and navigation buttons as requested by user."
   - agent: "testing"
     message: "TESTING COMPLETED SUCCESSFULLY: All Usuario Dashboard functionality tested and working correctly. User login authentication, dashboard access, navigation buttons, statistics cards, all tabs (Boletos Activos, Premios Ganados, Historial), date filters, and change password modal are all functional. All required ticket information fields are properly implemented in the code. Test user has no tickets (expected), but empty states are handled correctly."
+  - agent: "main_agent"
+    message: "FIXES IMPLEMENTED (2024-11-21): Fixed critical bugs and added missing features as requested by user. All changes have been tested and verified."
+    changes:
+      - "Bug Fix: Botón 'Ir a perfil' ahora funciona correctamente - redirige a /usuario para usuarios y /admin para administradores"
+      - "Bug Fix: Flujo de compra arreglado - sorteos en estado 'published' ahora permiten comprar boletos"
+      - "Feature: Agregado botón '← Volver al Inicio' en página de detalle del sorteo"
+      - "Feature: Agregada sección 'Premios del Sorteo' completa con imágenes y videos"
+      - "Feature: Para sorteos multi-etapa, premios se muestran agrupados por etapa con sus propias imágenes/videos"
+      - "Feature: Sección 'Otros Sorteos Activos' funcional al final de la página de detalle"
+      - "Data: Creados 6 sorteos de prueba en diferentes estados (DRAFT, PUBLISHED, WAITING, LIVE, COMPLETED)"
+    tested: true
+    test_method: "Manual testing with screenshots + curl"
