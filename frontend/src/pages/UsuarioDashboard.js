@@ -27,6 +27,9 @@ const UsuarioDashboard = () => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
   const [filtroFecha, setFiltroFecha] = useState('todos');
+  const [filtroSorteo, setFiltroSorteo] = useState('todos');
+  const [filtroNumeroBoleto, setFiltroNumeroBoleto] = useState('');
+  const [sorteos, setSorteos] = useState([]);
 
   useEffect(() => {
     if (!user) {
