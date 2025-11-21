@@ -869,6 +869,53 @@ async def get_sorteos(estado: Optional[str] = None, incluir_draft: bool = False)
     
     return sorteos
 
+@api_router.get("/sorteos/{sorteo_id}/participantes")
+async def get_participantes_sorteo(sorteo_id: str):
+    """Obtener lista de participantes (usuarios con boletos aprobados) para sorteo LIVE"""
+    # Obtener todos los boletos aprobados del sorteo
+    boletos = await db.boletos.find({
+        'sorteo_id': sorteo_id,
+        'pago_confirmado': True
+    }, {"_id": 0}).to_list(10000)
+    
+    # Agrupar por usuario y obtener información
+    participantes = []
+    usuarios_unicos = {}
+    
+    for boleto in boletos:
+        usuario_id = boleto['usuario_id']
+        
+        if usuario_id not in usuarios_unicos:
+            # Obtener información del usuario
+            usuario_doc = await db.users.find_one({'id': usuario_id}, {"_id": 0})
+            if usuario_doc:
+                usuarios_unicos[usuario_id] = {
+                    'usuario_id': usuario_id,
+                    'nombre': usuario_doc.get('nombre', ''),
+                    'email': usuario_doc.get('email', ''),
+                    'numeros_boletos': []
+                }
+        
+        # Agregar número de boleto
+        if usuario_id in usuarios_unicos:
+            usuarios_unicos[usuario_id]['numeros_boletos'].append(boleto['numero_boleto'])
+    
+    # Convertir a lista y crear una entrada por cada boleto
+    for usuario_data in usuarios_unicos.values():
+        for numero_boleto in usuario_data['numeros_boletos']:
+            participantes.append({
+                'usuario_id': usuario_data['usuario_id'],
+                'nombre': usuario_data['nombre'],
+                'email': usuario_data['email'],
+                'numero_boleto': numero_boleto
+            })
+    
+    return {
+        'sorteo_id': sorteo_id,
+        'total_participantes': len(participantes),
+        'participantes': participantes
+    }
+
 @api_router.get("/sorteos/{sorteo_id}", response_model=Sorteo)
 async def get_sorteo(sorteo_id: str):
     sorteo_doc = await db.sorteos.find_one({'id': sorteo_id}, {"_id": 0})
