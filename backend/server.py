@@ -1102,7 +1102,6 @@ async def update_sorteo(sorteo_id: str, data: SorteoCreate, request: Request):
     
     # Update sorteo
     update_data = data.model_dump()
-    update_data['fecha_inicio'] = update_data['fecha_inicio'].isoformat()
     update_data['fecha_cierre'] = update_data['fecha_cierre'].isoformat()
     
     await db.sorteos.update_one(
