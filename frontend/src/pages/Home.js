@@ -58,6 +58,7 @@ const HomeComplete = () => {
     
     return () => {
       clearInterval(pollingInterval);
+      clearInterval(limpiezaInterval);
     };
   }, []);
 
