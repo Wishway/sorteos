@@ -14,6 +14,14 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
   const yaTerminado = sorteo.ganadores && sorteo.ganadores.length > 0;
 
   useEffect(() => {
+    // Si ya terminó (tiene ganadores), mostrarlos directamente sin animación
+    if (yaTerminado) {
+      setIsAnimating(false);
+      setWinners(sorteo.ganadores);
+      setShowWinners(true);
+      return;
+    }
+    
     if (participantes.length === 0) return;
 
     // Timer para countdown
@@ -41,7 +49,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       clearInterval(countdownInterval);
       clearInterval(rotationInterval);
     };
-  }, [participantes]);
+  }, [participantes, yaTerminado]);
 
   const finishAnimation = async () => {
     setIsAnimating(false);
