@@ -42,13 +42,48 @@ const UsuarioDashboard = () => {
   const fetchMisBoletos = async () => {
     try {
       const response = await axios.get(`${API}/boletos/mis-boletos`, { withCredentials: true });
-      setBoletos(response.data);
+      // Ordenar por fecha de compra descendente (más recientes primero)
+      const boletosOrdenados = response.data.sort((a, b) => 
+        new Date(b.fecha_compra) - new Date(a.fecha_compra)
+      );
+      setBoletos(boletosOrdenados);
+      
+      // Extraer sorteos únicos
+      const sorteosUnicos = [...new Set(boletosOrdenados.map(b => b.sorteo_titulo))];
+      setSorteos(sorteosUnicos);
     } catch (error) {
       console.error('Error al cargar boletos:', error);
       toast.error('Error al cargar tus boletos');
     } finally {
       setLoading(false);
     }
+  };
+  
+  const boletosFiltrados = () => {
+    let resultado = [...boletos];
+    
+    // Filtrar por sorteo
+    if (filtroSorteo !== 'todos') {
+      resultado = resultado.filter(b => b.sorteo_titulo === filtroSorteo);
+    }
+    
+    // Filtrar por número de boleto
+    if (filtroNumeroBoleto) {
+      const numero = parseInt(filtroNumeroBoleto);
+      resultado = resultado.filter(b => b.numero_boleto === numero);
+    }
+    
+    // Filtrar por fecha (ya existe en el código original)
+    const ahora = new Date();
+    if (filtroFecha === '7dias') {
+      const hace7Dias = new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000);
+      resultado = resultado.filter(b => new Date(b.fecha_compra) >= hace7Dias);
+    } else if (filtroFecha === '30dias') {
+      const hace30Dias = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
+      resultado = resultado.filter(b => new Date(b.fecha_compra) >= hace30Dias);
+    }
+    
+    return resultado;
   };
 
   const handleLogout = async () => {
