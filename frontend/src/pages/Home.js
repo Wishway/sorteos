@@ -122,7 +122,7 @@ const HomeComplete = () => {
     const newCountdowns = {};
     sorteosWaiting.forEach(sorteo => {
       const ahora = new Date();
-      const fechaInicio = new Date(sorteo.fecha_inicio);
+      const fechaInicio = new Date(sorteo.fecha_cierre);
       const diff = fechaInicio - ahora;
       
       if (diff > 0) {
@@ -284,7 +284,7 @@ const HomeComplete = () => {
                       <div className="bg-black rounded-xl p-6 mb-4">
                         {(() => {
                           const ahora = new Date();
-                          const fechaInicio = new Date(sorteo.fecha_inicio);
+                          const fechaInicio = new Date(sorteo.fecha_cierre);
                           const fechaWaiting = sorteo.fecha_waiting ? new Date(sorteo.fecha_waiting) : null;
                           const todosVendidos = sorteo.progreso_porcentaje >= 100;
                           const fechaAlcanzada = fechaInicio <= ahora;
@@ -335,7 +335,7 @@ const HomeComplete = () => {
                       </div>
 
                       <p className="text-orange-300 text-sm mb-4">
-                        Fecha programada: {formatDateTime(sorteo.fecha_inicio)}
+                        Fecha programada: {formatDateTime(sorteo.fecha_cierre)}
                       </p>
 
                       <Link to={`/sorteo/${sorteo.landing_slug}`}>
@@ -413,14 +413,14 @@ const HomeComplete = () => {
                     </p>
 
                     {/* Contador regresivo si aún no ha comenzado */}
-                    {new Date(sorteo.fecha_inicio) > new Date() && (
+                    {new Date(sorteo.fecha_cierre) > new Date() && (
                       <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-xl p-3 mb-4 border border-blue-500/30">
                         <p className="text-xs text-blue-300 mb-2 flex items-center gap-1">
                           <Clock className="w-3 h-3" />
                           Inicia en:
                         </p>
                         <Countdown 
-                          targetDate={sorteo.fecha_inicio} 
+                          targetDate={sorteo.fecha_cierre} 
                           className="justify-center text-white"
                         />
                       </div>
