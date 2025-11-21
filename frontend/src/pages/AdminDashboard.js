@@ -25,6 +25,7 @@ const AdminDashboard = () => {
   const [usuarios, setUsuarios] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
+  const [editingSorteoId, setEditingSorteoId] = useState(null);
   const [boletosPendientes, setBoletosPendientes] = useState([]);
   const [loadingPendientes, setLoadingPendientes] = useState(false);
   const [boletosAprobados, setBoletosAprobados] = useState([]);
