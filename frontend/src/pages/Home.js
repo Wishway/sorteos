@@ -380,28 +380,77 @@ const HomeComplete = () => {
                     <CardContent className="p-6 text-center">
                       <h3 className="font-bold text-2xl mb-4 text-white">{sorteo.titulo}</h3>
                       
-                      <div className="bg-black rounded-xl p-6 mb-4">
-                        <p className="text-orange-400 text-sm mb-3 font-semibold">Inicia en:</p>
-                        <div className="flex justify-center gap-3">
-                          <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-lg px-4 py-3 min-w-[70px]">
-                            <div className="text-4xl font-bold text-white">{countdown.horas.toString().padStart(2, '0')}</div>
-                            <div className="text-xs text-orange-100">Horas</div>
-                          </div>
-                          <div className="text-white text-4xl font-bold flex items-center">:</div>
-                          <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-lg px-4 py-3 min-w-[70px]">
-                            <div className="text-4xl font-bold text-white">{countdown.minutos.toString().padStart(2, '0')}</div>
-                            <div className="text-xs text-orange-100">Mins</div>
-                          </div>
-                          <div className="text-white text-4xl font-bold flex items-center">:</div>
-                          <div className="bg-gradient-to-br from-orange-500 to-red-600 rounded-lg px-4 py-3 min-w-[70px]">
-                            <div className="text-4xl font-bold text-white">{countdown.segundos.toString().padStart(2, '0')}</div>
-                            <div className="text-xs text-orange-100">Segs</div>
-                          </div>
+                      {/* Mostrar información de progreso */}
+                      <div className="mb-4">
+                        <div className="flex justify-between items-center mb-2">
+                          <span className="text-sm text-gray-400">Boletos vendidos</span>
+                          <span className="text-sm font-bold text-orange-400">
+                            {sorteo.cantidad_vendida}/{sorteo.cantidad_total_boletos}
+                          </span>
                         </div>
+                        <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
+                          <div 
+                            className="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-500"
+                            style={{ width: `${sorteo.progreso_porcentaje}%` }}
+                          ></div>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-black rounded-xl p-6 mb-4">
+                        {(() => {
+                          const ahora = new Date();
+                          const fechaInicio = new Date(sorteo.fecha_inicio);
+                          const fechaWaiting = sorteo.fecha_waiting ? new Date(sorteo.fecha_waiting) : null;
+                          const todosVendidos = sorteo.progreso_porcentaje >= 100;
+                          const fechaAlcanzada = fechaInicio <= ahora;
+                          
+                          // Si ambas condiciones se cumplieron, mostrar contador de 30 min desde fecha_waiting
+                          if (todosVendidos && fechaAlcanzada && fechaWaiting) {
+                            const fecha30Min = new Date(fechaWaiting.getTime() + 30 * 60 * 1000);
+                            return (
+                              <>
+                                <p className="text-orange-400 text-sm mb-3 font-semibold">¡Sorteo comienza en:</p>
+                                <Countdown targetDate={fecha30Min} className="justify-center" />
+                                <p className="text-xs text-gray-400 mt-3">Margen de 30 minutos antes del sorteo</p>
+                              </>
+                            );
+                          }
+                          
+                          // Si solo falta la fecha
+                          if (todosVendidos && !fechaAlcanzada) {
+                            return (
+                              <>
+                                <p className="text-orange-400 text-sm mb-3 font-semibold">¡Todos los boletos vendidos! Sorteo en:</p>
+                                <Countdown targetDate={fechaInicio} className="justify-center" />
+                              </>
+                            );
+                          }
+                          
+                          // Si solo faltan boletos
+                          if (!todosVendidos && fechaAlcanzada) {
+                            return (
+                              <>
+                                <p className="text-orange-400 text-sm mb-3 font-semibold">Fecha alcanzada</p>
+                                <p className="text-white text-lg">Esperando completar venta de boletos</p>
+                                <p className="text-sm text-gray-400 mt-2">
+                                  Faltan {sorteo.cantidad_total_boletos - sorteo.cantidad_vendida} boletos
+                                </p>
+                              </>
+                            );
+                          }
+                          
+                          // Default
+                          return (
+                            <>
+                              <p className="text-orange-400 text-sm mb-3 font-semibold">Inicia en:</p>
+                              <Countdown targetDate={fechaInicio} className="justify-center" />
+                            </>
+                          );
+                        })()}
                       </div>
 
                       <p className="text-orange-300 text-sm mb-4">
-                        {formatDateTime(sorteo.fecha_inicio)}
+                        Fecha programada: {formatDateTime(sorteo.fecha_inicio)}
                       </p>
 
                       <Link to={`/sorteo/${sorteo.landing_slug}`}>
