@@ -1151,6 +1151,26 @@ async def pausar_sorteo(sorteo_id: str, request: Request):
     
     return {"message": f"Sorteo {'pausado' if nuevo_estado == 'pausado' else 'reactivado'} exitosamente"}
 
+@api_router.post("/admin/actualizar-estados-sorteos")
+async def actualizar_estados_automatico():
+    """Verificar y actualizar estados de todos los sorteos activos (para llamar periódicamente)"""
+    try:
+        # Obtener sorteos en PUBLISHED y WAITING
+        sorteos_activos = await db.sorteos.find({
+            'estado': {'$in': ['published', 'activo', 'waiting']}
+        }).to_list(1000)
+        
+        actualizaciones = 0
+        for sorteo_doc in sorteos_activos:
+            resultado = await verificar_transicion_estado(sorteo_doc['id'])
+            if resultado:
+                actualizaciones += 1
+        
+        return {"message": f"Se actualizaron {actualizaciones} sorteos"}
+    except Exception as e:
+        logging.error(f"Error al actualizar estados: {str(e)}")
+        return {"error": str(e)}
+
 @api_router.post("/admin/liberar-boletos-expirados")
 async def ejecutar_liberacion_boletos(request: Request):
     """Liberar boletos pendientes con más de 24 horas (job manual)"""
