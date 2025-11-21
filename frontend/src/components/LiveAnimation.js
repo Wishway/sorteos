@@ -43,39 +43,23 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
   const finishAnimation = async () => {
     setIsAnimating(false);
     
-    // Seleccionar ganador(es) aleatorio(s)
-    const numPremios = sorteo.tipo === 'unico' 
-      ? (sorteo.premios?.length || 1) 
-      : sorteo.etapas?.length || 1;
+    // USAR GANADORES DEL BACKEND (ya seleccionados cuando pasó a LIVE)
+    // NO generar ganadores aleatorios aquí
+    const ganadoresBackend = sorteo.ganadores || [];
     
-    const selectedWinners = [];
-    const availableParticipants = [...participantes];
-    
-    for (let i = 0; i < Math.min(numPremios, availableParticipants.length); i++) {
-      const randomIndex = Math.floor(Math.random() * availableParticipants.length);
-      const winner = availableParticipants[randomIndex];
-      
-      // Agregar premio correspondiente
-      let premio;
-      if (sorteo.tipo === 'unico') {
-        premio = sorteo.premios?.[i]?.nombre || 'Premio Principal';
-      } else {
-        premio = sorteo.etapas?.[i]?.premio || `Premio ${i + 1}`;
-      }
-      
-      selectedWinners.push({
-        ...winner,
-        premio: premio
-      });
-      
-      availableParticipants.splice(randomIndex, 1);
+    if (ganadoresBackend.length > 0) {
+      // Usar ganadores que ya seleccionó el backend
+      setWinners(ganadoresBackend);
+    } else {
+      // Fallback: si por alguna razón no hay ganadores en backend, mostrar mensaje
+      console.error('No hay ganadores en el sorteo desde el backend');
+      setWinners([]);
     }
     
-    setWinners(selectedWinners);
     setShowWinners(true);
     
     if (onAnimationComplete) {
-      onAnimationComplete(selectedWinners);
+      onAnimationComplete(ganadoresBackend);
     }
   };
 
