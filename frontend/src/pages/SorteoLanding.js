@@ -586,7 +586,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                 <CardTitle>Comprar Boleto</CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
-                {(sorteo.estado === 'published' || sorteo.estado === 'activo') && boletosDisponibles > 0 ? (
+                {(sorteo.estado === 'published' || sorteo.estado === 'activo' || sorteo.estado === 'waiting') && boletosDisponibles > 0 ? (
                   <>
                     <div>
                       <Label htmlFor="cantidad">¿Cuántos boletos?</Label>
