@@ -9,6 +9,9 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
   const [timeLeft, setTimeLeft] = useState(120); // 2 minutos
   const [winners, setWinners] = useState([]);
   const [showWinners, setShowWinners] = useState(false);
+  
+  // Si el sorteo ya tiene ganadores guardados, NO hacer animación
+  const yaTerminado = sorteo.ganadores && sorteo.ganadores.length > 0;
 
   useEffect(() => {
     if (participantes.length === 0) return;
