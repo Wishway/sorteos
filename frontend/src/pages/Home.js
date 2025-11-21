@@ -46,6 +46,16 @@ const HomeComplete = () => {
       }
     }, 60000); // Cada 60 segundos
     
+    // Limpieza automática de sorteos antiguos cada 24 horas
+    const limpiezaInterval = setInterval(async () => {
+      try {
+        await axios.post(`${API}/admin/limpiar-sorteos-antiguos`);
+        console.log('Limpieza de sorteos antiguos ejecutada');
+      } catch (error) {
+        console.error('Error en limpieza automática:', error);
+      }
+    }, 86400000); // Cada 24 horas
+    
     return () => {
       clearInterval(pollingInterval);
     };
