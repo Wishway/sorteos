@@ -879,7 +879,8 @@ async def verificar_transicion_estado(sorteo_id: str):
                 
                 minutos_en_waiting = (ahora - fecha_waiting).total_seconds() / 60
                 
-                if minutos_en_waiting >= 5:
+                # Pasar a LIVE después de ~5 minutos (4.5 min para dar margen)
+                if minutos_en_waiting >= 4.5:
                     # Seleccionar ganadores AHORA (solo una vez)
                     if not sorteo.ganadores or len(sorteo.ganadores) == 0:
                         ganadores_seleccionados = await seleccionar_ganadores_sorteo(sorteo_id)
