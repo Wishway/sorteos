@@ -1221,6 +1221,50 @@ async def guardar_ganadores_sorteo(sorteo_id: str, ganadores: List[dict], reques
     
     return {"message": f"{len(ganadores)} ganador(es) guardado(s) exitosamente", "sorteo_completado": True}
 
+@api_router.put("/admin/sorteo/{sorteo_id}/completar")
+async def completar_sorteo(sorteo_id: str, request: Request):
+    """Marcar sorteo como COMPLETED después de la animación LIVE"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden completar sorteos")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] != 'live':
+        raise HTTPException(status_code=400, detail="Solo se pueden completar sorteos en estado LIVE")
+    
+    # Actualizar estado a COMPLETED
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {
+            'estado': 'completed',
+            'fecha_completed': datetime.now(timezone.utc)
+        }}
+    )
+    
+    # Guardar ganadores en colección separada si hay
+    ganadores = sorteo_doc.get('ganadores', [])
+    if ganadores:
+        for ganador_data in ganadores:
+            ganador = Ganador(
+                sorteo_id=sorteo_id,
+                sorteo_titulo=sorteo_doc['titulo'],
+                usuario_id=ganador_data['usuario_id'],
+                usuario_nombre=ganador_data.get('usuario_nombre', ''),
+                usuario_email=ganador_data.get('usuario_email', ''),
+                numero_boleto=ganador_data['numero_boleto'],
+                premio=ganador_data.get('premio', 'Premio Principal'),
+                fecha_sorteo=datetime.now(timezone.utc)
+            )
+            
+            ganador_dict = ganador.model_dump()
+            ganador_dict['fecha_sorteo'] = ganador_dict['fecha_sorteo'].isoformat()
+            await db.ganadores.insert_one(ganador_dict)
+    
+    return {"message": "Sorteo completado exitosamente", "ganadores_guardados": len(ganadores)}
+
 @api_router.put("/admin/sorteo/{sorteo_id}/iniciar-live")
 async def iniciar_sorteo_live(sorteo_id: str, request: Request):
     """Iniciar sorteo en LIVE (solo desde WAITING)"""
