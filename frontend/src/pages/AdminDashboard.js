@@ -171,9 +171,44 @@ const AdminDashboard = () => {
     }
   };
 
-  const editarSorteo = (sorteoId) => {
-    toast.info('Redirigiendo a editar sorteo...');
-    navigate(`/admin/sorteo/${sorteoId}/editar`);
+  const editarSorteo = async (sorteoId) => {
+    try {
+      // Obtener los datos del sorteo
+      const response = await axios.get(`${API}/sorteos/${sorteoId}`, { withCredentials: true });
+      const sorteo = response.data;
+      
+      // Formatear fechas para el input datetime-local
+      const formatDateForInput = (dateString) => {
+        const date = new Date(dateString);
+        return date.toISOString().slice(0, 16);
+      };
+      
+      // Cargar datos en el formulario
+      setFormData({
+        titulo: sorteo.titulo,
+        descripcion: sorteo.descripcion,
+        precio_boleto: sorteo.precio_boleto.toString(),
+        cantidad_minima_boletos: sorteo.cantidad_minima_boletos.toString(),
+        cantidad_total_boletos: sorteo.cantidad_total_boletos.toString(),
+        tipo: sorteo.tipo,
+        porcentaje_comision: sorteo.porcentaje_comision.toString(),
+        fecha_inicio: formatDateForInput(sorteo.fecha_inicio),
+        fecha_cierre: formatDateForInput(sorteo.fecha_cierre),
+        color_primario: sorteo.color_primario,
+        color_secundario: sorteo.color_secundario,
+        reglas: sorteo.reglas || '',
+        imagenes: sorteo.imagenes || [],
+        videos: sorteo.videos || [],
+        etapas: sorteo.etapas || []
+      });
+      
+      setEditingSorteoId(sorteoId);
+      setShowCreateModal(true);
+      toast.info('Editando sorteo en borrador');
+    } catch (error) {
+      toast.error('Error al cargar datos del sorteo');
+      console.error(error);
+    }
   };
 
   const eliminarSorteo = async (sorteoId) => {
