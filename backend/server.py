@@ -763,6 +763,49 @@ async def liberar_boletos_expirados():
         logging.error(f"Error al liberar boletos: {str(e)}")
         return 0
 
+async def limpiar_sorteos_completados_antiguos():
+    """Eliminar sorteos completados y sus datos después de 30 días"""
+    try:
+        # Calcular fecha límite (30 días atrás)
+        fecha_limite = datetime.now(timezone.utc) - timedelta(days=30)
+        
+        # Buscar sorteos completados con más de 30 días
+        sorteos_antiguos = await db.sorteos.find({
+            'estado': 'completed',
+            'fecha_completed': {'$lt': fecha_limite}
+        }).to_list(1000)
+        
+        sorteos_eliminados = 0
+        boletos_eliminados = 0
+        ganadores_eliminados = 0
+        
+        for sorteo in sorteos_antiguos:
+            sorteo_id = sorteo['id']
+            
+            # Eliminar boletos asociados
+            result_boletos = await db.boletos.delete_many({'sorteo_id': sorteo_id})
+            boletos_eliminados += result_boletos.deleted_count
+            
+            # Eliminar ganadores asociados
+            result_ganadores = await db.ganadores.delete_many({'sorteo_id': sorteo_id})
+            ganadores_eliminados += result_ganadores.deleted_count
+            
+            # Eliminar el sorteo
+            await db.sorteos.delete_one({'id': sorteo_id})
+            sorteos_eliminados += 1
+        
+        if sorteos_eliminados > 0:
+            logging.info(f"Limpieza 30 días: {sorteos_eliminados} sorteos, {boletos_eliminados} boletos, {ganadores_eliminados} ganadores")
+        
+        return {
+            'sorteos': sorteos_eliminados,
+            'boletos': boletos_eliminados,
+            'ganadores': ganadores_eliminados
+        }
+    except Exception as e:
+        logging.error(f"Error al limpiar sorteos antiguos: {str(e)}")
+        return {'sorteos': 0, 'boletos': 0, 'ganadores': 0}
+
 # ============ HELPER FUNCTIONS ============
 async def actualizar_progreso_sorteo(sorteo_id: str):
     """Actualizar cantidad vendida y progreso basado en boletos aprobados"""
