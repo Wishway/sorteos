@@ -264,11 +264,11 @@ const AdminDashboard = () => {
   };
 
   const iniciarSorteo = async (sorteoId) => {
-    if (!window.confirm('¿Iniciar el sorteo manualmente ahora?')) return;
+    if (!window.confirm('¿Iniciar el sorteo en LIVE ahora? Esto iniciará la animación de 2 minutos.')) return;
     
     try {
-      await axios.put(`${API}/admin/sorteo/${sorteoId}/estado?nuevo_estado=live`, {}, { withCredentials: true });
-      toast.success('Sorteo iniciado');
+      await axios.put(`${API}/admin/sorteo/${sorteoId}/iniciar-live`, {}, { withCredentials: true });
+      toast.success('¡Sorteo iniciado en LIVE! La animación durará 2 minutos');
       fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al iniciar sorteo');
