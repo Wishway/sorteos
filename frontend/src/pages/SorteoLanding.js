@@ -330,6 +330,117 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
               </Card>
             )}
 
+            {/* Sección de Premios */}
+            <Card className="sorteo-card">
+              <CardHeader>
+                <CardTitle>Premios del Sorteo</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {sorteo.tipo === 'etapas' ? (
+                  /* Premios agrupados por etapa */
+                  <div className="space-y-6">
+                    {sorteo.etapas.map((etapa) => (
+                      <div key={etapa.numero} className="border-b pb-6 last:border-b-0">
+                        <h3 className="text-xl font-bold mb-4 flex items-center gap-2">
+                          <Badge style={{ backgroundColor: sorteo.color_primario }}>
+                            Etapa {etapa.numero}
+                          </Badge>
+                          {etapa.premio}
+                        </h3>
+                        
+                        {/* Imágenes de premios de esta etapa */}
+                        {etapa.imagen_urls && etapa.imagen_urls.length > 0 && (
+                          <div className="mb-4">
+                            <h4 className="text-sm font-semibold text-gray-700 mb-2">Imágenes:</h4>
+                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                              {etapa.imagen_urls.map((url, idx) => (
+                                <img 
+                                  key={idx}
+                                  src={url} 
+                                  alt={`Premio Etapa ${etapa.numero} - ${idx + 1}`}
+                                  className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                                />
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {/* Videos de premios de esta etapa */}
+                        {etapa.video_urls && etapa.video_urls.length > 0 && (
+                          <div>
+                            <h4 className="text-sm font-semibold text-gray-700 mb-2">Videos:</h4>
+                            <div className="space-y-2">
+                              {etapa.video_urls.map((url, idx) => (
+                                <a 
+                                  key={idx}
+                                  href={url}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  className="block text-blue-600 hover:text-blue-800 underline"
+                                >
+                                  🎥 Ver video {idx + 1}
+                                </a>
+                              ))}
+                            </div>
+                          </div>
+                        )}
+                        
+                        {(!etapa.imagen_urls || etapa.imagen_urls.length === 0) && 
+                         (!etapa.video_urls || etapa.video_urls.length === 0) && (
+                          <p className="text-gray-500 text-sm italic">No hay imágenes o videos para esta etapa</p>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  /* Premios para sorteo de etapa única */
+                  <div className="space-y-4">
+                    {/* Imágenes generales del sorteo */}
+                    {sorteo.imagenes && sorteo.imagenes.length > 0 && (
+                      <div className="mb-4">
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Imágenes de los premios:</h4>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                          {sorteo.imagenes.map((url, idx) => (
+                            <img 
+                              key={idx}
+                              src={url} 
+                              alt={`Premio ${idx + 1}`}
+                              className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                            />
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {/* Videos generales del sorteo */}
+                    {sorteo.videos && sorteo.videos.length > 0 && (
+                      <div>
+                        <h4 className="text-sm font-semibold text-gray-700 mb-2">Videos:</h4>
+                        <div className="space-y-2">
+                          {sorteo.videos.map((url, idx) => (
+                            <a 
+                              key={idx}
+                              href={url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block text-blue-600 hover:text-blue-800 underline"
+                            >
+                              🎥 Ver video {idx + 1}
+                            </a>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    
+                    {(!sorteo.imagenes || sorteo.imagenes.length === 0) && 
+                     (!sorteo.videos || sorteo.videos.length === 0) && (
+                      <p className="text-gray-500 text-center py-4">No hay imágenes o videos de premios disponibles</p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
             <Tabs defaultValue="descripcion" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="descripcion">Descripción</TabsTrigger>
