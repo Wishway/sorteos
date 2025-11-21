@@ -421,7 +421,291 @@ const HomeComplete = () => {
         </div>
       )}
 
-      {/* Continúa en el siguiente archivo... */}
+      {/* SECCIÓN 4: SORTEOS DISPONIBLES (PUBLISHED) */}
+      {sorteosPublished.length > 0 && (
+        <div className="bg-gradient-to-b from-gray-900 to-gray-800 py-20 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-16">
+              <Badge className="bg-gradient-to-r from-purple-600 to-blue-600 text-white text-lg px-6 py-2 mb-4">
+                🎯 SORTEOS DISPONIBLES
+              </Badge>
+              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                Participa Ahora y Gana
+              </h2>
+              <p className="text-xl text-gray-400">
+                Elige tu sorteo favorito y compra tus boletos
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {sorteosPublished.map((sorteo) => (
+                <Card key={sorteo.id} className="overflow-hidden hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 bg-gradient-to-br from-gray-800 to-gray-900 border-0">
+                  <div className="relative h-64 overflow-hidden group">
+                    {sorteo.imagenes?.[0] ? (
+                      <img 
+                        src={sorteo.imagenes[0]} 
+                        alt={sorteo.titulo}
+                        className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+                        <Trophy className="w-24 h-24 text-white opacity-50" />
+                      </div>
+                    )}
+                    
+                    <div className="absolute top-4 right-4">
+                      <Badge className="bg-green-600 text-white font-bold">
+                        {sorteo.tipo === 'etapas' ? 'Multi-Etapas' : 'Único'}
+                      </Badge>
+                    </div>
+
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 to-transparent p-4">
+                      <div className="flex items-center justify-between text-white">
+                        <span className="text-sm flex items-center gap-1">
+                          <Trophy className="w-4 h-4" />
+                          {sorteo.cantidad_vendida} participantes
+                        </span>
+                        <span className="text-lg font-bold">
+                          {sorteo.progreso_porcentaje.toFixed(0)}%
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <CardContent className="p-6">
+                    <h3 className="text-2xl font-bold text-white mb-3 line-clamp-2">
+                      {sorteo.titulo}
+                    </h3>
+                    
+                    <p className="text-gray-400 mb-4 line-clamp-2 min-h-[48px]">
+                      {sorteo.descripcion}
+                    </p>
+
+                    <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-xl p-4 mb-4 border border-purple-500/30">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <p className="text-xs text-purple-300 mb-1">Precio del boleto</p>
+                          <p className="text-3xl font-bold text-white">
+                            {formatCurrency(sorteo.precio_boleto)}
+                          </p>
+                        </div>
+                        <Sparkles className="w-10 h-10 text-purple-400" />
+                      </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <div className="flex justify-between items-center mb-2">
+                        <span className="text-sm font-semibold text-gray-300">Progreso</span>
+                        <span className="text-sm font-bold text-purple-400">
+                          {sorteo.cantidad_vendida}/{sorteo.cantidad_total_boletos}
+                        </span>
+                      </div>
+                      <div className="relative h-3 bg-gray-700 rounded-full overflow-hidden">
+                        <div 
+                          className="absolute top-0 left-0 h-full bg-gradient-to-r from-purple-500 to-blue-500 transition-all duration-500 rounded-full"
+                          style={{ width: `${sorteo.progreso_porcentaje}%` }}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-4 pb-4 border-b border-gray-700">
+                      <Calendar className="w-4 h-4 text-purple-400" />
+                      <span>Cierra: {formatDate(sorteo.fecha_cierre)}</span>
+                    </div>
+
+                    <Link to={`/sorteo/${sorteo.landing_slug}`}>
+                      <Button className="w-full text-lg font-bold py-6 rounded-xl bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 text-white shadow-lg">
+                        <Sparkles className="w-5 h-5 mr-2" />
+                        Participar Ahora
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECCIÓN 5: GANADORES (Winner Wall) */}
+      {ganadores.length > 0 && (
+        <div className="bg-gradient-to-br from-yellow-900/30 via-gray-900 to-gray-800 py-20 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge className="bg-gradient-to-r from-yellow-500 to-orange-500 text-black text-lg px-6 py-2 mb-4 font-bold">
+                🏆 WALL OF WINNERS
+              </Badge>
+              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">
+                ¡Felicitaciones a Nuestros Ganadores!
+              </h2>
+              <p className="text-xl text-gray-400">
+                Conoce a los afortunados de los últimos 30 días
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {ganadores.map((ganador) => (
+                <Card key={ganador.id} className="overflow-hidden border-2 border-yellow-500 shadow-2xl bg-gradient-to-br from-gray-900 to-black hover:scale-105 transition-transform">
+                  <div className="relative h-48 overflow-hidden">
+                    {ganador.sorteo?.imagenes?.[0] ? (
+                      <img 
+                        src={ganador.sorteo.imagenes[0]} 
+                        alt={ganador.sorteo.titulo}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-yellow-500 to-orange-600 flex items-center justify-center">
+                        <Trophy className="w-20 h-20 text-white opacity-50" />
+                      </div>
+                    )}
+                    
+                    <Badge className="absolute top-4 left-4 bg-yellow-500 text-black font-bold text-sm px-4 py-2 shadow-lg">
+                      🏆 GANADOR
+                    </Badge>
+
+                    {ganador.etapa_numero && (
+                      <Badge className="absolute top-4 right-4 bg-blue-600 text-white font-bold text-xs px-3 py-1">
+                        Etapa {ganador.etapa_numero}
+                      </Badge>
+                    )}
+                  </div>
+
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-xl mb-3 text-white line-clamp-2">
+                      {ganador.sorteo?.titulo || 'Sorteo'}
+                    </h3>
+
+                    <div className="bg-gradient-to-r from-yellow-900/50 to-orange-900/50 rounded-lg p-4 mb-4 border border-yellow-500/30">
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold text-lg">
+                          {ganador.usuario?.name?.[0]?.toUpperCase() || '🎊'}
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-xs text-yellow-400">Ganador</p>
+                          <p className="font-bold text-white">{ganador.usuario?.name || 'Anónimo'}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="bg-black/50 rounded-lg p-3 text-center">
+                        <p className="text-xs text-yellow-400 mb-1">Boleto Ganador</p>
+                        <p className="text-3xl font-bold text-yellow-500">
+                          #{ganador.numero_boleto?.toString().padStart(4, '0') || '0000'}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="bg-blue-900/30 rounded-lg p-3 mb-3 border border-blue-500/30">
+                      <p className="text-xs text-blue-400 mb-1">Premio</p>
+                      <p className="font-semibold text-white line-clamp-2">
+                        {ganador.premio}
+                      </p>
+                    </div>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                      <Calendar className="w-4 h-4 text-yellow-500" />
+                      <span>Sorteado: {formatDate(ganador.fecha_sorteo)}</span>
+                    </div>
+
+                    {ganador.sorteo?.landing_slug && (
+                      <Link to={`/sorteo/${ganador.sorteo.landing_slug}`} className="block mt-3">
+                        <Button variant="outline" className="w-full border-yellow-500 text-yellow-400 hover:bg-yellow-500/10" size="sm">
+                          Ver Sorteo
+                        </Button>
+                      </Link>
+                    )}
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* SECCIÓN 6: SORTEOS COMPLETADOS/FINALIZADOS */}
+      {sorteosCompleted.length > 0 && (
+        <div className="bg-gradient-to-b from-gray-800 to-gray-900 py-20 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4 flex items-center justify-center gap-3">
+                <Award className="w-12 h-12 text-blue-400" />
+                Sorteos Finalizados
+              </h2>
+              <p className="text-xl text-gray-400">
+                Historial de sorteos completados
+              </p>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              {sorteosCompleted.map((sorteo) => (
+                <Card key={sorteo.id} className="overflow-hidden bg-gradient-to-br from-gray-800 to-gray-900 border border-gray-700 opacity-80 hover:opacity-100 transition-opacity">
+                  <div className="relative h-48 overflow-hidden">
+                    {sorteo.imagenes?.[0] ? (
+                      <img 
+                        src={sorteo.imagenes[0]} 
+                        alt={sorteo.titulo}
+                        className="w-full h-full object-cover grayscale"
+                      />
+                    ) : (
+                      <div className="w-full h-full bg-gradient-to-br from-gray-700 to-gray-800 flex items-center justify-center">
+                        <Trophy className="w-20 h-20 text-gray-600 opacity-50" />
+                      </div>
+                    )}
+                    
+                    <div className="absolute inset-0 bg-black/60 flex items-center justify-center">
+                      <Badge className="bg-blue-600 text-white font-bold text-lg px-6 py-2">
+                        ✓ FINALIZADO
+                      </Badge>
+                    </div>
+                  </div>
+
+                  <CardContent className="p-6">
+                    <h3 className="font-bold text-xl mb-2 text-white line-clamp-2">
+                      {sorteo.titulo}
+                    </h3>
+                    
+                    <p className="text-gray-500 text-sm mb-4">
+                      Finalizado el {formatDate(sorteo.fecha_cierre)}
+                    </p>
+
+                    <div className="flex items-center gap-2 text-sm text-gray-400 mb-4">
+                      <Users className="w-4 h-4" />
+                      <span>{sorteo.cantidad_vendida} participantes</span>
+                    </div>
+
+                    <Link to={`/sorteo/${sorteo.landing_slug}`}>
+                      <Button variant="outline" className="w-full border-gray-600 text-gray-400 hover:bg-gray-800">
+                        Ver Detalles
+                      </Button>
+                    </Link>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Footer CTA */}
+      <div className="bg-gradient-to-r from-purple-900 to-blue-900 py-16 px-4">
+        <div className="max-w-4xl mx-auto text-center">
+          <h2 className="text-3xl lg:text-4xl font-bold text-white mb-4">
+            ¿Listo para cambiar tu vida?
+          </h2>
+          <p className="text-xl text-gray-200 mb-8">
+            Únete a miles de ganadores que ya confiaron en WishWay
+          </p>
+          {!user && (
+            <Link to="/register">
+              <Button 
+                size="lg"
+                className="bg-white text-purple-900 hover:bg-gray-100 font-bold text-xl px-12 py-6 rounded-full shadow-2xl"
+              >
+                Crear Cuenta Gratis
+              </Button>
+            </Link>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
