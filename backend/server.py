@@ -1481,9 +1481,10 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     sorteo = Sorteo(**sorteo_doc)
     
     # ============ VALIDACIÓN DE DISPONIBILIDAD ============
-    # 1. El sorteo debe estar en estado PUBLISHED o ACTIVO
-    # Si está en estos estados, se puede comprar sin importar las fechas
-    if sorteo.estado not in [SorteoEstado.PUBLISHED, SorteoEstado.ACTIVO]:
+    # 1. Validar estado del sorteo
+    # PUBLISHED o ACTIVO: siempre se puede comprar
+    # WAITING: se puede comprar SI aún faltan boletos por vender
+    if sorteo.estado not in [SorteoEstado.PUBLISHED, SorteoEstado.ACTIVO, SorteoEstado.WAITING]:
         raise HTTPException(status_code=400, detail="Sorteo no disponible para compra")
     
     # 2. Validar que haya boletos disponibles (contando solo aprobados)
