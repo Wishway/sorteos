@@ -283,6 +283,74 @@ const UsuarioDashboard = () => {
         </div>
 
         {/* Main Content */}
+        {/* Filtros */}
+        <Card className="mb-4">
+          <CardHeader>
+            <CardTitle className="text-lg">Filtros</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Filtro por sorteo */}
+              <div>
+                <Label htmlFor="filtro-sorteo">Sorteo</Label>
+                <select
+                  id="filtro-sorteo"
+                  value={filtroSorteo}
+                  onChange={(e) => setFiltroSorteo(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  <option value="todos">Todos los sorteos</option>
+                  {sorteos.map((sorteo, idx) => (
+                    <option key={idx} value={sorteo}>{sorteo}</option>
+                  ))}
+                </select>
+              </div>
+              
+              {/* Filtro por número de boleto */}
+              <div>
+                <Label htmlFor="filtro-numero">Número de Boleto</Label>
+                <Input
+                  id="filtro-numero"
+                  type="number"
+                  placeholder="Ej: 123"
+                  value={filtroNumeroBoleto}
+                  onChange={(e) => setFiltroNumeroBoleto(e.target.value)}
+                />
+              </div>
+              
+              {/* Filtro por fecha */}
+              <div>
+                <Label htmlFor="filtro-fecha">Fecha</Label>
+                <select
+                  id="filtro-fecha"
+                  value={filtroFecha}
+                  onChange={(e) => setFiltroFecha(e.target.value)}
+                  className="w-full p-2 border rounded-md"
+                >
+                  <option value="todos">Todas las fechas</option>
+                  <option value="7dias">Últimos 7 días</option>
+                  <option value="30dias">Últimos 30 días</option>
+                </select>
+              </div>
+            </div>
+            
+            {/* Botón para limpiar filtros */}
+            {(filtroSorteo !== 'todos' || filtroNumeroBoleto || filtroFecha !== 'todos') && (
+              <Button 
+                variant="outline" 
+                className="mt-4"
+                onClick={() => {
+                  setFiltroSorteo('todos');
+                  setFiltroNumeroBoleto('');
+                  setFiltroFecha('todos');
+                }}
+              >
+                Limpiar Filtros
+              </Button>
+            )}
+          </CardContent>
+        </Card>
+
         <Tabs defaultValue="activos" className="space-y-4">
           <TabsList>
             <TabsTrigger value="activos" data-testid="tab-activos">Boletos Activos</TabsTrigger>
