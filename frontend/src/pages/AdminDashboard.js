@@ -795,11 +795,35 @@ const AdminDashboard = () => {
                                 {etapa.video_urls && etapa.video_urls.length > 0 && (
                                   <p className="text-xs text-purple-600 mt-1">✓ {etapa.video_urls.length} video(s)</p>
                                 )}
+                                {etapa.premios && etapa.premios.length > 0 && (
+                                  <p className="text-xs text-green-600 mt-1">✓ {etapa.premios.length} premio(s) detallado(s)</p>
+                                )}
                               </div>
                               <Button type="button" variant="destructive" size="sm" onClick={() => eliminarEtapa(index)}>
                                 Eliminar
                               </Button>
                             </div>
+                            
+                            {/* Premios de esta etapa */}
+                            {etapa.premios && etapa.premios.length > 0 && (
+                              <div className="mt-3 pl-4 border-l-2 border-green-500">
+                                <p className="text-xs font-semibold text-green-700 mb-2">Premios:</p>
+                                {etapa.premios.map((premio, pIdx) => (
+                                  <div key={pIdx} className="text-xs bg-white p-2 rounded mb-1 flex justify-between items-center">
+                                    <span>{premio.nombre}</span>
+                                    <Button 
+                                      type="button" 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      onClick={() => eliminarPremioDeEtapa(index, pIdx)}
+                                      className="h-6 w-6 p-0"
+                                    >
+                                      ×
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
                           </div>
                         ))}
 
