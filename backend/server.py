@@ -286,6 +286,8 @@ class Sorteo(BaseModel):
     reglas: Optional[str] = None
     compra_minima: int = 1
     datos_bancarios: Optional[str] = None
+    fecha_waiting: Optional[datetime] = None  # Cuándo entró en WAITING
+    fecha_live: Optional[datetime] = None     # Cuándo inició LIVE
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Boleto(BaseModel):
