@@ -560,7 +560,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                         id="cantidad"
                         type="number"
                         min={sorteo.cantidad_minima_boletos || 1}
-                        max="10"
+                        max={Math.min(boletosDisponibles, 50)}
                         value={cantidad}
                         onChange={(e) => handleCantidadChange(e.target.value)}
                         className="w-full"
