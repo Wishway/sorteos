@@ -1078,6 +1078,16 @@ async def pausar_sorteo(sorteo_id: str, request: Request):
     
     return {"message": f"Sorteo {'pausado' if nuevo_estado == 'pausado' else 'reactivado'} exitosamente"}
 
+@api_router.post("/admin/liberar-boletos-expirados")
+async def ejecutar_liberacion_boletos(request: Request):
+    """Liberar boletos pendientes con más de 24 horas (job manual)"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins")
+    
+    count = await liberar_boletos_expirados()
+    return {"message": f"Se liberaron {count} boletos expirados"}
+
 @api_router.post("/admin/sorteo/{sorteo_id}/guardar-ganadores")
 async def guardar_ganadores_sorteo(sorteo_id: str, ganadores: List[dict], request: Request):
     """Guardar ganadores del sorteo y marcar como completado"""
