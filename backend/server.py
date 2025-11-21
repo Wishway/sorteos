@@ -369,11 +369,10 @@ class SorteoCreate(BaseModel):
     cantidad_total_boletos: int
     tipo: SorteoTipo
     porcentaje_comision: float
-    fecha_inicio: datetime
-    fecha_cierre: datetime
+    fecha_cierre: datetime  # ÚNICA fecha/hora del sorteo
     etapas: List[Etapa] = []
+    premios: List[Premio] = []
     imagenes: List[str] = []
-    videos: List[str] = []
     color_primario: str = "#4F46E5"
     color_secundario: str = "#06B6D4"
     reglas: Optional[str] = None
