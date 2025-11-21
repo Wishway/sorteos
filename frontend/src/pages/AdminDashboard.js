@@ -631,13 +631,19 @@ const AdminDashboard = () => {
                         <Label htmlFor="cantidad_total_boletos">Boletos Totales</Label>
                         <Input id="cantidad_total_boletos" name="cantidad_total_boletos" type="number" value={formData.cantidad_total_boletos} onChange={handleInputChange} required />
                       </div>
-                      <div>
-                        <Label htmlFor="fecha_inicio">Fecha Inicio</Label>
-                        <Input id="fecha_inicio" name="fecha_inicio" type="datetime-local" value={formData.fecha_inicio} onChange={handleInputChange} required />
-                      </div>
-                      <div>
-                        <Label htmlFor="fecha_cierre">Fecha Cierre</Label>
-                        <Input id="fecha_cierre" name="fecha_cierre" type="datetime-local" value={formData.fecha_cierre} onChange={handleInputChange} required />
+                      <div className="col-span-2">
+                        <Label htmlFor="fecha_cierre">Fecha y Hora del Sorteo *</Label>
+                        <Input 
+                          id="fecha_cierre" 
+                          name="fecha_cierre" 
+                          type="datetime-local" 
+                          value={formData.fecha_cierre} 
+                          onChange={handleInputChange} 
+                          required 
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Esta es la ÚNICA fecha que controla el sorteo: contadores, transiciones de estado y realización del sorteo.
+                        </p>
                       </div>
                       <div>
                         <Label htmlFor="tipo">Tipo de Sorteo</Label>
