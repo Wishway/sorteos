@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import { Trophy, Calendar, Clock, Star, Sparkles, Award, Users } from 'lucide-react';
+import Countdown from '../components/Countdown';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
