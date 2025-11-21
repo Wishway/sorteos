@@ -101,20 +101,20 @@ const HomeComplete = () => {
 
   const handleAnimationComplete = async (sorteoId, winners) => {
     try {
-      // Guardar ganadores en el backend
-      await axios.post(
-        `${API}/admin/sorteo/${sorteoId}/guardar-ganadores`,
-        winners,
+      // Marcar sorteo como COMPLETED
+      await axios.put(
+        `${API}/admin/sorteo/${sorteoId}/completar`,
+        {},
         { withCredentials: true }
       );
-      console.log('Ganadores guardados exitosamente');
+      console.log('Sorteo marcado como COMPLETED');
       
-      // Recargar datos después de 30 segundos para mostrar el sorteo en "Completados"
-      setTimeout(() => {
-        fetchData();
-      }, 30000);
+      // Recargar datos inmediatamente para mostrar en "Completados"
+      fetchAllData();
     } catch (error) {
-      console.error('Error al guardar ganadores:', error);
+      console.error('Error al completar sorteo:', error);
+      // Recargar de todas formas
+      fetchAllData();
     }
   };
 
