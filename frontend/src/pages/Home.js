@@ -75,77 +75,25 @@ const HomeComplete = () => {
     }
   };
 
-  const startLiveAnimation = async (sorteoId) => {
+  const loadParticipants = async (sorteoId) => {
     try {
-      // Obtener participantes del sorteo
       const response = await axios.get(`${API}/sorteos/${sorteoId}/participantes`);
-      const participantes = response.data.participantes || [];
-      
-      setLiveAnimations(prev => ({
+      setLiveParticipants(prev => ({
         ...prev,
-        [sorteoId]: {
-          participantes,
-          currentIndex: 0,
-          isAnimating: true,
-          startTime: Date.now(),
-          winners: [] // Se llenará después de 2 minutos
-        }
+        [sorteoId]: response.data.participantes || []
       }));
-      
-      // Simular animación de 2 minutos
-      const animationDuration = 120000; // 2 minutos
-      const updateInterval = 100; // Actualizar cada 100ms
-      
-      const animationInterval = setInterval(() => {
-        setLiveAnimations(prev => {
-          const current = prev[sorteoId];
-          if (!current) return prev;
-          
-          const elapsed = Date.now() - current.startTime;
-          
-          if (elapsed >= animationDuration) {
-            // Animación terminada, mostrar ganador
-            clearInterval(animationInterval);
-            fetchWinners(sorteoId);
-            return {
-              ...prev,
-              [sorteoId]: {
-                ...current,
-                isAnimating: false
-              }
-            };
-          }
-          
-          // Cambiar participante/número aleatorio
-          return {
-            ...prev,
-            [sorteoId]: {
-              ...current,
-              currentIndex: Math.floor(Math.random() * participantes.length)
-            }
-          };
-        });
-      }, updateInterval);
-      
     } catch (error) {
-      console.error('Error al iniciar animación:', error);
+      console.error('Error al cargar participantes:', error);
     }
   };
 
-  const fetchWinners = async (sorteoId) => {
-    try {
-      const response = await axios.get(`${API}/ganadores/sorteo/${sorteoId}`);
-      setLiveAnimations(prev => ({
-        ...prev,
-        [sorteoId]: {
-          ...prev[sorteoId],
-          winners: response.data,
-          showWinners: true
-        }
-      }));
-    } catch (error) {
-      console.error('Error al cargar ganadores:', error);
-    }
+  const handleAnimationComplete = async (sorteoId, winners) => {
+    // Aquí se puede guardar los ganadores en el backend si es necesario
+    console.log('Sorteo completado:', sorteoId, 'Ganadores:', winners);
+    // Recargar datos después de 30 segundos
+    setTimeout(() => {
+      fetchData();
+    }, 30000);
   };
 
   const updateCountdowns = () => {
