@@ -791,7 +791,7 @@ async def actualizar_progreso_sorteo(sorteo_id: str):
     return boletos_aprobados, progreso
 
 async def verificar_transicion_estado(sorteo_id: str):
-    """Verificar y ejecutar transiciones automáticas de estado"""
+    """Verificar y ejecutar transiciones automáticas de estado - LÓGICA COMPLETA"""
     sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
     if not sorteo_doc:
         return
@@ -800,6 +800,7 @@ async def verificar_transicion_estado(sorteo_id: str):
     ahora = datetime.now(timezone.utc)
     estado_actual = sorteo.estado
     nuevo_estado = None
+    update_data = {}
     
     # PUBLISHED → WAITING
     if estado_actual in [SorteoEstado.PUBLISHED, SorteoEstado.ACTIVO]:
@@ -810,32 +811,104 @@ async def verificar_transicion_estado(sorteo_id: str):
         })
         
         todos_vendidos = boletos_aprobados >= sorteo.cantidad_total_boletos
-        fecha_alcanzada = sorteo.fecha_inicio <= ahora
+        fecha_alcanzada = sorteo.fecha_cierre <= ahora
         
-        # Si se vendieron todos los boletos O si llegó la fecha de inicio
+        # Si se vendieron todos los boletos O si llegó la fecha del sorteo
         if todos_vendidos or fecha_alcanzada:
-            # Pero solo pasar a WAITING si ambos no se cumplieron aún
-            # Si ambos se cumplen, ir directo a preparar LIVE
-            if todos_vendidos and fecha_alcanzada:
-                # Verificar si ya pasaron 30 minutos desde que se cumplieron ambas condiciones
-                # Por ahora, pasar a WAITING y después a LIVE manualmente
-                nuevo_estado = SorteoEstado.WAITING
-            else:
-                nuevo_estado = SorteoEstado.WAITING
+            nuevo_estado = SorteoEstado.WAITING
+            update_data['fecha_waiting'] = datetime.now(timezone.utc)
+    
+    # WAITING → LIVE (automático después de 5 minutos si ambas condiciones se cumplen)
+    elif estado_actual == SorteoEstado.WAITING:
+        boletos_aprobados = await db.boletos.count_documents({
+            'sorteo_id': sorteo_id,
+            'pago_confirmado': True
+        })
+        
+        todos_vendidos = boletos_aprobados >= sorteo.cantidad_total_boletos
+        fecha_alcanzada = sorteo.fecha_cierre <= ahora
+        
+        # Si ambas condiciones se cumplen y pasaron 5 minutos desde entrada a WAITING
+        if todos_vendidos and fecha_alcanzada:
+            fecha_waiting = sorteo.fecha_waiting
+            if fecha_waiting:
+                if isinstance(fecha_waiting, str):
+                    fecha_waiting = datetime.fromisoformat(fecha_waiting.replace('Z', '+00:00'))
+                
+                minutos_en_waiting = (ahora - fecha_waiting).total_seconds() / 60
+                
+                if minutos_en_waiting >= 5:
+                    # Seleccionar ganadores AHORA (solo una vez)
+                    if not sorteo.ganadores or len(sorteo.ganadores) == 0:
+                        ganadores_seleccionados = await seleccionar_ganadores_sorteo(sorteo_id)
+                        update_data['ganadores'] = ganadores_seleccionados
+                    
+                    nuevo_estado = SorteoEstado.LIVE
+                    update_data['fecha_live'] = datetime.now(timezone.utc)
     
     # Actualizar estado si cambió
     if nuevo_estado and nuevo_estado != estado_actual:
-        update_data = {'estado': nuevo_estado}
-        
-        # Guardar timestamp cuando entra en WAITING
-        if nuevo_estado == SorteoEstado.WAITING:
-            update_data['fecha_waiting'] = datetime.now(timezone.utc)
+        update_data['estado'] = nuevo_estado
         
         await db.sorteos.update_one(
             {'id': sorteo_id},
             {'$set': update_data}
         )
         logging.info(f"Sorteo {sorteo_id} cambió de estado: {estado_actual} → {nuevo_estado}")
+        
+        return nuevo_estado
+    
+    return None
+
+async def seleccionar_ganadores_sorteo(sorteo_id: str):
+    """Seleccionar ganadores de un sorteo de forma aleatoria"""
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        return []
+    
+    sorteo = Sorteo(**sorteo_doc)
+    
+    # Obtener participantes con boletos aprobados
+    boletos = await db.boletos.find({
+        'sorteo_id': sorteo_id,
+        'pago_confirmado': True
+    }).to_list(10000)
+    
+    if not boletos:
+        return []
+    
+    # Determinar cuántos ganadores necesitamos
+    num_premios = len(sorteo.premios) if sorteo.tipo == 'unico' else len(sorteo.etapas)
+    num_premios = max(num_premios, 1)  # Al menos 1 ganador
+    
+    # Seleccionar ganadores aleatorios
+    import random
+    ganadores = []
+    boletos_disponibles = list(boletos)
+    
+    for i in range(min(num_premios, len(boletos_disponibles))):
+        boleto_ganador = random.choice(boletos_disponibles)
+        boletos_disponibles.remove(boleto_ganador)
+        
+        # Obtener info del usuario
+        usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
+        
+        # Determinar premio
+        if sorteo.tipo == 'unico':
+            premio_nombre = sorteo.premios[i].nombre if i < len(sorteo.premios) else "Premio Principal"
+        else:
+            premio_nombre = sorteo.etapas[i].premio if i < len(sorteo.etapas) else f"Premio {i+1}"
+        
+        ganadores.append({
+            'usuario_id': boleto_ganador['usuario_id'],
+            'usuario_nombre': usuario.get('nombre', '') if usuario else '',
+            'usuario_email': usuario.get('email', '') if usuario else '',
+            'numero_boleto': boleto_ganador['numero_boleto'],
+            'premio': premio_nombre,
+            'fecha_seleccion': datetime.now(timezone.utc).isoformat()
+        })
+    
+    return ganadores
 
 # ============ SORTEOS ENDPOINTS ============
 @api_router.post("/sorteos", response_model=Sorteo)
