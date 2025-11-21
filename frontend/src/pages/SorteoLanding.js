@@ -49,11 +49,17 @@ const SorteoLanding = () => {
         axios.get(`${API}/ganadores/sorteo/${slug}`).catch(() => ({ data: [] }))
       ]);
       
-      setSorteo(sorteoRes.data);
+      const sorteoData = sorteoRes.data;
+      setSorteo(sorteoData);
       setGanadores(ganadoresRes.data);
       
+      // Inicializar cantidad con el mínimo de boletos
+      const cantidadMinima = sorteoData.cantidad_minima_boletos || 1;
+      setCantidad(cantidadMinima);
+      setNumerosBoletos(Array(cantidadMinima).fill(''));
+      
       // Fetch available numbers
-      const numerosRes = await axios.get(`${API}/sorteos/${sorteoRes.data.id}/numeros-disponibles`);
+      const numerosRes = await axios.get(`${API}/sorteos/${sorteoData.id}/numeros-disponibles`);
       setNumerosDisponibles(numerosRes.data.disponibles);
     } catch (error) {
       console.error('Error al cargar sorteo:', error);
