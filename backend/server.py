@@ -1026,7 +1026,10 @@ async def iniciar_sorteo_live(sorteo_id: str, request: Request):
     
     await db.sorteos.update_one(
         {'id': sorteo_id},
-        {'$set': {'estado': 'live'}}
+        {'$set': {
+            'estado': 'live',
+            'fecha_live': datetime.now(timezone.utc)
+        }}
     )
     
     return {"message": "Sorteo iniciado en modo LIVE"}
