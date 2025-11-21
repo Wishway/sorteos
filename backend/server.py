@@ -1017,8 +1017,9 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     
     sorteo = Sorteo(**sorteo_doc)
     
-    if sorteo.estado != SorteoEstado.ACTIVO:
-        raise HTTPException(status_code=400, detail="El sorteo no está activo")
+    # El sorteo debe estar en estado PUBLISHED (en venta) para comprar
+    if sorteo.estado not in [SorteoEstado.PUBLISHED, SorteoEstado.ACTIVO]:
+        raise HTTPException(status_code=400, detail="Sorteo no disponible")
     
     # Validate minimum quantity
     if len(data.numeros_boletos) < sorteo.compra_minima:
