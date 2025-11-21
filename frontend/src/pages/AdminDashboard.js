@@ -140,9 +140,19 @@ const AdminDashboard = () => {
         fecha_inicio: new Date(formData.fecha_inicio).toISOString(),
         fecha_cierre: new Date(formData.fecha_cierre).toISOString()
       };
-      await axios.post(`${API}/sorteos`, sorteoData, { withCredentials: true });
-      toast.success('¡Sorteo creado exitosamente!');
+      
+      if (editingSorteoId) {
+        // Modo edición
+        await axios.put(`${API}/admin/sorteo/${editingSorteoId}`, sorteoData, { withCredentials: true });
+        toast.success('¡Sorteo actualizado exitosamente!');
+      } else {
+        // Modo creación
+        await axios.post(`${API}/sorteos`, sorteoData, { withCredentials: true });
+        toast.success('¡Sorteo creado exitosamente!');
+      }
+      
       setShowCreateModal(false);
+      setEditingSorteoId(null);
       fetchData();
       setFormData({
         titulo: '', descripcion: '', precio_boleto: '', cantidad_minima_boletos: '',
@@ -152,8 +162,16 @@ const AdminDashboard = () => {
       });
       setImagenUrl('');
       setVideoUrl('');
+      setEtapaForm({ 
+        numero: 1, 
+        porcentaje: '', 
+        premio: '', 
+        nombre: '',
+        imagen_urls: [],
+        video_urls: []
+      });
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al crear sorteo');
+      toast.error(error.response?.data?.detail || `Error al ${editingSorteoId ? 'actualizar' : 'crear'} sorteo`);
     }
   };
 
