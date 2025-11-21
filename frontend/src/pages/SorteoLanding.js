@@ -106,10 +106,31 @@ const SorteoLanding = () => {
     setNumerosBoletos(nuevosNumeros);
   };
 
-  const handleNumeroChange = (index, valor) => {
+  const handleNumeroChange = async (index, valor) => {
     const nuevosNumeros = [...numerosBoletos];
     nuevosNumeros[index] = valor;
     setNumerosBoletos(nuevosNumeros);
+    
+    // Validar disponibilidad si el valor es válido
+    const numero = parseInt(valor);
+    if (numero && numero >= 1 && numero <= sorteo.cantidad_total_boletos) {
+      try {
+        const response = await axios.post(
+          `${API}/sorteos/${sorteo.id}/validar-numero`,
+          { numero },
+          { withCredentials: true }
+        );
+        
+        if (!response.data.disponible) {
+          toast.error(response.data.mensaje);
+          // Limpiar el input si no está disponible
+          nuevosNumeros[index] = '';
+          setNumerosBoletos(nuevosNumeros);
+        }
+      } catch (error) {
+        console.error('Error al validar número:', error);
+      }
+    }
   };
 
   const handleComprar = async () => {
