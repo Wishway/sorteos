@@ -1209,15 +1209,11 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     
     # ============ VALIDACIÓN DE DISPONIBILIDAD ============
     # 1. El sorteo debe estar en estado PUBLISHED o ACTIVO
+    # Si está en estos estados, se puede comprar sin importar las fechas
     if sorteo.estado not in [SorteoEstado.PUBLISHED, SorteoEstado.ACTIVO]:
         raise HTTPException(status_code=400, detail="Sorteo no disponible para compra")
     
-    # 2. Validar que aún no haya pasado la fecha de cierre
-    ahora = datetime.now(timezone.utc)
-    if sorteo.fecha_cierre < ahora:
-        raise HTTPException(status_code=400, detail="El sorteo ya cerró")
-    
-    # 3. Validar que haya boletos disponibles (contando solo aprobados)
+    # 2. Validar que haya boletos disponibles (contando solo aprobados)
     boletos_aprobados = await db.boletos.count_documents({
         'sorteo_id': sorteo.id,
         'pago_confirmado': True
