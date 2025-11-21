@@ -284,6 +284,36 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
               </CardContent>
             </Card>
 
+            {/* Contador regresivo */}
+            {(sorteo.estado === 'published' || sorteo.estado === 'waiting') && (
+              <Card className="sorteo-card bg-gradient-to-br from-purple-50 to-blue-50 border-2" style={{ borderColor: sorteo.color_primario }}>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Clock className="w-6 h-6" />
+                    {sorteo.estado === 'published' ? 'Sorteo Inicia En:' : 'Sorteo Por Comenzar'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="flex flex-col items-center">
+                    <p className="text-sm text-gray-600 mb-4">
+                      Fecha: {formatDateTime(sorteo.fecha_inicio)}
+                    </p>
+                    {new Date(sorteo.fecha_inicio) > new Date() ? (
+                      <Countdown 
+                        targetDate={sorteo.fecha_inicio} 
+                        className="justify-center"
+                      />
+                    ) : (
+                      <div className="text-center">
+                        <p className="text-xl font-bold text-green-600">¡El sorteo ya está activo!</p>
+                        <p className="text-sm text-gray-600 mt-2">Participa antes del cierre</p>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             {sorteo.tipo === 'etapas' && sorteo.etapas.length > 0 && (
               <Card className="sorteo-card">
                 <CardHeader>
