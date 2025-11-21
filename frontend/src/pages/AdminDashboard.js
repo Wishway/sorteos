@@ -683,31 +683,7 @@ const AdminDashboard = () => {
                       </div>
                     </div>
 
-                    <div className="col-span-2 border-t pt-4">
-                      <h3 className="font-semibold mb-3">Videos Promocionales</h3>
-                      {formData.videos.map((vid, index) => (
-                        <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-gray-50 rounded">
-                          <span className="flex-1 text-sm truncate">{vid}</span>
-                          <Button type="button" variant="destructive" size="sm" onClick={() => {
-                            setFormData(prev => ({ ...prev, videos: prev.videos.filter((_, i) => i !== index) }));
-                          }}>Eliminar</Button>
-                        </div>
-                      ))}
-                      <div className="flex gap-2 mt-3">
-                        <Input 
-                          placeholder="URL de video (YouTube, Google Drive, etc)" 
-                          type="url"
-                          value={videoUrl} 
-                          onChange={(e) => setVideoUrl(e.target.value)} 
-                        />
-                        <Button type="button" onClick={() => {
-                          if (videoUrl.trim()) {
-                            setFormData(prev => ({ ...prev, videos: [...prev.videos, videoUrl.trim()] }));
-                            setVideoUrl('');
-                          }
-                        }}>Agregar</Button>
-                      </div>
-                    </div>
+                    {/* Sección de videos eliminada - los videos van en cada premio individual */}
 
                     {/* Sección de Premios para Sorteo Único */}
                     {formData.tipo === 'unico' && (
