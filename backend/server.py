@@ -743,6 +743,27 @@ async def cambiar_password(request: Request, password_actual: str, password_nuev
     
     return {"message": "Contraseña cambiada exitosamente"}
 
+# ============ BACKGROUND JOBS ============
+async def liberar_boletos_expirados():
+    """Liberar boletos pendientes que tienen más de 24 horas"""
+    try:
+        # Calcular fecha límite (24 horas atrás)
+        fecha_limite = datetime.now(timezone.utc) - timedelta(hours=24)
+        
+        # Buscar boletos pendientes antiguos
+        result = await db.boletos.delete_many({
+            'pago_confirmado': False,
+            'fecha_compra': {'$lt': fecha_limite}
+        })
+        
+        if result.deleted_count > 0:
+            logging.info(f"Liberados {result.deleted_count} boletos expirados")
+        
+        return result.deleted_count
+    except Exception as e:
+        logging.error(f"Error al liberar boletos: {str(e)}")
+        return 0
+
 # ============ HELPER FUNCTIONS ============
 async def actualizar_progreso_sorteo(sorteo_id: str):
     """Actualizar cantidad vendida y progreso basado en boletos aprobados"""
