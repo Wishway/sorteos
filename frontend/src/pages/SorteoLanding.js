@@ -108,11 +108,24 @@ const SorteoLanding = () => {
 
   const handleNumeroChange = async (index, valor) => {
     const nuevosNumeros = [...numerosBoletos];
+    const numero = parseInt(valor);
+    
+    // Validar que esté en el rango
+    if (numero && (numero < 1 || numero > sorteo.cantidad_total_boletos)) {
+      toast.error(`El número debe estar entre 1 y ${sorteo.cantidad_total_boletos}`);
+      return;
+    }
+    
+    // Validar números duplicados en la misma compra
+    if (numero && nuevosNumeros.some((n, i) => i !== index && parseInt(n) === numero)) {
+      toast.error(`El número ${numero} ya está seleccionado en esta compra`);
+      return;
+    }
+    
     nuevosNumeros[index] = valor;
     setNumerosBoletos(nuevosNumeros);
     
-    // Validar disponibilidad si el valor es válido
-    const numero = parseInt(valor);
+    // Validar disponibilidad en el backend
     if (numero && numero >= 1 && numero <= sorteo.cantidad_total_boletos) {
       try {
         const response = await axios.post(
