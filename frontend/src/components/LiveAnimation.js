@@ -53,7 +53,21 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     
     for (let i = 0; i < Math.min(numPremios, availableParticipants.length); i++) {
       const randomIndex = Math.floor(Math.random() * availableParticipants.length);
-      selectedWinners.push(availableParticipants[randomIndex]);
+      const winner = availableParticipants[randomIndex];
+      
+      // Agregar premio correspondiente
+      let premio;
+      if (sorteo.tipo === 'unico') {
+        premio = sorteo.premios?.[i]?.nombre || 'Premio Principal';
+      } else {
+        premio = sorteo.etapas?.[i]?.premio || `Premio ${i + 1}`;
+      }
+      
+      selectedWinners.push({
+        ...winner,
+        premio: premio
+      });
+      
       availableParticipants.splice(randomIndex, 1);
     }
     
