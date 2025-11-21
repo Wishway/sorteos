@@ -33,10 +33,22 @@ const HomeComplete = () => {
 
   useEffect(() => {
     fetchAllData();
-    const interval = setInterval(() => {
-      updateCountdowns();
-    }, 1000);
-    return () => clearInterval(interval);
+    
+    // Polling para actualizar estados automáticamente cada 60 segundos
+    const pollingInterval = setInterval(async () => {
+      try {
+        // Llamar al backend para actualizar estados
+        await axios.post(`${API}/admin/actualizar-estados-sorteos`);
+        // Recargar datos
+        fetchAllData();
+      } catch (error) {
+        console.error('Error al actualizar estados:', error);
+      }
+    }, 60000); // Cada 60 segundos
+    
+    return () => {
+      clearInterval(pollingInterval);
+    };
   }, []);
 
   const fetchAllData = async () => {
