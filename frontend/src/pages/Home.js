@@ -178,123 +178,36 @@ const HomeComplete = () => {
       </div>
 
       {/* SECCIÓN 2: SORTEOS EN VIVO (LIVE) */}
-      {sorteosLive.length > 0 && sorteosLive.map((sorteo) => {
-        const animation = liveAnimations[sorteo.id];
-        const currentParticipant = animation?.participantes?.[animation?.currentIndex];
-        
-        return (
-          <div key={sorteo.id} className="relative py-20 px-4 overflow-hidden" style={{
-            background: 'linear-gradient(135deg, #0a0e27 0%, #1a1a2e 50%, #16213e 100%)'
-          }}>
-            {/* Luces de fondo animadas */}
-            <div className="absolute inset-0 opacity-30">
-              {[...Array(20)].map((_, i) => (
-                <div
-                  key={i}
-                  className="absolute rounded-full"
-                  style={{
-                    width: `${Math.random() * 200 + 50}px`,
-                    height: `${Math.random() * 200 + 50}px`,
-                    background: `radial-gradient(circle, ${i % 2 === 0 ? '#ffd700' : '#4169e1'} 0%, transparent 70%)`,
-                    left: `${Math.random() * 100}%`,
-                    top: `${Math.random() * 100}%`,
-                    animation: `pulse ${Math.random() * 3 + 2}s ease-in-out infinite`,
-                    animationDelay: `${Math.random() * 2}s`
-                  }}
-                />
-              ))}
+      {sorteosLive.length > 0 && (
+        <div className="bg-gradient-to-b from-black via-purple-900/20 to-black py-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="text-center mb-12">
+              <Badge className="bg-gradient-to-r from-red-600 to-red-700 text-white text-xl px-8 py-3 mb-6 animate-pulse">
+                🔴 SORTEO EN VIVO
+              </Badge>
+              <h2 className="text-5xl lg:text-6xl font-bold mb-4 text-white">
+                Transmisión en Directo
+              </h2>
+              <p className="text-xl text-gray-300">¡El sorteo está sucediendo ahora!</p>
             </div>
 
-            <div className="max-w-7xl mx-auto relative z-10">
-              {/* Título del evento */}
-              <div className="text-center mb-12">
-                <Badge className="bg-gradient-to-r from-red-600 to-red-700 text-white text-xl px-8 py-3 mb-6 animate-pulse">
-                  🔴 EN VIVO AHORA
-                </Badge>
-                <h2 className="text-5xl lg:text-6xl font-bold mb-4" style={{
-                  background: 'linear-gradient(90deg, #ffd700 0%, #ffed4e 50%, #ffd700 100%)',
-                  WebkitBackgroundClip: 'text',
-                  WebkitTextFillColor: 'transparent',
-                  textShadow: '0 0 30px rgba(255, 215, 0, 0.5)'
-                }}>
-                  {sorteo.titulo}
-                </h2>
-              </div>
-
-              {animation?.isAnimating ? (
-                /* Animación de selección */
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-12">
-                  {/* Panel de participantes */}
-                  <div className="bg-black/50 backdrop-blur-md rounded-3xl p-8 border-2 border-yellow-500/50 shadow-2xl">
-                    <h3 className="text-2xl font-bold text-yellow-400 mb-6 text-center flex items-center justify-center gap-3">
-                      <Users className="w-8 h-8" />
-                      PARTICIPANTES
-                    </h3>
-                    <div className="flex items-center justify-center h-64">
-                      <div className="text-center animate-pulse">
-                        <div className="text-6xl font-bold text-white mb-4">
-                          {currentParticipant?.nombre || 'Seleccionando...'}
-                        </div>
-                        <div className="text-3xl text-yellow-400">
-                          Boleto #{currentParticipant?.numero_boleto?.toString().padStart(4, '0') || '0000'}
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Panel de números */}
-                  <div className="bg-black/50 backdrop-blur-md rounded-3xl p-8 border-2 border-blue-500/50 shadow-2xl">
-                    <h3 className="text-2xl font-bold text-blue-400 mb-6 text-center flex items-center justify-center gap-3">
-                      <Trophy className="w-8 h-8" />
-                      NÚMERO GANADOR
-                    </h3>
-                    <div className="flex items-center justify-center h-64">
-                      <div className="text-9xl font-bold text-blue-400 animate-bounce">
-                        {currentParticipant?.numero_boleto?.toString().padStart(4, '0') || '????'}
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : animation?.showWinners && animation?.winners?.length > 0 ? (
-                /* Mostrar ganadores */
-                <div className="space-y-6">
-                  {animation.winners.map((winner, idx) => (
-                    <div key={idx} className="bg-gradient-to-r from-yellow-500/20 to-yellow-700/20 backdrop-blur-md rounded-3xl p-8 border-4 border-yellow-400 shadow-2xl">
-                      <div className="flex flex-col lg:flex-row items-center justify-between gap-6">
-                        <div className="flex items-center gap-6">
-                          <div className="w-20 h-20 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 flex items-center justify-center text-black font-bold text-3xl shadow-lg">
-                            {idx + 1}
-                          </div>
-                          <div>
-                            <p className="text-yellow-400 text-sm uppercase tracking-wider mb-1">Ganador</p>
-                            <h3 className="text-4xl font-bold text-white mb-2">{winner.usuario?.name || 'Ganador'}</h3>
-                            <p className="text-gray-300 text-lg">Boleto #{winner.numero_boleto?.toString().padStart(4, '0')}</p>
-                          </div>
-                        </div>
-                        <div className="text-right">
-                          <p className="text-yellow-400 text-sm uppercase tracking-wider mb-1">Premio</p>
-                          <h4 className="text-3xl font-bold text-white">{winner.premio}</h4>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center text-white text-2xl py-12">
-                  Cargando información del sorteo...
-                </div>
-              )}
+            <div className="space-y-8">
+              {sorteosLive.map((sorteo) => {
+                const participantes = liveParticipants[sorteo.id] || [];
+                
+                return (
+                  <LiveAnimation
+                    key={sorteo.id}
+                    sorteo={sorteo}
+                    participantes={participantes}
+                    onAnimationComplete={(winners) => handleAnimationComplete(sorteo.id, winners)}
+                  />
+                );
+              })}
             </div>
-
-            <style jsx>{`
-              @keyframes pulse {
-                0%, 100% { opacity: 0.3; transform: scale(1); }
-                50% { opacity: 0.6; transform: scale(1.1); }
-              }
-            `}</style>
           </div>
-        );
-      })}
+        </div>
+      )}
 
       {/* SECCIÓN 3: SORTEOS EN ESPERA (WAITING) - Faltan 6 horas o menos */}
       {sorteosWaiting.length > 0 && (
