@@ -482,6 +482,20 @@ const HomeComplete = () => {
                       {sorteo.descripcion}
                     </p>
 
+                    {/* Contador regresivo si aún no ha comenzado */}
+                    {new Date(sorteo.fecha_inicio) > new Date() && (
+                      <div className="bg-gradient-to-r from-blue-900/50 to-purple-900/50 rounded-xl p-3 mb-4 border border-blue-500/30">
+                        <p className="text-xs text-blue-300 mb-2 flex items-center gap-1">
+                          <Clock className="w-3 h-3" />
+                          Inicia en:
+                        </p>
+                        <Countdown 
+                          targetDate={sorteo.fecha_inicio} 
+                          className="justify-center text-white"
+                        />
+                      </div>
+                    )}
+
                     <div className="bg-gradient-to-r from-purple-900/50 to-blue-900/50 rounded-xl p-4 mb-4 border border-purple-500/30">
                       <div className="flex items-center justify-between">
                         <div>
