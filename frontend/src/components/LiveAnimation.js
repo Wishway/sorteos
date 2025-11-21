@@ -25,14 +25,14 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       });
     }, 1000);
 
-    // Animación de rotación de participantes
-    let participantIndex = 0;
+    // Animación de rotación de participantes ALEATORIA
     const rotationInterval = setInterval(() => {
       if (participantes.length > 0) {
-        setCurrentParticipant(participantes[participantIndex % participantes.length]);
-        participantIndex++;
+        // Seleccionar participante aleatorio para la animación
+        const randomIndex = Math.floor(Math.random() * participantes.length);
+        setCurrentParticipant(participantes[randomIndex]);
       }
-    }, 150); // Cambiar cada 150ms para efecto rápido
+    }, 150); // Cambiar cada 150ms para efecto rápido y aleatorio
 
     return () => {
       clearInterval(countdownInterval);
