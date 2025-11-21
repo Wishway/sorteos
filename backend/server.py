@@ -1282,11 +1282,8 @@ async def guardar_ganadores_sorteo(sorteo_id: str, ganadores: List[dict], reques
     return {"message": f"{len(ganadores)} ganador(es) guardado(s) exitosamente", "sorteo_completado": True}
 
 @api_router.put("/admin/sorteo/{sorteo_id}/completar")
-async def completar_sorteo(sorteo_id: str, request: Request):
-    """Marcar sorteo como COMPLETED después de la animación LIVE"""
-    admin = await get_current_user(request)
-    if admin.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Solo admins pueden completar sorteos")
+async def completar_sorteo(sorteo_id: str):
+    """Marcar sorteo como COMPLETED después de la animación LIVE - Puede ser llamado públicamente"""
     
     sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
     if not sorteo_doc:
