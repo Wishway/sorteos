@@ -61,10 +61,10 @@ const HomeComplete = () => {
       setSorteosCompleted(completed);
       setGanadores(ganadoresRes.data);
       
-      // Iniciar animaciones para sorteos LIVE
+      // Cargar participantes para sorteos LIVE
       live.forEach(sorteo => {
-        if (!liveAnimations[sorteo.id]) {
-          startLiveAnimation(sorteo.id);
+        if (!liveParticipants[sorteo.id]) {
+          loadParticipants(sorteo.id);
         }
       });
       
