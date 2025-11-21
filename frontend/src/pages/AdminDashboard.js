@@ -260,6 +260,9 @@ const AdminDashboard = () => {
       };
       
       // Cargar datos en el formulario
+      // Usar fecha_cierre o fecha_inicio (compatibilidad)
+      const fechaSorteo = sorteo.fecha_cierre || sorteo.fecha_inicio;
+      
       setFormData({
         titulo: sorteo.titulo,
         descripcion: sorteo.descripcion,
@@ -268,14 +271,13 @@ const AdminDashboard = () => {
         cantidad_total_boletos: sorteo.cantidad_total_boletos.toString(),
         tipo: sorteo.tipo,
         porcentaje_comision: sorteo.porcentaje_comision.toString(),
-        fecha_inicio: formatDateForInput(sorteo.fecha_inicio),
-        fecha_cierre: formatDateForInput(sorteo.fecha_cierre),
+        fecha_cierre: formatDateForInput(fechaSorteo),
         color_primario: sorteo.color_primario,
         color_secundario: sorteo.color_secundario,
         reglas: sorteo.reglas || '',
         imagenes: sorteo.imagenes || [],
-        videos: sorteo.videos || [],
-        etapas: sorteo.etapas || []
+        etapas: sorteo.etapas || [],
+        premios: sorteo.premios || []
       });
       
       setEditingSorteoId(sorteoId);
