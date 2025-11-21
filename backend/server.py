@@ -1168,6 +1168,36 @@ async def get_sorteo_by_slug(slug: str):
     
     return Sorteo(**sorteo_doc)
 
+@api_router.post("/sorteos/{sorteo_id}/validar-numero")
+async def validar_numero_boleto(sorteo_id: str, numero: int):
+    """Validar si un número de boleto está disponible"""
+    # Buscar boletos con este número
+    boleto = await db.boletos.find_one({
+        'sorteo_id': sorteo_id,
+        'numero_boleto': numero
+    })
+    
+    if not boleto:
+        return {"disponible": True, "mensaje": "Número disponible"}
+    
+    # Si el boleto está aprobado, no está disponible
+    if boleto.get('pago_confirmado', False):
+        return {"disponible": False, "mensaje": f"El boleto Nº {numero} ya está ocupado"}
+    
+    # Si está pendiente, verificar las 24 horas
+    fecha_compra = boleto.get('fecha_compra')
+    if fecha_compra:
+        if isinstance(fecha_compra, str):
+            fecha_compra = datetime.fromisoformat(fecha_compra.replace('Z', '+00:00'))
+        
+        horas_pasadas = (datetime.now(timezone.utc) - fecha_compra).total_seconds() / 3600
+        
+        if horas_pasadas < 24:
+            return {"disponible": False, "mensaje": f"El boleto Nº {numero} está reservado temporalmente"}
+    
+    # Si pasaron más de 24 horas y está pendiente, está disponible
+    return {"disponible": True, "mensaje": "Número disponible"}
+
 @api_router.get("/sorteos/{sorteo_id}/numeros-disponibles")
 async def get_numeros_disponibles(sorteo_id: str):
     sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
