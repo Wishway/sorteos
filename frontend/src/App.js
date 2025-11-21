@@ -6,9 +6,11 @@ import '@/App.css';
 
 // Pages
 import Home from '@/pages/Home';
-import Login from '@/pages/Login';
+import Login from '@/pages/LoginNew';
 import Register from '@/pages/Register';
 import CompletarDatos from '@/pages/CompletarDatos';
+import ForgotPassword from '@/pages/ForgotPassword';
+import ResetPassword from '@/pages/ResetPassword';
 import SorteoLanding from '@/pages/SorteoLanding';
 import UsuarioDashboard from '@/pages/UsuarioDashboard';
 import VendedorDashboard from '@/pages/VendedorDashboard';
