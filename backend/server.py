@@ -1596,6 +1596,11 @@ async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Reque
     if not numero_comprobante or numero_comprobante.strip() == "":
         raise HTTPException(status_code=400, detail="El número de comprobante es obligatorio")
     
+    # Get boleto info first
+    boleto_doc = await db.boletos.find_one({'id': boleto_id})
+    if not boleto_doc:
+        raise HTTPException(status_code=404, detail="Boleto no encontrado")
+    
     result = await db.boletos.update_one(
         {'id': boleto_id},
         {'$set': {
@@ -1604,8 +1609,10 @@ async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Reque
         }}
     )
     
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Boleto no encontrado")
+    # Actualizar progreso del sorteo y verificar transiciones
+    sorteo_id = boleto_doc['sorteo_id']
+    await actualizar_progreso_sorteo(sorteo_id)
+    await verificar_transicion_estado(sorteo_id)
     
     return {"message": "Boleto aprobado exitosamente"}
 
