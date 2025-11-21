@@ -128,22 +128,10 @@ const ForgotPassword = () => {
                   <p className="text-sm text-gray-500 mt-4">
                     El enlace expirará en 1 hora
                   </p>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Por favor, revisa tu bandeja de entrada y tu carpeta de spam.
+                  </p>
                 </div>
-
-                {/* Development Only - Reset Link */}
-                {resetToken && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
-                    <p className="text-xs text-yellow-800 font-semibold mb-2">
-                      🔧 Modo Desarrollo - Token generado:
-                    </p>
-                    <Link 
-                      to={`/reset-password?token=${resetToken}`}
-                      className="text-xs text-purple-600 hover:text-purple-700 break-all underline"
-                    >
-                      Ir a restablecer contraseña →
-                    </Link>
-                  </div>
-                )}
 
                 {/* Resend Button */}
                 <Button 
