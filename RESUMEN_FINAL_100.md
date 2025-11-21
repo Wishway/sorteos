@@ -327,4 +327,4 @@ Todas las funcionalidades solicitadas han sido implementadas:
 - **Vendedor:** vendedor@wishway.com / password123
 - **Usuario:** usuario@wishway.com / password123
 
-**URL:** https://rafflehub-1.preview.emergentagent.com
+**URL:** https://digital-raffle-3.preview.emergentagent.com

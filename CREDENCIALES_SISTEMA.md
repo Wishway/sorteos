@@ -2,7 +2,7 @@
 
 ## 📋 Información del Sistema
 
-**URL de la Aplicación:** https://rafflehub-1.preview.emergentagent.com
+**URL de la Aplicación:** https://digital-raffle-3.preview.emergentagent.com
 
 **Base de Datos:** MongoDB - `wishway_sorteos`
 

@@ -1,179 +1,215 @@
 <analysis>**original_problem_statement:**
-The user wants to build a comprehensive web platform for managing digital raffles, adapted for . The system should be fully automated.
+The user wants to build a comprehensive web platform for managing digital raffles, adapted for . The system should be fully automated and feature-rich.
 
 **PRODUCT REQUIREMENTS:**
 
-1.  **User Roles:**
-    *   **Admin:** Total control. Creates and manages raffles, users, sellers, commissions, and payments.
-    *   **Seller/Affiliate:** Gets a unique referral link to earn commissions. Can track sales and earnings.
-    *   **User/Buyer:** Registers to buy tickets, views their purchased tickets, and sees their winnings.
-
-2.  **Raffle Types:**
-    *   **Single Stage:** A standard raffle that runs on a specific date.
-    *   **Multi-Stage:** Raffles with multiple stages triggered automatically when certain sales percentages are met (e.g., 25%, 50%, 75%, 100%). A winning ticket in an early stage is excluded from subsequent stages but still participates in the final draw.
-
-3.  **Core Functionality:**
-    *   **Authentication:** Custom JWT (email/password) and Google social login. Requires email verification. Registration includes fields like full name, ID number (cédula), and cell phone number.
-    *   **Ticket Purchase:**
-        *   Users select the quantity of tickets to buy, which dynamically generates input fields for each ticket number.
-        *   The system must validate that the chosen ticket numbers are available and within the valid range for the raffle.
-        *   Bank transfer is the primary payment method. Bank details are displayed at checkout.
-        *   A minimum purchase quantity per transaction can be set by the admin.
-    *   **Ticket Management:**
-        *   Tickets purchased via transfer are  until approved by the admin.
-        *   Pending tickets are reserved for 24 hours and automatically expire (become available again) if not approved.
-        *   Admin must enter a bank confirmation number to approve a ticket.
-    *   **Admin Panel:**
-        *   Dashboard for managing users (block/delete), raffles (create/edit/delete with rules), and commissions.
-        *   Section to manage bank details and a WhatsApp contact number for payment confirmations.
-        *   A view to approve/reject pending tickets.
-        *   A view to see all approved tickets, filterable by raffle and ticket number.
-    *   **User Panel:**
-        *   A My Profile section to view personal data.
-        *   A detailed history of purchased tickets, including raffle name, raffle ID, ticket status, and confirmation number.
-        *   Ability to change password.
-    *   **Raffle Creation:** Admins can set ticket price, commission percentages, dates, minimum sales, and add promotional image/video URLs (e.g., from YouTube/Google Drive).
-    *   **Landing Pages:** Each raffle gets a public landing page () showing prizes, progress, stages, and winners. These pages should also feature promotional banners for other active raffles.
+1.  **User Roles:** Admin (full control), Seller (referral links), User/Buyer (ticket purchase and management).
+2.  **Raffle Types:** Single Stage and Multi-Stage (triggered by sales percentages).
+3.  **Raffle States:** A full state machine is required for raffles: ,  (on sale),  (pre-draw countdown),  (draw in-progress animation),  (finished), and .
+4.  **Core Functionality:**
+    *   **Authentication:** Custom JWT (email/password) with a Forgot Password flow via email, and Google social login. The login and registration pages need a premium, modern design.
+    *   **Landing Page (Home):** A dynamic, professionally designed page that changes based on the state of raffles. It must include:
+        *   A hero section with a logo and background image.
+        *   A Live Sorteo section with a 2-minute animation when a draw is in progress.
+        *   A Sorteos en Espera (Waiting) section with a countdown for raffles starting within 6 hours.
+        *   A Sorteos Disponibles (Published) section with a premium marketplace look.
+        *   A Ganadores Recientes (Recent Winners) wall, showing winners for 30 days.
+        *   A Sorteos Finalizados (Completed) section for historical reference.
+    *   **Raffle Creation/Editing (Admin):**
+        *   A dynamic form that adapts based on raffle type (Single vs. Multi-Stage).
+        *   For multi-stage raffles, the admin must be able to add prizes, images, and videos specific to *each stage*.
+        *   For single-stage raffles, the admin must be able to add one or more prizes with associated media.
+    *   **Sorteo Detail Page:** Must show a Back button, a detailed Prizes section (grouped by stage if applicable), and a section for Other Raffles.
+    *   **Ticket Purchase & Approval:** Users buy tickets, which are  until an admin approves them with a confirmation number.
+    *   **Admin Dashboard:** Manage users, raffles (including state changes like 'Publish'), and approve tickets.
+    *   **User Dashboard:** View personal data and ticket history.
 
 **User's preferred language**: Spanish (español)
 
 **what currently exists?**
-A full-stack application with a FastAPI backend and React frontend has been developed over several iterations. The backend includes most of the requested business logic, such as data models for users, raffles, and tickets, along with API endpoints for user management (auth, blocking), raffle management (creation, editing rules), and the complete ticket purchase/approval flow (including ticket expiration and mandatory confirmation numbers).
+A full-stack application with a FastAPI backend and React frontend. The application has undergone significant development, including:
+- A complete raffle state machine (, , , , ) has been implemented on the backend () and integrated into the frontend ().
+- The main landing page () has been completely redesigned with dynamic sections that appear/disappear based on the state of the raffles (Live, Waiting, Published, Winners, Completed).
+- A full Forgot/Reset Password flow has been created, including backend endpoints and frontend pages. A critical security flaw (exposing the reset token on the UI) was fixed, and the system now uses email for password recovery.
+- The login page has been redesigned with a more modern aesthetic.
+- The admin dashboard features a dynamic form for creating raffles and controls for managing their state.
 
-However, the frontend implementation is incomplete and does not reflect all the available backend functionalities. While basic pages and components exist, many of the UI features requested in the last two user interactions are missing or were only partially implemented.
+However, the user has just reported several new bugs and feature gaps, indicating that the implementation is not yet complete or fully functional.
 
 **Last working item**:
-*   **Last item agent was working:** The agent was attempting to fix the frontend of the Admin Dashboard () after the user reported that previously requested features were not visible. Specifically, the agent was adding the UI for:
-    1.  The modal to approve a pending ticket, which now requires a mandatory comprobante (confirmation number) input.
-    2.  The new tab/section titled Boletos Aprobados (Approved Tickets) to display all active tickets with filtering capabilities.
-*   **Status:** IN PROGRESS
+*   **Last item agent was working:** The agent was about to start working on a new list of bugs and feature requests provided by the user in message #400. The agent's last action was to acknowledge the request and view the user-provided screenshot and related code. No implementation has been started for this new list.
+*   **Status:** NOT STARTED
 *   **Agent Testing Done:** N
-*   **Which testing method agent to use?** Frontend testing agent (to verify the complex UI interactions in the Admin and User dashboards) and Backend testing agent (to ensure the new API logic is correct).
-*   **User Testing Done:** N
+*   **Which testing method agent to use?** Frontend testing agent and Backend testing agent. A comprehensive test is needed to cover the new bugs and features.
+*   **User Testing Done:** Y (User has tested and provided the new list of issues).
 
 **All Pending/In progress Issue list**:
-*   **Issue 1 (P0): Incomplete Frontend Implementation for Core Features**
-    *   **Description:** The user has repeatedly stated that the frontend does not reflect the backend capabilities. The entire feature set from the user's last two requests (messages #242 and #275) needs to be fully implemented and verified on the frontend. This is the highest priority.
-    *   **Attempted fixes:** The agent has made several attempts to update the frontend files (, , ), but has been running into token limits or getting sidetracked, leading to incomplete work. The last action was editing  to add the UI for approving tickets and viewing approved tickets.
+*   **Issue 1 (P0): Critical Bug - Cannot Purchase Published Raffles**
+*   **Issue 2 (P0): Bug - Go to Profile Button is Non-Functional**
+*   **Issue 3 (P1): Incomplete Feature - Raffle Creation Form**
+*   **Issue 4 (P1): Incomplete Feature - Sorteo Detail Page**
+*   **Issue 5 (P2): Task - Create Comprehensive Test Data**
+*   **Issue 6 (P2): Unresolved Backend Instability**
+
+**Issues Detail:**
+*   **Issue 1: Critical Bug - Cannot Purchase Published Raffles**
+    *   **Description:** The user reports that even when a raffle is correctly set to the Published (en venta) state, attempting to purchase a ticket results in a Sorteo no disponible (Raffle not available) error. This blocks the core functionality of the application.
     *   **Next debug checklist:**
-        1.  **AdminDashboard.js:**
-            *   Ensure the Approve Ticket modal has a mandatory input for .
-            *   Fully implement the Boletos Aprobados tab, including fetching data from the  endpoint and implementing the filters for  and .
-            *   Implement the user management UI (block/delete buttons, search field).
-            *   Implement the raffle management UI (edit/delete buttons with correct logic).
-        2.  **UsuarioDashboard.js:**
-            *   Verify the ticket list correctly displays , , and .
-        3.  **SorteoLanding.js:**
-            *   Ensure the minimum purchase logic is enforced on the frontend.
-            *   Add the promotional banner section for other raffles.
-        4.  **CreateRaffle/EditRaffle Component:**
-            *   Ensure the form uses URL inputs for images/videos instead of file uploads.
-    *   **Why fix this issue and what will be achieved with the fix?** To fulfill the user's explicit requirements and make the application functional as specified. The backend logic is mostly there, but inaccessible without the UI.
-    *   **Status:** IN PROGRESS
+        1.  Review the backend logic in  that handles ticket purchases.
+        2.  Check the conditions that validate a raffle's availability. It's likely the logic is not correctly interpreting the  state or is conflicting with another condition (e.g., dates, ticket stock).
+        3.  Trace the API call from the frontend to the backend to ensure the correct raffle ID and state are being processed.
+    *   **Why fix this issue and what will be achieved with the fix?** This is a critical, blocking bug. Fixing it will restore the primary function of the platform: selling raffle tickets.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Both.
+
+*   **Issue 2: Bug - Go to Profile Button is Non-Functional**
+    *   **Description:** The Ir a perfil / Mi cuenta button in the header does not correctly navigate users to their respective dashboards (Admin or User).
+    *   **Next debug checklist:**
+        1.  Examine the  handler for this button in the main layout/header component.
+        2.  Check the logic that reads the user's role from .
+        3.  Ensure 's  function is being called with the correct path ( for admins,  for users).
+    *   **Why fix this issue and what will be achieved with the fix?** This is a basic navigation bug. Fixing it will improve user experience and allow logged-in users to access their dashboards.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Frontend.
+
+*   **Issue 3: Incomplete Feature - Raffle Creation Form**
+    *   **Description:** The admin form for creating raffles is still not correctly implemented. It does not allow adding multiple prizes (with name, description, image URL, video URL) for single-stage raffles, nor does it properly associate multiple prizes with *each specific stage* in multi-stage raffles.
+    *   **Next debug checklist:**
+        1.  Modify the frontend state management in  to handle a nested structure of stages, each with a list of prizes.
+        2.  Update the JSX in the form to correctly render input fields for prizes within each stage.
+        3.  Ensure the  function sends the payload to the backend in the correct format, matching the updated Pydantic models.
+        4.  Verify the backend () can correctly receive and store this nested prize data.
+    *   **Why fix this issue and what will be achieved with the fix?** This is essential for the platform's flexibility, allowing admins to define complex prize structures as requested.
+    *   **Status:** NOT STARTED
     *   **Is recurring issue?** Y
     *   **Should Test frontend/backend/both after fix?** Both.
-    *   **Blocked on other issue:** None.
+
+*   **Issue 4: Incomplete Feature - Sorteo Detail Page**
+    *   **Description:** The public-facing raffle detail page () is missing three required elements:
+        1.  A Back to Home button.
+        2.  A Prizes section that displays all prizes (grouped by stage) with their images/videos.
+        3.  An Other Raffles section at the bottom.
+    *   **Next debug checklist:**
+        1.  Edit .
+        2.  Add a  or  to navigate back to .
+        3.  Fetch the detailed raffle data, including stages and prizes.
+        4g.  Render the prizes, iterating through stages and then prizes within each stage, displaying their media.
+        5.  Add a component at the bottom that fetches and displays a list of other active raffles.
+    *   **Why fix this issue and what will be achieved with the fix?** To provide a complete and user-friendly experience on the raffle detail page, encouraging engagement and cross-promotion.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Frontend.
+
+*   **Issue 5: Task - Create Comprehensive Test Data**
+    *   **Description:** The user has requested the creation of several test raffles to cover all possible states (, , , , ) and types (single-stage with multiple prizes, multi-stage with different prizes per stage).
+    *   **Next debug checklist:**
+        1.  Use the (fixed) admin dashboard or a backend script to create the required seed data.
+        2.  Ensure the data includes varied dates and configurations to test all UI sections (e.g., a raffle waiting to trigger the countdown, a live one to test the animation, a completed one to test the winner wall).
+    *   **Why fix this issue and what will be achieved with the fix?** This will enable thorough testing of all the new state-based features on the landing page and fix the critical purchase bug.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** N
+    *   **Should Test frontend/backend/both after fix?** Both.
+
+*   **Issue 6: Unresolved Backend Instability**
+    *   **Description:** The previous agent struggled significantly with a recurring  from Pydantic related to the  enum. The backend would fail to return raffles with the legacy  state, even after the enum was updated. The agent suspected a server hot-reload/caching issue but never confirmed the root cause before being interrupted by other user requests. The last attempt to fix it resulted in .
+    *   **Next debug checklist:**
+        1.  Before any other changes, force a restart of the backend: backend: stopped
+backend: started.
+        2.  Use  to call the  endpoint and verify if raffles with  state are returned.
+        3.  Check backend logs (==> /var/log/supervisor/backend.err.log <==
+INFO:     Stopping reloader process [35]
+INFO:     Will watch for changes in these directories: ['/app/backend']
+INFO:     Uvicorn running on http://0.0.0.0:8001 (Press CTRL+C to quit)
+INFO:     Started reloader process [195] using WatchFiles
+
+==> /var/log/supervisor/backend.out.log <==) for any  immediately after the  test.
+        4.  If the error persists, the enum definition in  or the Pydantic model usage must be re-examined.
+    *   **Why fix this issue and what will be achieved with the fix?** This is a lurking instability that caused significant delays. If not properly addressed, it will likely reappear and block further development or testing.
+    *   **Status:** NOT STARTED
+    *   **Is recurring issue?** Y
+    *   **Should Test frontend/backend/both after fix?** Backend.
 
 **In progress Task List**:
-*   **Task 1 (P0): Complete Frontend Implementation**
-    *   **Description:** Implement all the missing UI features from the user's last request (message #275) to align the frontend with the already-developed backend logic.
-    *   **Where to resume:** Continue working on  to finish the Boletos Aprobados section and the user/raffle management features. Then, move to other components like , , and the raffle creation form.
-    *   **What will be achieved with this?** A fully functional application that meets all the user's specified requirements.
-    *   **Status:** IN PROGRESS
-    *   **Should Test frontend/backend/both after fix?** Both.
-    *   **Blocked on something:** None.
+*   None.
 
 **Upcoming and Future Tasks**
-*   None. All requested features are considered part of the current in-progress task list.
+*   None. All user requests are captured in the pending issue list.
 
 **Completed work in this session**
-- **Backend Development:**
-  - Full user authentication flow (JWT & Google).
-  - Data models for Users, Raffles, Tickets, and Admin Configuration.
-  - API endpoints for creating, editing, and deleting raffles with business logic (e.g., cannot delete if tickets are sold).
-  - API endpoints for the complete ticket purchase flow, including validation for ticket availability and minimum purchase quantity.
-  - API endpoints for user management (blocking/deleting users).
-  - API endpoints for ticket approval, requiring a confirmation number.
-  - API endpoint to fetch approved tickets with filters.
-  - Scheduled task logic for expiring pending tickets (backend endpoint  created, but cron job not set up).
-- **Frontend Development:**
-  - Initial scaffolding of pages: , , , , , , .
-  - Created user profile pages:  and .
-  - Implemented the purchase flow UI for selecting ticket quantity and entering specific numbers.
-  - Added Badge import to  to fix a crash.
+- **Feature: Full Raffle State Machine**
+  - Implemented , , , ,  states in the backend () and frontend ().
+  - Admins can now manage raffle lifecycle through new buttons on the dashboard.
+- **Feature: Complete Landing Page Overhaul ()**
+  - Redesigned the entire landing page to be dynamic, showing sections for Live, Waiting, Published, Winners, and Completed raffles based on their state.
+  - Implemented a Live Sorteo animation placeholder and Waiting countdown timers.
+- **Feature: Premium Login & Password Recovery**
+  - Redesigned the  page with a modern UI, logo, and show/hide password toggle.
+  - Implemented a full, secure password recovery flow using email. Created  and  pages and corresponding backend endpoints.
+  - Fixed a critical security vulnerability that was exposing the reset token on the UI.
+- **Bug Fixes:**
+  - Resolved multiple frontend syntax errors in  related to  functions.
+  - Fixed a backend data loading issue by making the  enum compatible with legacy  values.
 
 **Earlier issues found/mentioned but not fixed**
-*   **Issue 1: Agent Prematurely Finishes Tasks:**
-    *   **Description:** The agent has a recurring pattern of implementing backend logic, starting the frontend work, and then declaring the entire task 100% complete before the UI is functional or fully implemented. This has happened multiple times (messages 91, 139, 183, 241, 274), causing user frustration.
-    *   **Why to solve this issue and what will be achieved with this?** The next agent must ensure a feature is complete on both backend and frontend, and fully tested, before marking it as done. This will prevent rework and improve user trust.
-    *   **Should Test frontend/backend/both after fix:** N/A (process issue).
-    *   **Is recurring issue?** Y
+*   The backend instability issue with Pydantic enum validation (listed as **Issue 6** in All Pending/In progress Issue list) was encountered and partially debugged but never definitively resolved.
 
 **Known issue recurrence from previous fork**
-*   None.
+*   The agent's tendency to prematurely mark tasks as complete before full frontend implementation and testing was noted in the initial handoff and persisted in this session.
 
 **Code Architecture**
 
 
 **Key Technical Concepts**
-*   **Backend:** FastAPI, Python, MongoDB (via  driver).
-*   **Frontend:** React, JavaScript, , .
-*   **Authentication:** JWT (JSON Web Tokens) with roles.
-*   **Database:** Asynchronous communication with MongoDB.
+*   **Backend:** FastAPI, Pydantic (for data validation and state enums), Motor (async MongoDB),  (for email sending).
+*   **Frontend:** React, , , .
+*   **Core Logic:** State machine management for raffles, dynamic UI rendering based on object state.
 
 **key DB schema**
-*   : 
-*   : 
-*   : 
-*   : 
-*   : 
+*   : Now includes an  field (, , , , ). The  list within a  now supports  and  per stage.  are now nested within stages.
+*   : A new collection may be implicitly used by the password reset logic (or tokens stored on the user object).
 
 **All files**
-*   : The core backend file, containing all data models and API endpoints. Has been heavily modified.
-*   : A large and complex component for the admin panel. It's the primary focus of the current unfinished work.
-*   : The user's panel. Needs UI updates to show detailed ticket info.
-*   : The public raffle page. Needs updates for minimum purchase validation and promotional banners.
-*   : New page for the admin to edit their bank/contact details.
-*   : New page for the user to view their profile.
-*   : Main router file, updated with new routes for profile pages.
-*   : Manages user session state.
+*   : Heavily modified to include the  enum, new endpoints for state management (, , etc.), password recovery endpoints (, ), and email sending logic.
+*   : Completely rewritten to be a dynamic, multi-section landing page.
+*   : Completely rewritten with a new premium design.
+*   : Heavily modified to display raffle states, provide state-change buttons, and implement a more complex (though incomplete) raffle creation form.
+*   : New file for the password recovery flow.
+*   : New file for the password recovery flow.
+*   : Updated to include routes for the new password recovery pages.
+*   : Updated with SMTP server variables.
+*   : New documentation file for email configuration.
 
 **Critical Info for New Agent**
-*   The user is frustrated because the frontend is not keeping up with the requested features. Your absolute top priority is to implement the UI for the 8 features listed in the user's last message ().
-*   The backend logic for most of these 8 features should already be implemented in . You must verify this and then build the React components to consume those endpoints.
-*   Do not claim the task is complete until all 8 features are visibly working on the frontend and have been tested.
-*   Pay close attention to , as it is the most complex component and where the previous agent left off.
-
-**documents created in this job**
-*   
-*   
-*   
-*   
-*   
-*   
+*   Your first priority is to fix the critical bug preventing users from buying tickets for Published raffles (Issue #1). This is a blocker.
+*   Address the other bugs and feature gaps from the user's latest request (message #400). The user is very detail-oriented, so follow their requirements exactly.
+*   Be aware of the unresolved backend instability with the  enum (Issue #6). This issue caused major problems for the previous agent. If you encounter strange data loading issues, check the backend logs for  and consider a manual server restart as a first step, but investigate the root cause.
+*   The user's language is **Spanish**. You MUST respond in Spanish.
+*   After fixing the bugs, create the comprehensive test data requested by the user to validate all the new state-based functionalities.
 
 **Last 5 User Messages and any pending user messages**
-1.  **User (msg #242):** Provided a list of 8 new requirements, including detailed ticket info, mandatory proof for approval, an Approved Tickets list, raffle edit/delete rules, minimum purchase enforcement, user management, landing page ads, and using links for images/videos.
-2.  **Agent (msg #274):** Claimed all 8 requirements were implemented and the system was 100% functional (this was inaccurate).
-3.  **User (msg #275):** Complained that the features from the previous request were not working or visible on the frontend and re-submitted the same list of 8 requirements.
-4.  **Agent (msg #276):** Acknowledged the mistake and agreed to complete the frontend implementation.
-5.  **Agent (msg #278-280):** Started working on the  file to add the UI for approving tickets with a confirmation number and the Approved Tickets tab. This work is **INCOMPLETE**.
+1.  **User (msg #387):** Provided a massive, detailed list of requirements for a complete overhaul of the landing page, specifying sections for Live, Waiting, Published, Winners, and Completed raffles, and a specific visual style. (Status: **COMPLETED**)
+2.  **User (msg #400):** After the landing page was built, the user provided a new list of 5 critical bugs and feature gaps, including: the Go to Profile button not working, the purchase flow being broken for Published raffles, and the raffle creation form and detail pages being incomplete. (Status: **PENDING - THIS IS YOUR CURRENT TASK**)
+3.  **Agent (msg #401):** Acknowledged the new list of tasks and started analysis. (Status: **IN PROGRESS - AGENT LEFT OFF HERE**)
+4.  There are no other pending user messages. The agent's current task is to address everything from message #400.
 
 **Project Health Check:**
-*   **Broken:** The frontend is significantly out of sync with the backend, making many features inaccessible to the user. The  and  are not fully functional as per the latest requirements.
+*   **Broken:**
+    *   The core ticket purchasing flow is broken for  raffles.
+    *   Basic navigation (Go to Profile) is not working.
 *   **Mocked:** None.
 
 **Testing status**
-*   **Testing agent used after significant changes:** NO
+*   **Testing agent used after significant changes:** YES (used to debug  and test )
 *   **Troubleshoot agent used after agent stuck in loop:** NO
 *   **Test files created:** None.
-*   **Known regressions:** A  error in  was reported and fixed by adding an import.
+*   **Known regressions:** The ticket purchase flow, which previously worked, is now broken due to the new state machine logic.
 
 **Credentials to test flow:**
-Seed users were created and are documented in .
 *   **Admin:**  / 
-*   **Seller:**  / 
 *   **User:**  / 
+(As documented in )
 
 **What agent forgot to execute**
-The agent consistently forgot to complete the frontend implementation for the backend logic it created. Specifically, all 8 points from the user's message #275 were started on the backend but left incomplete on the frontend. The agent also repeatedly failed to perform thorough testing before declaring a task finished.</analysis>
+The agent has not yet implemented the 5 points from the user's most recent message (#400). Most notably, it did not fix the raffle creation form to correctly handle prizes per stage, and it introduced a critical regression that broke the ticket purchasing flow.</analysis>
