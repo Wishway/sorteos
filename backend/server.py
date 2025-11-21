@@ -450,6 +450,100 @@ async def logout(request: Request, response: Response):
     response.delete_cookie(key='session_token', path='/')
     return {"message": "Sesión cerrada"}
 
+@api_router.post("/auth/forgot-password")
+async def forgot_password(data: dict):
+    """Solicitar recuperación de contraseña"""
+    email = data.get('email')
+    if not email:
+        raise HTTPException(status_code=400, detail="Email requerido")
+    
+    user_doc = await db.users.find_one({'email': email})
+    if not user_doc:
+        # Por seguridad, no revelar si el email existe o no
+        return {"message": "Si el email existe, recibirás instrucciones de recuperación"}
+    
+    # Generar token de recuperación único
+    reset_token = str(uuid.uuid4())
+    reset_expires = datetime.now(timezone.utc) + timedelta(hours=1)  # Token válido por 1 hora
+    
+    # Guardar token en la base de datos
+    await db.password_resets.insert_one({
+        'user_id': user_doc['id'],
+        'email': email,
+        'reset_token': reset_token,
+        'expires_at': reset_expires,
+        'used': False,
+        'created_at': datetime.now(timezone.utc)
+    })
+    
+    # En desarrollo, devolver el token para testing
+    reset_link = f"/reset-password?token={reset_token}"
+    
+    return {
+        "message": "Si el email existe, recibirás instrucciones de recuperación",
+        "reset_token": reset_token,  # Solo para desarrollo
+        "reset_link": reset_link  # Solo para desarrollo
+    }
+
+@api_router.post("/auth/verify-reset-token")
+async def verify_reset_token(data: dict):
+    """Verificar si el token de recuperación es válido"""
+    token = data.get('token')
+    if not token:
+        raise HTTPException(status_code=400, detail="Token requerido")
+    
+    reset_doc = await db.password_resets.find_one({
+        'reset_token': token,
+        'used': False,
+        'expires_at': {'$gt': datetime.now(timezone.utc)}
+    })
+    
+    if not reset_doc:
+        raise HTTPException(status_code=400, detail="Token inválido o expirado")
+    
+    return {"valid": True, "email": reset_doc['email']}
+
+@api_router.post("/auth/reset-password")
+async def reset_password(data: dict):
+    """Restablecer contraseña con token"""
+    token = data.get('token')
+    new_password = data.get('new_password')
+    
+    if not token or not new_password:
+        raise HTTPException(status_code=400, detail="Token y nueva contraseña requeridos")
+    
+    if len(new_password) < 6:
+        raise HTTPException(status_code=400, detail="La contraseña debe tener al menos 6 caracteres")
+    
+    # Buscar token válido
+    reset_doc = await db.password_resets.find_one({
+        'reset_token': token,
+        'used': False,
+        'expires_at': {'$gt': datetime.now(timezone.utc)}
+    })
+    
+    if not reset_doc:
+        raise HTTPException(status_code=400, detail="Token inválido o expirado")
+    
+    # Actualizar contraseña
+    hashed_password = bcrypt.hashpw(new_password.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
+    
+    await db.users.update_one(
+        {'id': reset_doc['user_id']},
+        {'$set': {'password': hashed_password}}
+    )
+    
+    # Marcar token como usado
+    await db.password_resets.update_one(
+        {'reset_token': token},
+        {'$set': {'used': True, 'used_at': datetime.now(timezone.utc)}}
+    )
+    
+    # Invalidar todas las sesiones del usuario por seguridad
+    await db.user_sessions.delete_many({'user_id': reset_doc['user_id']})
+    
+    return {"message": "Contraseña actualizada exitosamente"}
+
 @api_router.put("/auth/completar-datos")
 async def completar_datos(request: Request, cedula: str, celular: str):
     user = await get_current_user(request)
