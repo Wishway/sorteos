@@ -88,12 +88,22 @@ const HomeComplete = () => {
   };
 
   const handleAnimationComplete = async (sorteoId, winners) => {
-    // Aquí se puede guardar los ganadores en el backend si es necesario
-    console.log('Sorteo completado:', sorteoId, 'Ganadores:', winners);
-    // Recargar datos después de 30 segundos
-    setTimeout(() => {
-      fetchData();
-    }, 30000);
+    try {
+      // Guardar ganadores en el backend
+      await axios.post(
+        `${API}/admin/sorteo/${sorteoId}/guardar-ganadores`,
+        winners,
+        { withCredentials: true }
+      );
+      console.log('Ganadores guardados exitosamente');
+      
+      // Recargar datos después de 30 segundos para mostrar el sorteo en "Completados"
+      setTimeout(() => {
+        fetchData();
+      }, 30000);
+    } catch (error) {
+      console.error('Error al guardar ganadores:', error);
+    }
   };
 
   const updateCountdowns = () => {
