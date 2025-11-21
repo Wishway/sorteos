@@ -1002,6 +1002,27 @@ async def pausar_sorteo(sorteo_id: str, request: Request):
     
     return {"message": f"Sorteo {'pausado' if nuevo_estado == 'pausado' else 'reactivado'} exitosamente"}
 
+@api_router.put("/admin/sorteo/{sorteo_id}/iniciar-live")
+async def iniciar_sorteo_live(sorteo_id: str, request: Request):
+    """Iniciar sorteo en LIVE (solo desde WAITING)"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden iniciar sorteos")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] != 'waiting':
+        raise HTTPException(status_code=400, detail="Solo se pueden iniciar sorteos en estado WAITING")
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'estado': 'live'}}
+    )
+    
+    return {"message": "Sorteo iniciado en modo LIVE"}
+
 @api_router.put("/admin/sorteo/{sorteo_id}/estado")
 async def cambiar_estado_sorteo(sorteo_id: str, nuevo_estado: str, request: Request):
     """Cambiar estado del sorteo manualmente (admin)"""
