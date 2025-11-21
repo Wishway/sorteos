@@ -134,6 +134,59 @@ const AdminDashboard = () => {
     toast.success('Etapa eliminada');
   };
 
+  const agregarPremio = () => {
+    if (!premioForm.nombre) {
+      toast.error('El nombre del premio es obligatorio');
+      return;
+    }
+    const nuevoPremio = { ...premioForm };
+    setFormData(prev => ({ ...prev, premios: [...prev.premios, nuevoPremio] }));
+    setPremioForm({
+      nombre: '',
+      descripcion: '',
+      imagen_url: '',
+      video_url: ''
+    });
+    toast.success('Premio agregado');
+  };
+
+  const eliminarPremio = (index) => {
+    setFormData(prev => ({ ...prev, premios: prev.premios.filter((_, i) => i !== index) }));
+    toast.success('Premio eliminado');
+  };
+
+  const agregarPremioAEtapa = (etapaIndex) => {
+    if (!premioForm.nombre) {
+      toast.error('El nombre del premio es obligatorio');
+      return;
+    }
+    const nuevoPremio = { ...premioForm };
+    setFormData(prev => {
+      const etapasActualizadas = [...prev.etapas];
+      if (!etapasActualizadas[etapaIndex].premios) {
+        etapasActualizadas[etapaIndex].premios = [];
+      }
+      etapasActualizadas[etapaIndex].premios.push(nuevoPremio);
+      return { ...prev, etapas: etapasActualizadas };
+    });
+    setPremioForm({
+      nombre: '',
+      descripcion: '',
+      imagen_url: '',
+      video_url: ''
+    });
+    toast.success(`Premio agregado a Etapa ${etapaIndex + 1}`);
+  };
+
+  const eliminarPremioDeEtapa = (etapaIndex, premioIndex) => {
+    setFormData(prev => {
+      const etapasActualizadas = [...prev.etapas];
+      etapasActualizadas[etapaIndex].premios = etapasActualizadas[etapaIndex].premios.filter((_, i) => i !== premioIndex);
+      return { ...prev, etapas: etapasActualizadas };
+    });
+    toast.success('Premio eliminado de la etapa');
+  };
+
   const handleCrearSorteo = async (e) => {
     e.preventDefault();
     try {
