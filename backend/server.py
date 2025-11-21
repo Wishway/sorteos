@@ -1373,29 +1373,7 @@ async def get_ganadores_recientes():
     
     return ganadores
 
-@api_router.get("/sorteos/{sorteo_id}/participantes")
-async def get_participantes_sorteo(sorteo_id: str):
-    """Obtiene participantes activos de un sorteo para mostrar en animación"""
-    # Solo boletos ACTIVOS (no pendientes ni anulados)
-    boletos = await db.boletos.find({
-        'sorteo_id': sorteo_id,
-        'estado': 'activo',
-        'pago_confirmado': True
-    }, {"_id": 0}).to_list(1000)
-    
-    participantes = []
-    for boleto in boletos:
-        user_doc = await db.users.find_one({'id': boleto['usuario_id']}, {"_id": 0})
-        if user_doc:
-            participantes.append({
-                'nombre': user_doc.get('name', 'Anónimo'),
-                'numero_boleto': boleto.get('numero_boleto', 0)
-            })
-    
-    return {
-        'participantes': participantes,
-        'total': len(participantes)
-    }
+# Removed duplicate endpoint
 
 # ============ ADMIN ENDPOINTS ============
 @api_router.post("/admin/ejecutar-sorteo")
