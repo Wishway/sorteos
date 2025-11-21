@@ -30,9 +30,8 @@ const ForgotPassword = () => {
     setLoading(true);
 
     try {
-      const response = await axios.post(`${API}/auth/forgot-password`, { email });
+      await axios.post(`${API}/auth/forgot-password`, { email });
       setSent(true);
-      setResetToken(response.data.reset_token); // Solo para desarrollo
       toast.success('Solicitud enviada', {
         description: 'Revisa tu correo para restablecer tu contraseña',
       });
