@@ -46,14 +46,10 @@ const HomeComplete = () => {
       
       const allSorteos = sorteosRes.data;
       const ahora = new Date();
-      const en6Horas = new Date(ahora.getTime() + 6 * 60 * 60 * 1000);
       
       // Filtrar sorteos por estado
       const live = allSorteos.filter(s => s.estado === 'live');
-      const waiting = allSorteos.filter(s => {
-        const fechaInicio = new Date(s.fecha_inicio);
-        return s.estado === 'waiting' && fechaInicio > ahora && fechaInicio <= en6Horas;
-      });
+      const waiting = allSorteos.filter(s => s.estado === 'waiting');
       const published = allSorteos.filter(s => s.estado === 'published' || s.estado === 'activo');
       const completed = allSorteos.filter(s => s.estado === 'completed' || s.estado === 'completado');
       
