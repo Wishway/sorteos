@@ -460,7 +460,7 @@ async def forgot_password(data: dict):
     user_doc = await db.users.find_one({'email': email})
     if not user_doc:
         # Por seguridad, no revelar si el email existe o no
-        return {"message": "Si el email existe, recibirás instrucciones de recuperación"}
+        return {"message": "Si el email está registrado, recibirás un correo con las instrucciones"}
     
     # Generar token de recuperación único
     reset_token = str(uuid.uuid4())
@@ -476,14 +476,19 @@ async def forgot_password(data: dict):
         'created_at': datetime.now(timezone.utc)
     })
     
-    # En desarrollo, devolver el token para testing
-    reset_link = f"/reset-password?token={reset_token}"
+    # Construir el enlace de recuperación
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://rafflehub-1.preview.emergentagent.com')
+    reset_link = f"{frontend_url}/reset-password?token={reset_token}"
     
-    return {
-        "message": "Si el email existe, recibirás instrucciones de recuperación",
-        "reset_token": reset_token,  # Solo para desarrollo
-        "reset_link": reset_link  # Solo para desarrollo
-    }
+    # Enviar email con el enlace
+    try:
+        await send_password_reset_email(email, user_doc.get('name', 'Usuario'), reset_link)
+    except Exception as e:
+        logging.error(f"Error al enviar email de recuperación: {str(e)}")
+        # No revelar el error al usuario por seguridad
+    
+    # Siempre devolver el mismo mensaje para no revelar si el email existe
+    return {"message": "Si el email está registrado, recibirás un correo con las instrucciones"}
 
 @api_router.post("/auth/verify-reset-token")
 async def verify_reset_token(data: dict):
