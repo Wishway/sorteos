@@ -926,7 +926,6 @@ async def create_sorteo(data: SorteoCreate, request: Request):
     )
     
     sorteo_dict = sorteo.model_dump()
-    sorteo_dict['fecha_inicio'] = sorteo_dict['fecha_inicio'].isoformat()
     sorteo_dict['fecha_cierre'] = sorteo_dict['fecha_cierre'].isoformat()
     sorteo_dict['created_at'] = sorteo_dict['created_at'].isoformat()
     
