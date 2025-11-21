@@ -569,7 +569,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                       <p className="text-xs text-gray-600 mt-1">
                         {sorteo.cantidad_minima_boletos > 1 
                           ? `Mínimo ${sorteo.cantidad_minima_boletos} boletos`
-                          : 'Puedes comprar hasta 10 boletos'
+                          : `Puedes comprar hasta ${Math.min(boletosDisponibles, 50)} boletos`
                         }
                       </p>
                     </div>
