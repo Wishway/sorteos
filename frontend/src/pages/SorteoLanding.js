@@ -106,27 +106,40 @@ const SorteoLanding = () => {
     setNumerosBoletos(nuevosNumeros);
   };
 
-  const handleNumeroChange = async (index, valor) => {
+  const handleNumeroChange = (index, valor) => {
     const nuevosNumeros = [...numerosBoletos];
-    const numero = parseInt(valor);
-    
-    // Validar que esté en el rango
-    if (numero && (numero < 1 || numero > sorteo.cantidad_total_boletos)) {
-      toast.error(`El número debe estar entre 1 y ${sorteo.cantidad_total_boletos}`);
-      return;
-    }
-    
-    // Validar números duplicados en la misma compra
-    if (numero && nuevosNumeros.some((n, i) => i !== index && parseInt(n) === numero)) {
-      toast.error(`El número ${numero} ya está seleccionado en esta compra`);
-      return;
-    }
-    
     nuevosNumeros[index] = valor;
     setNumerosBoletos(nuevosNumeros);
+  };
+  
+  const validarTodosLosNumeros = async () => {
+    // Validar todos los números antes de proceder con la compra
+    const errores = [];
     
-    // Validar disponibilidad en el backend
-    if (numero && numero >= 1 && numero <= sorteo.cantidad_total_boletos) {
+    for (let i = 0; i < numerosBoletos.length; i++) {
+      const numero = parseInt(numerosBoletos[i]);
+      
+      // Validar que se haya ingresado un número
+      if (!numero) {
+        errores.push(`Debe ingresar un número para el boleto ${i + 1}`);
+        continue;
+      }
+      
+      // Validar rango
+      if (numero < 1 || numero > sorteo.cantidad_total_boletos) {
+        errores.push(`El boleto ${i + 1} debe estar entre 1 y ${sorteo.cantidad_total_boletos}`);
+        continue;
+      }
+      
+      // Validar duplicados en la misma compra
+      for (let j = i + 1; j < numerosBoletos.length; j++) {
+        if (parseInt(numerosBoletos[j]) === numero) {
+          errores.push(`El número ${numero} está repetido en la compra`);
+          break;
+        }
+      }
+      
+      // Validar disponibilidad en backend
       try {
         const response = await axios.post(
           `${API}/sorteos/${sorteo.id}/validar-numero`,
@@ -135,15 +148,15 @@ const SorteoLanding = () => {
         );
         
         if (!response.data.disponible) {
-          toast.error(response.data.mensaje);
-          // Limpiar el input si no está disponible
-          nuevosNumeros[index] = '';
-          setNumerosBoletos(nuevosNumeros);
+          errores.push(response.data.mensaje);
         }
       } catch (error) {
         console.error('Error al validar número:', error);
+        errores.push(`Error al validar el número ${numero}`);
       }
     }
+    
+    return errores;
   };
 
   const handleComprar = async () => {
