@@ -655,7 +655,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                       <Button
                         className="w-full mb-2"
                         style={{ backgroundColor: sorteo.color_primario }}
-                        onClick={() => setShowDatosBancarios(true)}
+                        onClick={handleVerDatosBancarios}
                         disabled={numerosBoletos.some(n => !n)}
                         data-testid="ver-datos-bancarios-btn"
                       >
