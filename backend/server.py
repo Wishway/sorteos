@@ -1410,8 +1410,10 @@ async def get_sorteo_by_slug(slug: str):
     return Sorteo(**sorteo_doc)
 
 @api_router.post("/sorteos/{sorteo_id}/validar-numero")
-async def validar_numero_boleto(sorteo_id: str, numero: int):
-    """Validar si un número de boleto está disponible"""
+async def validar_numero_boleto(sorteo_id: str, request: ValidarNumeroRequest):
+    """Validar si un número de boleto está disponible (pendiente o comprado)"""
+    numero = request.numero
+    
     # Buscar boletos con este número
     boleto = await db.boletos.find_one({
         'sorteo_id': sorteo_id,
