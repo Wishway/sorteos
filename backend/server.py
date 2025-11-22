@@ -878,6 +878,9 @@ async def verificar_transicion_estado(sorteo_id: str):
             if fecha_waiting:
                 if isinstance(fecha_waiting, str):
                     fecha_waiting = datetime.fromisoformat(fecha_waiting.replace('Z', '+00:00'))
+                elif fecha_waiting.tzinfo is None:
+                    # Si no tiene zona horaria, agregarle UTC
+                    fecha_waiting = fecha_waiting.replace(tzinfo=timezone.utc)
                 
                 minutos_en_waiting = (ahora - fecha_waiting).total_seconds() / 60
                 
