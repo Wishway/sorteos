@@ -842,6 +842,11 @@ async def verificar_transicion_estado(sorteo_id: str):
     
     sorteo = Sorteo(**sorteo_doc)
     ahora = datetime.now(timezone.utc)
+    
+    # Asegurar que fecha_cierre tenga zona horaria
+    if sorteo.fecha_cierre.tzinfo is None:
+        sorteo.fecha_cierre = sorteo.fecha_cierre.replace(tzinfo=timezone.utc)
+    
     estado_actual = sorteo.estado
     nuevo_estado = None
     update_data = {}
