@@ -116,6 +116,13 @@ const SorteoLanding = () => {
     // Validar todos los números antes de proceder con la compra
     const errores = [];
     
+    // Validar cantidad mínima
+    const cantidadMinima = sorteo.cantidad_minima_boletos || 1;
+    if (numerosBoletos.length < cantidadMinima) {
+      errores.push(`Debes comprar al menos ${cantidadMinima} boleto(s)`);
+      return errores;
+    }
+    
     for (let i = 0; i < numerosBoletos.length; i++) {
       const numero = parseInt(numerosBoletos[i]);
       
