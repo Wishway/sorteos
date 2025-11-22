@@ -1308,11 +1308,8 @@ async def completar_sorteo(sorteo_id: str):
         for ganador_data in ganadores:
             ganador = Ganador(
                 sorteo_id=sorteo_id,
-                sorteo_titulo=sorteo_doc['titulo'],
+                boleto_id=ganador_data['boleto_id'],
                 usuario_id=ganador_data['usuario_id'],
-                usuario_nombre=ganador_data.get('usuario_nombre', ''),
-                usuario_email=ganador_data.get('usuario_email', ''),
-                numero_boleto=ganador_data['numero_boleto'],
                 premio=ganador_data.get('premio', 'Premio Principal'),
                 fecha_sorteo=datetime.now(timezone.utc)
             )
