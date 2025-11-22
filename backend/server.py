@@ -218,6 +218,8 @@ class ComisionEstado(str, Enum):
     PAGADO = "pagado"
 
 # ============ MODELS ============
+class ValidarNumeroRequest(BaseModel):
+    numero: int
 class User(BaseModel):
     model_config = ConfigDict(extra="ignore", populate_by_name=True)
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
