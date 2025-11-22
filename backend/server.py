@@ -1423,9 +1423,9 @@ async def validar_numero_boleto(sorteo_id: str, request: ValidarNumeroRequest):
     if not boleto:
         return {"disponible": True, "mensaje": "Número disponible"}
     
-    # Si el boleto está aprobado, no está disponible
+    # Si el boleto está aprobado/comprado, no está disponible
     if boleto.get('pago_confirmado', False):
-        return {"disponible": False, "mensaje": f"El boleto Nº {numero} ya está ocupado"}
+        return {"disponible": False, "mensaje": f"Error: el número {numero} ya está reservado o vendido"}
     
     # Si está pendiente, verificar las 24 horas
     fecha_compra = boleto.get('fecha_compra')
@@ -1436,7 +1436,7 @@ async def validar_numero_boleto(sorteo_id: str, request: ValidarNumeroRequest):
         horas_pasadas = (datetime.now(timezone.utc) - fecha_compra).total_seconds() / 3600
         
         if horas_pasadas < 24:
-            return {"disponible": False, "mensaje": f"El boleto Nº {numero} está reservado temporalmente"}
+            return {"disponible": False, "mensaje": f"Error: el número {numero} ya está reservado o vendido"}
     
     # Si pasaron más de 24 horas y está pendiente, está disponible
     return {"disponible": True, "mensaje": "Número disponible"}
