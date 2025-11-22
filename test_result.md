@@ -229,3 +229,66 @@ agent_communication:
       - "Data: Creados 6 sorteos de prueba en diferentes estados (DRAFT, PUBLISHED, WAITING, LIVE, COMPLETED)"
     tested: true
     test_method: "Manual testing with screenshots + curl"
+---
+
+## Testing Session - 2025-11-22
+
+### Bug Fix #1: Winners Not Displaying on Home Page (CRITICAL)
+**Status**: ✅ FIXED
+**Issue**: The "Ganadores de Sorteos" (Wall of Winners) section was empty despite having completed raffles with winners.
+
+**Root Cause Analysis**:
+1. The `seleccionar_ganadores_sorteo` function was not including `boleto_id` in the winner data structure
+2. The `completar_sorteo` function expected `boleto_id` but wasn't receiving it
+3. The `/api/ganadores/recientes` endpoint was comparing datetime object with ISO string, causing query to return 0 results
+
+**Fixes Applied**:
+- Added `boleto_id` field to winner selection in `seleccionar_ganadores_sorteo` function (line 946)
+- Updated `completar_sorteo` to correctly use `boleto_id` from winner data (line 1310)
+- Fixed `/api/ganadores/recientes` query to compare ISO strings instead of datetime objects (line 1643-1644)
+
+**Testing**:
+- Backend API tested: `curl http://localhost:8001/api/ganadores/recientes` returns 3 winners correctly
+- Frontend tested: Screenshot shows "WALL OF WINNERS" section displaying 3 winner cards with:
+  - Winner name (Jhon Espin)
+  - Winning ticket numbers (#0005, #0008, #0003)
+  - Prize information
+  - Raffle date
+- All winner data is enriched correctly with sorteo, usuario, and boleto information
+
+**Files Modified**:
+- `/app/backend/server.py` (lines 946, 1310, 1643-1644)
+
+---
+
+### Bug Fix #2: Ticket Validation Fires on Every Keystroke (CRITICAL)
+**Status**: ✅ FIXED
+**Issue**: When users typed ticket numbers in the purchase form, validation fired on every keystroke (e.g., typing "10" would validate "1" first, causing false "ticket taken" errors).
+
+**Root Cause Analysis**:
+- The `validarTodosLosNumeros` function existed but wasn't being called
+- The "Ver Datos Bancarios" button directly opened the dialog without validation
+
+**Fixes Applied**:
+- Created new `handleVerDatosBancarios` function that validates ALL ticket numbers before showing banking details dialog (line 162-176)
+- Updated "Ver Datos Bancarios" button onClick handler to call the new validation function (line 658)
+- Confirmed `handleNumeroChange` has NO real-time validation (lines 109-113)
+
+**Testing**:
+- Manual testing via screenshot tool confirmed:
+  1. ✅ User can type partial numbers ("1") without triggering validation
+  2. ✅ User can complete numbers ("10") without errors appearing
+  3. ✅ Validation ONLY triggers when clicking "Ver Datos Bancarios" button
+  4. ✅ Error toast appears correctly after button click if ticket is unavailable
+
+**Files Modified**:
+- `/app/frontend/src/pages/SorteoLanding.js` (lines 162-176, 658)
+
+---
+
+### Summary
+Both critical bugs reported by user have been successfully fixed and tested:
+1. ✅ Winners now display correctly in "WALL OF WINNERS" section
+2. ✅ Ticket validation only fires on button click, not on keystroke
+
+**Next Steps**: Full end-to-end testing of automatic state machine flow as mentioned in Issue #3.
