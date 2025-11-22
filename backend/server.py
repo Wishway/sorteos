@@ -955,8 +955,8 @@ async def seleccionar_ganadores_sorteo(sorteo_id: str):
         ganadores.append({
             'boleto_id': boleto_ganador['id'],
             'usuario_id': boleto_ganador['usuario_id'],
-            'usuario_nombre': usuario.get('nombre', '') if usuario else '',
-            'usuario_email': usuario.get('email', '') if usuario else '',
+            'nombre': usuario.get('name', '') if usuario else '',  # Usar 'name' en vez de 'nombre'
+            'email': usuario.get('email', '') if usuario else '',  # Cambiar a 'email' para consistencia
             'numero_boleto': boleto_ganador['numero_boleto'],
             'premio': premio_nombre,
             'fecha_seleccion': datetime.now(timezone.utc).isoformat()
