@@ -943,6 +943,7 @@ async def seleccionar_ganadores_sorteo(sorteo_id: str):
             premio_nombre = sorteo.etapas[i].premio if i < len(sorteo.etapas) else f"Premio {i+1}"
         
         ganadores.append({
+            'boleto_id': boleto_ganador['id'],
             'usuario_id': boleto_ganador['usuario_id'],
             'usuario_nombre': usuario.get('nombre', '') if usuario else '',
             'usuario_email': usuario.get('email', '') if usuario else '',
