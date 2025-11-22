@@ -1638,9 +1638,10 @@ async def get_ganadores_sorteo(sorteo_id: str):
 async def get_ganadores_recientes():
     """Obtiene ganadores de los últimos 30 días hábiles (calculado como 30 días calendario)"""
     fecha_limite = datetime.now(timezone.utc) - timedelta(days=30)
+    fecha_limite_iso = fecha_limite.isoformat()
     
     ganadores = await db.ganadores.find({
-        'fecha_sorteo': {'$gte': fecha_limite}
+        'fecha_sorteo': {'$gte': fecha_limite_iso}
     }, {"_id": 0}).to_list(1000)
     
     # Enriquecer con info del sorteo, usuario y boleto
