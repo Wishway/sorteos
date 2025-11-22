@@ -159,6 +159,22 @@ const SorteoLanding = () => {
     return errores;
   };
 
+  const handleVerDatosBancarios = async () => {
+    // Validar todos los números antes de mostrar los datos bancarios
+    const errores = await validarTodosLosNumeros();
+    
+    if (errores.length > 0) {
+      // Mostrar todos los errores al usuario
+      errores.forEach(error => {
+        toast.error(error);
+      });
+      return;
+    }
+    
+    // Si no hay errores, mostrar el diálogo de datos bancarios
+    setShowDatosBancarios(true);
+  };
+
   const handleComprar = async () => {
     if (!user) {
       toast.error('Debes iniciar sesión para comprar boletos');
