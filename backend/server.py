@@ -1234,16 +1234,26 @@ async def pausar_despausar_ventas(sorteo_id: str, pausar: bool, request: Request
 async def actualizar_estados_automatico():
     """Verificar y actualizar estados de todos los sorteos activos (para llamar periódicamente)"""
     try:
-        # Obtener sorteos en PUBLISHED y WAITING
+        # Obtener sorteos en PUBLISHED, WAITING y LIVE
         sorteos_activos = await db.sorteos.find({
-            'estado': {'$in': ['published', 'activo', 'waiting']}
+            'estado': {'$in': ['published', 'waiting', 'live']}
         }).to_list(1000)
         
         actualizaciones = 0
         for sorteo_doc in sorteos_activos:
-            resultado = await verificar_transicion_estado(sorteo_doc['id'])
+            # Usar la nueva máquina de estados
+            resultado = await state_machine.verificar_transicion_estado_nuevo(sorteo_doc['id'])
             if resultado:
                 actualizaciones += 1
+                
+                # Si cambió a LIVE, iniciar animación
+                if resultado == 'live':
+                    asyncio.create_task(live_animation_service.iniciar_animacion_live(sorteo_doc['id']))
+                    logger.info(f"Iniciando animación LIVE para sorteo {sorteo_doc['id']}")
+        
+        # Emitir actualización global
+        if actualizaciones > 0:
+            await broadcast_sorteos_update()
         
         return {"message": f"Se actualizaron {actualizaciones} sorteos"}
     except Exception as e:
