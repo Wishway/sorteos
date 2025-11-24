@@ -313,13 +313,13 @@ const AdminDashboard = () => {
     }
   };
 
-  const pausarSorteo = async (sorteoId) => {
+  const pausarDespausarVentas = async (sorteoId, pausar) => {
     try {
-      await axios.put(`${API}/admin/sorteo/${sorteoId}/pausar`, {}, { withCredentials: true });
-      toast.success('Estado actualizado');
+      await axios.put(`${API}/admin/sorteo/${sorteoId}/pausar-ventas?pausar=${pausar}`, {}, { withCredentials: true });
+      toast.success(pausar ? 'Ventas pausadas' : 'Ventas reanudadas');
       fetchData();
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al cambiar estado');
+      toast.error(error.response?.data?.detail || 'Error al pausar/despausar ventas');
     }
   };
 
