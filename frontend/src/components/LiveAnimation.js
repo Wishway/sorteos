@@ -2,19 +2,23 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Trophy, Sparkles, Star, Gift } from 'lucide-react';
+import websocketService from '../services/websocket';
 
 const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
   const [currentParticipant, setCurrentParticipant] = useState(null);
-  const [isAnimating, setIsAnimating] = useState(true);
-  const [timeLeft, setTimeLeft] = useState(120); // 2 minutos
+  const [isAnimating, setIsAnimating] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(0);
   const [winners, setWinners] = useState([]);
   const [showWinners, setShowWinners] = useState(false);
+  const [currentPrize, setCurrentPrize] = useState(null);
+  const [prizeIndex, setPrizeIndex] = useState(0);
+  const [wsParticipantes, setWsParticipantes] = useState([]);
   
-  // Si el sorteo ya tiene ganadores guardados, NO hacer animación
-  const yaTerminado = sorteo.ganadores && sorteo.ganadores.length > 0;
+  // Si el sorteo ya tiene ganadores guardados, mostrarlos directamente
+  const yaTerminado = sorteo.ganadores && sorteo.ganadores.length > 0 && sorteo.estado === 'completed';
 
   useEffect(() => {
-    // Si ya terminó (tiene ganadores), mostrarlos directamente sin animación
+    // Si ya terminó (completed con ganadores), mostrarlos directamente
     if (yaTerminado) {
       setIsAnimating(false);
       setWinners(sorteo.ganadores);
@@ -22,32 +26,70 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       return;
     }
     
-    if (participantes.length === 0) return;
-
-    // Timer para countdown
-    const countdownInterval = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval);
-          finishAnimation();
-          return 0;
+    // Si está en estado LIVE, conectar WebSocket
+    if (sorteo.estado === 'live') {
+      websocketService.joinSorteo(sorteo.id);
+      
+      // Escuchar inicio de animación
+      const handleAnimationStart = (data) => {
+        console.log('🎬 Animación LIVE iniciada', data);
+        setWsParticipantes(data.participantes || participantes);
+        setIsAnimating(true);
+      };
+      
+      // Escuchar sorteo de premio
+      const handlePrizeDrawing = (data) => {
+        console.log('🎁 Sorteando premio', data);
+        setCurrentPrize(data.premio_nombre);
+        setPrizeIndex(data.premio_index);
+        setTimeLeft(data.duracion_segundos); // 60 segundos por premio
+        setIsAnimating(true);
+      };
+      
+      // Escuchar anuncio de ganador
+      const handleWinnerAnnounced = (data) => {
+        console.log('🏆 Ganador anunciado', data);
+        setWinners(prev => [...prev, data.ganador]);
+        setIsAnimating(false);
+        setTimeLeft(0);
+      };
+      
+      // Escuchar finalización de animación
+      const handleAnimationComplete = (data) => {
+        console.log('✅ Animación completada', data);
+        setWinners(data.ganadores);
+        setShowWinners(true);
+        setIsAnimating(false);
+        if (onAnimationComplete) {
+          onAnimationComplete();
         }
-        return prev - 1;
-      });
-    }, 1000);
+      };
+      
+      websocketService.onLiveAnimationStart(handleAnimationStart);
+      websocketService.onLivePrizeDrawing(handlePrizeDrawing);
+      websocketService.onLiveWinnerAnnounced(handleWinnerAnnounced);
+      websocketService.onLiveAnimationComplete(handleAnimationComplete);
+      
+      return () => {
+        websocketService.offLiveAnimationStart(handleAnimationStart);
+        websocketService.offLivePrizeDrawing(handlePrizeDrawing);
+        websocketService.offLiveWinnerAnnounced(handleWinnerAnnounced);
+        websocketService.offLiveAnimationComplete(handleAnimationComplete);
+        websocketService.leaveSorteo(sorteo.id);
+      };
+    }
+  }, [sorteo.id, sorteo.estado]);
 
-    // Animación de rotación de participantes ALEATORIA
+  // Animación de rotación de participantes
+  useEffect(() => {
+    if (!isAnimating || wsParticipantes.length === 0) return;
+
     const rotationInterval = setInterval(() => {
-      if (participantes.length > 0) {
-        // Seleccionar participante aleatorio para la animación
-        const randomIndex = Math.floor(Math.random() * participantes.length);
-        setCurrentParticipant(participantes[randomIndex]);
-      }
-    }, 150); // Cambiar cada 150ms para efecto rápido y aleatorio
+      const randomIndex = Math.floor(Math.random() * wsParticipantes.length);
+      setCurrentParticipant(wsParticipantes[randomIndex]);
+    }, 150);
 
-    return () => {
-      clearInterval(countdownInterval);
-      clearInterval(rotationInterval);
+    return () => clearInterval(rotationInterval);
     };
   }, [participantes, yaTerminado]);
 
