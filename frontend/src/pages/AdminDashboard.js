@@ -871,7 +871,7 @@ const AdminDashboard = () => {
                                 type="url"
                                 value={etapaImagenUrl}
                                 onChange={(e) => setEtapaImagenUrl(e.target.value)}
-                                className="text-sm"
+                                className="text-sm overflow-hidden text-ellipsis whitespace-nowrap"
                               />
                               <Button 
                                 type="button" 
