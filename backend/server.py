@@ -2005,7 +2005,9 @@ async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Reque
     # Actualizar progreso del sorteo y verificar transiciones
     sorteo_id = boleto_doc['sorteo_id']
     await actualizar_progreso_sorteo(sorteo_id)
-    await verificar_transicion_estado(sorteo_id)
+    resultado = await state_machine.verificar_transicion_estado_nuevo(sorteo_id)
+    if resultado == 'live':
+        asyncio.create_task(live_animation_service.iniciar_animacion_live(sorteo_id))
     
     return {"message": "Boleto aprobado exitosamente"}
 
