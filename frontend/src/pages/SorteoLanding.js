@@ -606,29 +606,48 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                     <CardTitle>Ganadores</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    {ganadores.length === 0 ? (
-                      <div className="text-center py-8 text-gray-600">
-                        <Trophy className="w-12 h-12 mx-auto mb-4 opacity-30" />
-                        <p>Aún no hay ganadores</p>
-                      </div>
-                    ) : (
+                    {sorteo.ganadores && sorteo.ganadores.length > 0 ? (
                       <div className="space-y-4">
-                        {ganadores.map((ganador) => (
-                          <div key={ganador.id} className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border-2 border-yellow-400">
+                        {sorteo.ganadores.map((ganador, idx) => (
+                          <div key={idx} className="p-4 bg-gradient-to-r from-yellow-50 to-amber-50 rounded-lg border-2 border-yellow-400">
                             <div className="flex items-center gap-3">
                               <Trophy className="w-8 h-8 text-yellow-600" />
-                              <div>
-                                <p className="font-semibold text-lg">
-                                  {ganador.etapa_numero ? `Etapa ${ganador.etapa_numero}` : 'Gran Premio'}
+                              <div className="flex-1">
+                                <p className="font-semibold text-lg text-gray-900">
+                                  {ganador.nombre || ganador.email}
                                 </p>
-                                <p className="text-gray-700">{ganador.premio}</p>
-                                <p className="text-sm text-gray-600">
-                                  Ganado el {formatDateTime(ganador.fecha_sorteo)}
+                                <div className="flex items-center gap-2 text-sm text-gray-600 mt-1">
+                                  <span className="font-semibold">Boleto #{ganador.numero_boleto}</span>
+                                  {sorteo.tipo === 'etapas' && ganador.etapa && (
+                                    <>
+                                      <span>•</span>
+                                      <span>Etapa {ganador.etapa}</span>
+                                    </>
+                                  )}
+                                </div>
+                                <p className="text-gray-700 mt-1">
+                                  <span className="font-medium">Premio:</span> {ganador.premio}
                                 </p>
+                                {ganador.fecha_seleccion && (
+                                  <p className="text-xs text-gray-500 mt-1">
+                                    Ganado el {new Date(ganador.fecha_seleccion).toLocaleDateString('es-EC', {
+                                      day: '2-digit',
+                                      month: 'long',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </p>
+                                )}
                               </div>
                             </div>
                           </div>
                         ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-600">
+                        <Trophy className="w-12 h-12 mx-auto mb-4 opacity-30" />
+                        <p>Aún no hay ganadores para este sorteo</p>
                       </div>
                     )}
                   </CardContent>
