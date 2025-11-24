@@ -1049,31 +1049,26 @@ const AdminDashboard = () => {
                             </>
                           )}
 
-                          {/* PUBLISHED / ACTIVO: Pausar */}
+                          {/* PUBLISHED / ACTIVO: Pausar/Despausar Ventas */}
                           {(sorteo.estado === 'published' || sorteo.estado === 'activo') && (
-                            <>
-                              <Button 
-                                variant="outline" 
-                                size="sm"
-                                onClick={() => pausarSorteo(sorteo.id)}
-                                data-testid={`pausar-sorteo-${sorteo.id}`}
-                              >
-                                <XCircle className="w-4 h-4 mr-2" />
-                                Pausar Ventas
-                              </Button>
-                            </>
-                          )}
-
-                          {/* PAUSADO: Reactivar */}
-                          {sorteo.estado === 'pausado' && (
                             <Button 
-                              className="bg-orange-600 hover:bg-orange-700"
+                              variant={sorteo.ventas_pausadas ? "default" : "outline"}
                               size="sm"
-                              onClick={() => pausarSorteo(sorteo.id)}
-                              data-testid={`reactivar-sorteo-${sorteo.id}`}
+                              onClick={() => pausarDespausarVentas(sorteo.id, !sorteo.ventas_pausadas)}
+                              data-testid={`pausar-ventas-${sorteo.id}`}
+                              className={sorteo.ventas_pausadas ? "bg-orange-600 hover:bg-orange-700" : ""}
                             >
-                              <Play className="w-4 h-4 mr-2" />
-                              Reactivar
+                              {sorteo.ventas_pausadas ? (
+                                <>
+                                  <Play className="w-4 h-4 mr-2" />
+                                  Reanudar Ventas
+                                </>
+                              ) : (
+                                <>
+                                  <XCircle className="w-4 h-4 mr-2" />
+                                  Pausar Ventas
+                                </>
+                              )}
                             </Button>
                           )}
 
