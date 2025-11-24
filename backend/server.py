@@ -2180,6 +2180,17 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+@app.on_event("startup")
+async def startup_event():
+    """Inicializar módulos al arrancar"""
+    # Inicializar state_machine
+    state_machine.init_state_machine(db, Sorteo, SorteoEstado, SorteoTipo)
+    logger.info("State machine inicializada")
+    
+    # Inicializar live_animation_service
+    live_animation_service.init_live_service(db, Sorteo, SorteoEstado, SorteoTipo)
+    logger.info("Live animation service inicializado")
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()
