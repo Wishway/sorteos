@@ -415,13 +415,9 @@ const HomeComplete = () => {
                   </div>
 
                   <CardContent className="p-6">
-                    <h3 className="text-2xl font-bold text-white mb-3 line-clamp-2">
+                    <h3 className="text-2xl font-bold text-white mb-4 line-clamp-2">
                       {sorteo.titulo}
                     </h3>
-                    
-                    <p className="text-gray-400 mb-4 line-clamp-2 min-h-[48px]">
-                      {sorteo.descripcion}
-                    </p>
 
                     {/* Contador regresivo si aún no ha comenzado */}
                     {new Date(sorteo.fecha_cierre) > new Date() && (
