@@ -35,6 +35,17 @@ const HomeComplete = () => {
   useEffect(() => {
     fetchAllData();
     
+    // Conectar WebSocket
+    websocketService.connect();
+    
+    // Escuchar actualización global de sorteos
+    const handleSorteosListUpdated = () => {
+      console.log('📡 Lista de sorteos actualizada desde WebSocket');
+      fetchAllData();
+    };
+    
+    websocketService.onSorteosListUpdated(handleSorteosListUpdated);
+    
     // Polling para actualizar estados automáticamente cada 60 segundos
     const pollingInterval = setInterval(async () => {
       try {
@@ -60,6 +71,7 @@ const HomeComplete = () => {
     return () => {
       clearInterval(pollingInterval);
       clearInterval(limpiezaInterval);
+      websocketService.offSorteosListUpdated(handleSorteosListUpdated);
     };
   }, []);
 
