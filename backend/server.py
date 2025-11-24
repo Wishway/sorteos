@@ -42,9 +42,15 @@ SMTP_PASSWORD = os.environ.get('SMTP_PASSWORD', '')
 FROM_EMAIL = os.environ.get('FROM_EMAIL', SMTP_USER)
 FROM_NAME = os.environ.get('FROM_NAME', 'WishWay Sorteos')
 
+# Import WebSocket manager
+from websocket_manager import sio, emit_sorteo_state_changed, emit_sorteo_updated, broadcast_sorteos_update, emit_live_animation_start, emit_live_prize_drawing, emit_live_winner_announced, emit_live_animation_complete, emit_ventas_pausadas
+
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
+
+# Wrap app with Socket.IO
+socket_app = socketio.ASGIApp(sio, app)
 
 # ============ EMAIL FUNCTIONS ============
 async def send_password_reset_email(to_email: str, user_name: str, reset_link: str):
