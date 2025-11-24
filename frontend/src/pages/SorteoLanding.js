@@ -589,11 +589,11 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                   </CardHeader>
                   <CardContent>
                     <div className="prose max-w-none">
-                      <p className="text-gray-700 whitespace-pre-line">{sorteo.descripcion}</p>
+                      <p className="text-gray-700 whitespace-pre-line break-words overflow-wrap-anywhere">{sorteo.descripcion}</p>
                       {sorteo.reglas && (
                         <div className="mt-6">
                           <h3 className="text-lg font-semibold mb-2">Reglas y Condiciones</h3>
-                          <p className="text-gray-700 whitespace-pre-line">{sorteo.reglas}</p>
+                          <p className="text-gray-700 whitespace-pre-line break-words overflow-wrap-anywhere">{sorteo.reglas}</p>
                         </div>
                       )}
                     </div>
