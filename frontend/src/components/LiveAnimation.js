@@ -90,14 +90,17 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     }, 150);
 
     return () => clearInterval(rotationInterval);
-    };
-  }, [participantes, yaTerminado]);
+  }, [isAnimating, wsParticipantes]);
 
-  const finishAnimation = async () => {
-    setIsAnimating(false);
-    
-    // USAR GANADORES DEL BACKEND (ya seleccionados cuando pasó a LIVE)
-    // NO generar ganadores aleatorios aquí
+  // Countdown timer
+  useEffect(() => {
+    if (!isAnimating || timeLeft <= 0) return;
+
+    const timer = setInterval(() => {
+      setTimeLeft(prev => Math.max(0, prev - 1));
+    }, 1000);
+
+    return () => clearInterval(timer);
     const ganadoresBackend = sorteo.ganadores || [];
     
     if (ganadoresBackend.length > 0) {
