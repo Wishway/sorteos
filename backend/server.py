@@ -45,6 +45,10 @@ FROM_NAME = os.environ.get('FROM_NAME', 'WishWay Sorteos')
 # Import WebSocket manager
 from websocket_manager import sio, emit_sorteo_state_changed, emit_sorteo_updated, broadcast_sorteos_update, emit_live_animation_start, emit_live_prize_drawing, emit_live_winner_announced, emit_live_animation_complete, emit_ventas_pausadas
 
+# Import state machine and live service
+import state_machine
+import live_animation_service
+
 # Create the main app
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
