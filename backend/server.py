@@ -1629,7 +1629,9 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     # Si el pago es por Payphone, está aprobado automáticamente
     if pago_confirmado:
         await actualizar_progreso_sorteo(sorteo.id)
-        await verificar_transicion_estado(sorteo.id)
+        resultado = await state_machine.verificar_transicion_estado_nuevo(sorteo.id)
+        if resultado == 'live':
+            asyncio.create_task(live_animation_service.iniciar_animacion_live(sorteo.id))
     
     cantidad_boletos = len(data.numeros_boletos)
     total = sorteo.precio_boleto * cantidad_boletos
