@@ -1205,28 +1205,30 @@ async def publicar_sorteo(sorteo_id: str, request: Request):
     
     return {"message": "Sorteo publicado exitosamente"}
 
-@api_router.put("/admin/sorteo/{sorteo_id}/pausar")
-async def pausar_sorteo(sorteo_id: str, request: Request):
-    """Pausar un sorteo publicado"""
+@api_router.put("/admin/sorteo/{sorteo_id}/pausar-ventas")
+async def pausar_despausar_ventas(sorteo_id: str, pausar: bool, request: Request):
+    """Pausar o despausar ventas de un sorteo publicado"""
     admin = await get_current_user(request)
     if admin.role != UserRole.ADMIN:
-        raise HTTPException(status_code=403, detail="Solo admins pueden pausar sorteos")
+        raise HTTPException(status_code=403, detail="Solo admins pueden pausar ventas")
     
     sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if sorteo_doc['estado'] not in ['published', 'pausado']:
-        raise HTTPException(status_code=400, detail="Solo se pueden pausar sorteos publicados")
-    
-    nuevo_estado = 'pausado' if sorteo_doc['estado'] == 'published' else 'published'
+    if sorteo_doc['estado'] != 'published':
+        raise HTTPException(status_code=400, detail="Solo se pueden pausar ventas de sorteos publicados")
     
     await db.sorteos.update_one(
         {'id': sorteo_id},
-        {'$set': {'estado': nuevo_estado}}
+        {'$set': {'ventas_pausadas': pausar}}
     )
     
-    return {"message": f"Sorteo {'pausado' if nuevo_estado == 'pausado' else 'reactivado'} exitosamente"}
+    # Emitir evento WebSocket
+    await emit_ventas_pausadas(sorteo_id, pausar)
+    await broadcast_sorteos_update()
+    
+    return {"message": f"Ventas {'pausadas' if pausar else 'reanudadas'} exitosamente", "pausadas": pausar}
 
 @api_router.post("/admin/actualizar-estados-sorteos")
 async def actualizar_estados_automatico():
