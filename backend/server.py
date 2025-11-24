@@ -297,6 +297,8 @@ class Sorteo(BaseModel):
     fecha_live: Optional[datetime] = None     # Cuándo inició LIVE
     fecha_completed: Optional[datetime] = None  # Cuándo se completó
     ganadores: List[dict] = []  # Lista de ganadores seleccionados
+    ventas_pausadas: bool = False  # Para pausar/despausar ventas en estado PUBLISHED
+    etapa_actual: int = 0  # Etapa actual para sorteos por etapas (0 = no iniciado)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class Boleto(BaseModel):
