@@ -129,6 +129,11 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
               <Trophy className="w-10 h-10 text-yellow-400" />
               {sorteo.titulo}
             </h2>
+            {currentPrize && (
+              <p className="text-yellow-400 text-xl font-semibold">
+                🎁 Sorteando: {currentPrize}
+              </p>
+            )}
             <p className="text-gray-300 text-lg">Sorteo en progreso...</p>
           </div>
 
