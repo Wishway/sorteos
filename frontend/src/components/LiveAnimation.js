@@ -101,23 +101,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     }, 1000);
 
     return () => clearInterval(timer);
-    const ganadoresBackend = sorteo.ganadores || [];
-    
-    if (ganadoresBackend.length > 0) {
-      // Usar ganadores que ya seleccionó el backend
-      setWinners(ganadoresBackend);
-    } else {
-      // Fallback: si por alguna razón no hay ganadores en backend, mostrar mensaje
-      console.error('No hay ganadores en el sorteo desde el backend');
-      setWinners([]);
-    }
-    
-    setShowWinners(true);
-    
-    if (onAnimationComplete) {
-      onAnimationComplete(ganadoresBackend);
-    }
-  };
+  }, [isAnimating, timeLeft]);
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
