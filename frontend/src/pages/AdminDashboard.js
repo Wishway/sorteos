@@ -672,7 +672,8 @@ const AdminDashboard = () => {
                           placeholder="URL de imagen (ej: https://...)" 
                           type="url"
                           value={imagenUrl} 
-                          onChange={(e) => setImagenUrl(e.target.value)} 
+                          onChange={(e) => setImagenUrl(e.target.value)}
+                          className="overflow-hidden text-ellipsis whitespace-nowrap"
                         />
                         <Button type="button" onClick={() => {
                           if (imagenUrl.trim()) {
