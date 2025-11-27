@@ -135,10 +135,37 @@ const VendedorDashboard = () => {
           cedula: response.data.cedula || '',
           celular: response.data.celular || ''
         });
+        
+        // Cargar movimientos también
+        fetchMovimientos();
       }
     } catch (error) {
       // No mostrar toast aquí para evitar errores durante el unmount
       console.error('Error al cargar perfil:', error);
+    }
+  };
+  
+  const fetchMovimientos = async () => {
+    if (!isMounted.current) return;
+    
+    try {
+      const params = new URLSearchParams();
+      if (filtroTipoMovimiento !== 'todos') {
+        params.append('tipo', filtroTipoMovimiento);
+      }
+      if (fechaDesde) {
+        params.append('fecha_desde', new Date(fechaDesde).toISOString());
+      }
+      if (fechaHasta) {
+        params.append('fecha_hasta', new Date(fechaHasta).toISOString());
+      }
+      
+      const response = await axios.get(`${API}/vendedor/movimientos?${params}`, { withCredentials: true });
+      if (isMounted.current) {
+        setMovimientos(response.data);
+      }
+    } catch (error) {
+      console.error('Error al cargar movimientos:', error);
     }
   };
 
