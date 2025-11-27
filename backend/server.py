@@ -351,6 +351,22 @@ class Comision(BaseModel):
     estado: ComisionEstado = ComisionEstado.PENDIENTE
     fecha: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
+class EstadoRetiro(str, Enum):
+    PENDIENTE = "pendiente"
+    APROBADO = "aprobado"
+    RECHAZADO = "rechazado"
+
+class Retiro(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    vendedor_id: str
+    monto: float
+    estado: EstadoRetiro = EstadoRetiro.PENDIENTE
+    comprobante_url: Optional[str] = None
+    motivo_rechazo: Optional[str] = None
+    fecha_solicitud: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    fecha_aprobacion: Optional[datetime] = None
+
 class ConfiguracionAdmin(BaseModel):
     model_config = ConfigDict(extra="ignore")
     id: str = Field(default_factory=lambda: str(uuid.uuid4()))
