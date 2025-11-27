@@ -153,6 +153,12 @@ class WebSocketService {
     }
   }
 
+  offLiveTimeUpdate(callback) {
+    if (this.socket) {
+      this.socket.off('live_time_update', callback);
+    }
+  }
+
   offLiveWinnerAnnounced(callback) {
     if (this.socket) {
       this.socket.off('live_winner_announced', callback);
