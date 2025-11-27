@@ -481,8 +481,15 @@ const VendedorDashboard = () => {
               </div>
             </div>
 
+            {/* Información de resultados */}
+            {totalMovimientos > 0 && (
+              <p className="text-white text-sm mb-3">
+                Mostrando {movimientos.length} de {totalMovimientos} movimientos (Página {paginaActual} de {totalPaginas})
+              </p>
+            )}
+
             {/* Lista de movimientos */}
-            <div className="space-y-3 max-h-96 overflow-y-auto">
+            <div className="space-y-3 max-h-96 overflow-y-auto mb-4">
               {movimientos.length === 0 ? (
                 <p className="text-center text-gray-300 py-8">No hay movimientos para mostrar</p>
               ) : (
