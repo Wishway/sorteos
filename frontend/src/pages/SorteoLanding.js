@@ -213,12 +213,16 @@ const SorteoLanding = () => {
     setComprando(true);
 
     try {
+      // Obtener vendedor_id desde referralService
+      const vendedorId = referralService.getVendedorForPurchase();
+      
       const response = await axios.post(
         `${API}/boletos/comprar`,
         {
           sorteo_id: sorteo.id,
           numeros_boletos: numerosValidos,
           metodo_pago: 'transferencia',
+          vendedor_id: vendedorId,  // Enviar vendedor_id
           vendedor_link: vendedorLink,
           comprobante_url: comprobanteUrl
         },
@@ -226,6 +230,13 @@ const SorteoLanding = () => {
       );
 
       toast.success(response.data.message);
+      
+      // Limpiar vendedor después de compra exitosa
+      if (vendedorId) {
+        referralService.clearVendedor();
+        console.log('✅ Vendedor limpiado después de compra exitosa');
+      }
+      
       setShowDatosBancarios(false);
       setCantidad(1);
       setNumerosBoletos(['']);
