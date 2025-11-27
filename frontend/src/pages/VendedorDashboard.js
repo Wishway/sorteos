@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDateTime } from '@/lib/utils';
-import { DollarSign, ShoppingCart, Link as LinkIcon, LogOut, Home, Copy, CheckCircle, Lock, Building, CreditCard, Phone, Clock } from 'lucide-react';
+import { DollarSign, ShoppingCart, Link as LinkIcon, LogOut, Home, Copy, CheckCircle, Lock, Building, CreditCard, Phone, Clock, User } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
