@@ -9,8 +9,11 @@ class DatosBancarios(BaseModel):
     nombre_banco: str
     tipo_cuenta: str
     numero_cuenta: str
-    telefono: str
-    whatsapp: Optional[str] = None
+
+class ActualizarPerfil(BaseModel):
+    name: str
+    cedula: str
+    celular: str
 
 class CambiarPasswordRequest(BaseModel):
     password_actual: str
