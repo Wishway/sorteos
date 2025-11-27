@@ -11,7 +11,8 @@ import { Loader2 } from 'lucide-react';
 const Register = () => {
   const navigate = useNavigate();
   const { register, user, handleGoogleCallback, loading: authLoading } = useAuth();
-  const isMounted = useRef(true);
+  const isMountedRef = useRef(true);
+  const processingGoogleRef = useRef(false);
   
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -22,37 +23,38 @@ const Register = () => {
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    isMounted.current = true;
-    
-    if (!authLoading && user) {
-      navigate('/usuario');
-    }
-    
+    isMountedRef.current = true;
     return () => {
-      isMounted.current = false;
+      isMountedRef.current = false;
     };
+  }, []);
+
+  useEffect(() => {
+    if (!authLoading && user && isMountedRef.current) {
+      navigate('/usuario', { replace: true });
+    }
   }, [user, authLoading, navigate]);
 
   useEffect(() => {
-    isMounted.current = true;
-    
     const processGoogleCallback = async () => {
+      if (processingGoogleRef.current) return;
+      
       if (window.location.hash.includes('session_id=')) {
-        if (isMounted.current) {
+        processingGoogleRef.current = true;
+        
+        if (isMountedRef.current) {
           setLoading(true);
         }
+        
         try {
           await handleGoogleCallback();
-          if (isMounted.current) {
+          if (isMountedRef.current) {
             toast.success('¡Cuenta creada exitosamente!');
-            navigate('/usuario');
+            // La navegación se hará automáticamente por el useEffect anterior
           }
         } catch (error) {
-          if (isMounted.current) {
+          if (isMountedRef.current) {
             toast.error('Error al registrarse con Google');
-          }
-        } finally {
-          if (isMounted.current) {
             setLoading(false);
           }
         }
@@ -60,11 +62,7 @@ const Register = () => {
     };
     
     processGoogleCallback();
-    
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  }, [handleGoogleCallback]);
 
   const handleRegister = async (e) => {
     e.preventDefault();
@@ -79,22 +77,22 @@ const Register = () => {
       return;
     }
 
-    if (isMounted.current) {
-      setLoading(true);
-    }
+    if (!isMountedRef.current) return;
+    setLoading(true);
 
     try {
       await register(email, password, name, cedula, celular);
-      if (isMounted.current) {
+      if (isMountedRef.current) {
         toast.success('¡Cuenta creada! Por favor inicia sesión.');
-        navigate('/login');
+        setTimeout(() => {
+          if (isMountedRef.current) {
+            navigate('/login', { replace: true });
+          }
+        }, 100);
       }
     } catch (error) {
-      if (isMounted.current) {
+      if (isMountedRef.current) {
         toast.error(error.response?.data?.detail || 'Error al registrarse');
-      }
-    } finally {
-      if (isMounted.current) {
         setLoading(false);
       }
     }
