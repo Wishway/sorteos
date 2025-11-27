@@ -245,7 +245,7 @@ const VendedorDashboard = () => {
     );
   }
 
-  const linkVendedor = `${window.location.origin}/?vendedor=${user.id}`;
+  const linkVendedor = user?.id ? `${window.location.origin}/?vendedor=${user.id}` : '';
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 py-8 px-4">
