@@ -45,14 +45,22 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
+    // Limpiar el estado PRIMERO
+    setUser(null);
+    
+    // Limpiar localStorage
     try {
-      await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
-    } catch (error) {
-      console.error('Error al cerrar sesión:', error);
-    } finally {
-      setUser(null);
-      // Limpiar cualquier dato en localStorage relacionado con la sesión
       localStorage.removeItem('vendedor_id');
+    } catch (e) {
+      console.error('Error limpiando localStorage:', e);
+    }
+    
+    // Hacer la llamada al backend sin bloquear
+    try {
+      // No esperar la respuesta, hacerlo en segundo plano
+      axios.post(`${API}/auth/logout`, {}, { withCredentials: true }).catch(() => {});
+    } catch (error) {
+      // Ignorar errores del logout del backend
     }
   };
 
