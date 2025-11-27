@@ -35,6 +35,10 @@ def setup_vendedor_endpoints(api_router, db, get_current_user, UserRole, EstadoR
         if user.role != UserRole.VENDEDOR:
             raise HTTPException(status_code=403, detail="Solo vendedores pueden actualizar datos bancarios")
         
+        # Validar que el número de cuenta no esté vacío
+        if not datos.numero_cuenta or datos.numero_cuenta.strip() == "":
+            raise HTTPException(status_code=400, detail="El número de cuenta no puede estar vacío")
+        
         # Actualizar datos bancarios
         await db.users.update_one(
             {'id': user.id},
@@ -42,13 +46,42 @@ def setup_vendedor_endpoints(api_router, db, get_current_user, UserRole, EstadoR
                 'nombre_banco': datos.nombre_banco,
                 'tipo_cuenta': datos.tipo_cuenta,
                 'numero_cuenta': datos.numero_cuenta,
-                'telefono': datos.telefono,
-                'whatsapp': datos.whatsapp or datos.telefono,
                 'datos_bancarios_completos': True
             }}
         )
         
         return {"message": "Datos bancarios actualizados correctamente"}
+    
+    @api_router.put("/vendedor/perfil")
+    async def actualizar_perfil_vendedor(datos: ActualizarPerfil, request: Request):
+        """Actualizar perfil del vendedor (nombre, cédula, celular)"""
+        user = await get_current_user(request)
+        if user.role != UserRole.VENDEDOR:
+            raise HTTPException(status_code=403, detail="Solo vendedores pueden actualizar su perfil")
+        
+        # Validar que la cédula no se repita
+        if datos.cedula != user.cedula:
+            cedula_existente = await db.users.find_one({'cedula': datos.cedula, 'id': {'$ne': user.id}})
+            if cedula_existente:
+                raise HTTPException(status_code=400, detail="La cédula ya está registrada en otro usuario")
+        
+        # Validar que el celular no se repita
+        if datos.celular != user.celular:
+            celular_existente = await db.users.find_one({'celular': datos.celular, 'id': {'$ne': user.id}})
+            if celular_existente:
+                raise HTTPException(status_code=400, detail="El celular ya está registrado en otro usuario")
+        
+        # Actualizar perfil
+        await db.users.update_one(
+            {'id': user.id},
+            {'$set': {
+                'name': datos.name,
+                'cedula': datos.cedula,
+                'celular': datos.celular
+            }}
+        )
+        
+        return {"message": "Perfil actualizado correctamente"}
     
     @api_router.get("/vendedor/perfil")
     async def get_perfil_vendedor(request: Request):
