@@ -543,11 +543,11 @@ const HomeComplete = () => {
                     <div className="bg-gradient-to-r from-yellow-900/50 to-orange-900/50 rounded-lg p-4 mb-4 border border-yellow-500/30">
                       <div className="flex items-center gap-3 mb-2">
                         <div className="w-10 h-10 rounded-full bg-gradient-to-br from-yellow-400 to-orange-500 flex items-center justify-center text-black font-bold text-lg">
-                          {ganador.usuario?.name?.[0]?.toUpperCase() || '🎊'}
+                          {(ganador.usuario_nombre || ganador.usuario?.name)?.[0]?.toUpperCase() || '🎊'}
                         </div>
                         <div className="flex-1">
                           <p className="text-xs text-yellow-400">Ganador</p>
-                          <p className="font-bold text-white">{ganador.usuario?.name || 'Anónimo'}</p>
+                          <p className="font-bold text-white">{ganador.usuario_nombre || ganador.usuario?.name || 'Participante'}</p>
                         </div>
                       </div>
                       
