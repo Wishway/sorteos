@@ -99,15 +99,25 @@ async def ejecutar_animacion_live(sorteo_id: str):
         logger.info(f"Sorteando premio {idx + 1}/{len(ganadores)}: {premio_nombre}")
         
         # Emitir inicio de sorteo de este premio
+        inicio_premio = datetime.now(timezone.utc)
         await emit_live_prize_drawing(sorteo_id, {
             'premio_index': idx,
             'premio_nombre': premio_nombre,
             'duracion_segundos': duracion_por_premio,
-            'timestamp': datetime.now(timezone.utc).isoformat()
+            'timestamp': inicio_premio.isoformat(),
+            'tiempo_restante': duracion_por_premio
         })
         
-        # Esperar 1 minuto (60 segundos)
-        await asyncio.sleep(duracion_por_premio)
+        # Esperar 1 minuto (60 segundos) enviando actualizaciones cada segundo
+        for segundo in range(duracion_por_premio, 0, -1):
+            # Emitir actualización de tiempo cada segundo
+            await emit_live_time_update(sorteo_id, {
+                'premio_index': idx,
+                'premio_nombre': premio_nombre,
+                'tiempo_restante': segundo,
+                'timestamp': datetime.now(timezone.utc).isoformat()
+            })
+            await asyncio.sleep(1)
         
         # Anunciar ganador
         await emit_live_winner_announced(sorteo_id, {
