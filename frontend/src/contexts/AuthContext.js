@@ -45,8 +45,15 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
-    setUser(null);
+    try {
+      await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    } finally {
+      setUser(null);
+      // Limpiar cualquier dato en localStorage relacionado con la sesión
+      localStorage.removeItem('vendedor_id');
+    }
   };
 
   const handleGoogleCallback = async () => {
