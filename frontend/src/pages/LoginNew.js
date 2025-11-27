@@ -23,39 +23,43 @@ const Login = () => {
   useEffect(() => {
     isMounted.current = true;
     
-    if (!authLoading && user) {
-      redirectBasedOnRole(user.role);
-    }
-    
     return () => {
       isMounted.current = false;
     };
+  }, []);
+
+  useEffect(() => {
+    if (!authLoading && user && isMounted.current) {
+      redirectBasedOnRole(user.role);
+    }
   }, [user, authLoading]);
 
   useEffect(() => {
-    isMounted.current = true;
+    const processingRef = { current: false };
     
     const processGoogleCallback = async () => {
+      if (processingRef.current) return;
+      
       if (window.location.hash.includes('session_id=')) {
+        processingRef.current = true;
+        
         if (isMounted.current) {
           setLoading(true);
         }
+        
         try {
           const userData = await handleGoogleCallback();
           if (isMounted.current) {
             toast.success('¡Bienvenido de nuevo!', {
               description: `Has iniciado sesión como ${userData.name}`,
             });
-            redirectBasedOnRole(userData.role);
+            // La redirección se hará automáticamente por el useEffect anterior
           }
         } catch (error) {
           if (isMounted.current) {
             toast.error('Error al iniciar sesión', {
               description: 'No se pudo completar el inicio de sesión con Google',
             });
-          }
-        } finally {
-          if (isMounted.current) {
             setLoading(false);
           }
         }
@@ -63,11 +67,7 @@ const Login = () => {
     };
     
     processGoogleCallback();
-    
-    return () => {
-      isMounted.current = false;
-    };
-  }, []);
+  }, [handleGoogleCallback]);
 
   const redirectBasedOnRole = (role) => {
     if (!isMounted.current) return;
