@@ -51,11 +51,24 @@ const VendedorDashboard = () => {
   const [montoRetiro, setMontoRetiro] = useState('');
 
   useEffect(() => {
+    let isMounted = true;
+    
     if (!user || user.role !== 'vendedor') {
       navigate('/login');
       return;
     }
-    fetchPerfil();
+    
+    const loadPerfil = async () => {
+      if (isMounted) {
+        await fetchPerfil();
+      }
+    };
+    
+    loadPerfil();
+    
+    return () => {
+      isMounted = false;
+    };
   }, [user]);
 
   const fetchPerfil = async () => {
