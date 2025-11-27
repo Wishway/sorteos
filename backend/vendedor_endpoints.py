@@ -83,6 +83,35 @@ def setup_vendedor_endpoints(api_router, db, get_current_user, UserRole, EstadoR
         
         return {"message": "Perfil actualizado correctamente"}
     
+    @api_router.get("/vendedor/movimientos")
+    async def obtener_historial_movimientos(
+        request: Request,
+        tipo: str = None,
+        fecha_desde: str = None,
+        fecha_hasta: str = None
+    ):
+        """Obtener historial de movimientos del vendedor con filtros"""
+        user = await get_current_user(request)
+        if user.role != UserRole.VENDEDOR:
+            raise HTTPException(status_code=403, detail="Solo vendedores")
+        
+        from movimientos_vendedor import obtener_movimientos_vendedor
+        from datetime import datetime
+        
+        # Convertir fechas si se proporcionan
+        fecha_desde_dt = datetime.fromisoformat(fecha_desde) if fecha_desde else None
+        fecha_hasta_dt = datetime.fromisoformat(fecha_hasta) if fecha_hasta else None
+        
+        movimientos = await obtener_movimientos_vendedor(
+            db=db,
+            vendedor_id=user.id,
+            tipo=tipo,
+            fecha_desde=fecha_desde_dt,
+            fecha_hasta=fecha_hasta_dt
+        )
+        
+        return movimientos
+    
     @api_router.get("/vendedor/perfil")
     async def get_perfil_vendedor(request: Request):
         """Obtener perfil completo del vendedor"""
