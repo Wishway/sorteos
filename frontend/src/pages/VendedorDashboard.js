@@ -155,11 +155,14 @@ const VendedorDashboard = () => {
     }
   };
   
-  const fetchMovimientos = async () => {
+  const fetchMovimientos = async (page = 1) => {
     if (!isMounted.current) return;
     
     try {
       const params = new URLSearchParams();
+      params.append('page', page.toString());
+      params.append('limit', '20');
+      
       if (filtroTipoMovimiento !== 'todos') {
         params.append('tipo', filtroTipoMovimiento);
       }
@@ -172,11 +175,26 @@ const VendedorDashboard = () => {
       
       const response = await axios.get(`${API}/vendedor/movimientos?${params}`, { withCredentials: true });
       if (isMounted.current) {
-        setMovimientos(response.data);
+        setMovimientos(response.data.movimientos);
+        setTotalMovimientos(response.data.total);
+        setTotalPaginas(response.data.total_pages);
+        setPaginaActual(response.data.page);
       }
     } catch (error) {
       console.error('Error al cargar movimientos:', error);
+      if (isMounted.current) {
+        toast.error('Error al cargar movimientos');
+      }
     }
+  };
+  
+  const handleBuscarMovimientos = () => {
+    setPaginaActual(1);
+    fetchMovimientos(1);
+  };
+  
+  const handleCambiarPagina = (nuevaPagina) => {
+    fetchMovimientos(nuevaPagina);
   };
 
   const handleLogout = async () => {
