@@ -121,16 +121,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     return () => clearInterval(rotationInterval);
   }, [isAnimating, wsParticipantes, participantes]);
 
-  // Countdown timer
-  useEffect(() => {
-    if (!isAnimating || timeLeft <= 0) return;
-
-    const timer = setInterval(() => {
-      setTimeLeft(prev => Math.max(0, prev - 1));
-    }, 1000);
-
-    return () => clearInterval(timer);
-  }, [isAnimating, timeLeft]);
+  // NO usar countdown local, el servidor envía actualizaciones cada segundo via WebSocket
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);
