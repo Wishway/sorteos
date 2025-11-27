@@ -565,6 +565,33 @@ const VendedorDashboard = () => {
                 ))
               )}
             </div>
+            
+            {/* Paginación */}
+            {totalPaginas > 1 && (
+              <div className="flex justify-center items-center gap-2 mt-4">
+                <Button
+                  onClick={() => handleCambiarPagina(paginaActual - 1)}
+                  disabled={paginaActual === 1}
+                  className="bg-white/10 hover:bg-white/20 text-white disabled:opacity-30"
+                  size="sm"
+                >
+                  Anterior
+                </Button>
+                
+                <span className="text-white px-4">
+                  Página {paginaActual} de {totalPaginas}
+                </span>
+                
+                <Button
+                  onClick={() => handleCambiarPagina(paginaActual + 1)}
+                  disabled={paginaActual === totalPaginas}
+                  className="bg-white/10 hover:bg-white/20 text-white disabled:opacity-30"
+                  size="sm"
+                >
+                  Siguiente
+                </Button>
+              </div>
+            )}
           </CardContent>
         </Card>
 
