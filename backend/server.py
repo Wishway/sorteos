@@ -2310,6 +2310,18 @@ async def limpiar_boletos_expirados(request: Request):
 async def root():
     return {"message": "WishWay Sorteos API"}
 
+# Configurar logging PRIMERO
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+# Inicializar endpoints de vendedor ANTES de incluir el router
+vendedor_endpoints.setup_vendedor_endpoints(api_router, db, get_current_user, UserRole, EstadoRetiro)
+logger.info("Endpoints de vendedor inicializados")
+
+# AHORA sí incluir el router con todos los endpoints
 app.include_router(api_router)
 
 app.add_middleware(
@@ -2319,16 +2331,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
-
-# Inicializar endpoints de vendedor ANTES del startup
-vendedor_endpoints.setup_vendedor_endpoints(api_router, db, get_current_user, UserRole, EstadoRetiro)
-logger.info("Endpoints de vendedor inicializados")
 
 @app.on_event("startup")
 async def startup_event():
