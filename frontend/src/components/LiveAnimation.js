@@ -83,12 +83,14 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       
       websocketService.onLiveAnimationStart(handleAnimationStart);
       websocketService.onLivePrizeDrawing(handlePrizeDrawing);
+      websocketService.onLiveTimeUpdate(handleTimeUpdate);
       websocketService.onLiveWinnerAnnounced(handleWinnerAnnounced);
       websocketService.onLiveAnimationComplete(handleAnimationComplete);
       
       return () => {
         websocketService.offLiveAnimationStart(handleAnimationStart);
         websocketService.offLivePrizeDrawing(handlePrizeDrawing);
+        websocketService.offLiveTimeUpdate(handleTimeUpdate);
         websocketService.offLiveWinnerAnnounced(handleWinnerAnnounced);
         websocketService.offLiveAnimationComplete(handleAnimationComplete);
         websocketService.leaveSorteo(sorteo.id);
