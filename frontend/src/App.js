@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from 'sonner';
 import '@/App.css';
+import referralService from '@/services/referralService';
 
 // Pages
 import Home from '@/pages/Home';
@@ -19,6 +20,11 @@ import PerfilUsuario from '@/pages/PerfilUsuario';
 import PerfilAdmin from '@/pages/PerfilAdmin';
 
 function App() {
+  // Detectar vendedor desde URL al cargar la aplicación
+  useEffect(() => {
+    referralService.checkAndSaveFromURL();
+  }, []);
+
   return (
     <AuthProvider>
       <BrowserRouter>
