@@ -1504,8 +1504,158 @@ const AdminDashboard = () => {
               </div>
             )}
           </TabsContent>
+
+          {/* TAB DE RETIROS */}
+          <TabsContent value="retiros" className="space-y-4">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-2xl font-bold">Retiros de Vendedores</h2>
+              <Button onClick={fetchRetiros} variant="outline">
+                Actualizar
+              </Button>
+            </div>
+            
+            {loadingRetiros ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : retiros.length === 0 ? (
+              <Card className="p-12 text-center">
+                <p className="text-gray-600">No hay retiros pendientes</p>
+              </Card>
+            ) : (
+              <div className="grid gap-4">
+                {retiros.map((retiro) => (
+                  <Card key={retiro.id} className="sorteo-card">
+                    <CardContent className="p-6">
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                        <div className="lg:col-span-2">
+                          <div className="flex items-center gap-2 mb-3">
+                            <Badge className={
+                              retiro.estado === 'pendiente' ? 'bg-yellow-100 text-yellow-700' :
+                              retiro.estado === 'aprobado' ? 'bg-green-100 text-green-700' :
+                              'bg-red-100 text-red-700'
+                            }>
+                              {retiro.estado.toUpperCase()}
+                            </Badge>
+                          </div>
+                          
+                          <div className="space-y-2">
+                            <div>
+                              <span className="text-sm font-semibold">Vendedor:</span>
+                              <p className="text-gray-700">{retiro.vendedor?.name}</p>
+                              <p className="text-xs text-gray-500">{retiro.vendedor?.email}</p>
+                            </div>
+                            
+                            <div>
+                              <span className="text-sm font-semibold">Monto solicitado:</span>
+                              <p className="text-2xl font-bold text-green-600">{formatCurrency(retiro.monto)}</p>
+                            </div>
+                            
+                            <div>
+                              <span className="text-sm font-semibold">Fecha de solicitud:</span>
+                              <p className="text-gray-700">{formatDateTime(retiro.fecha_solicitud)}</p>
+                            </div>
+                            
+                            <div className="border-t pt-2 mt-2">
+                              <span className="text-sm font-semibold block mb-1">Datos Bancarios:</span>
+                              <div className="bg-gray-50 p-3 rounded text-sm space-y-1">
+                                <p><strong>Banco:</strong> {retiro.vendedor?.nombre_banco || 'No especificado'}</p>
+                                <p><strong>Tipo:</strong> {retiro.vendedor?.tipo_cuenta || 'No especificado'}</p>
+                                <p><strong>Cuenta:</strong> {retiro.vendedor?.numero_cuenta || 'No especificado'}</p>
+                                <p><strong>Teléfono:</strong> {retiro.vendedor?.telefono || 'No especificado'}</p>
+                                {retiro.vendedor?.whatsapp && retiro.vendedor.whatsapp !== retiro.vendedor.telefono && (
+                                  <p><strong>WhatsApp:</strong> {retiro.vendedor.whatsapp}</p>
+                                )}
+                              </div>
+                            </div>
+                            
+                            {retiro.comprobante_url && (
+                              <div>
+                                <span className="text-sm font-semibold">Comprobante:</span>
+                                <a href={retiro.comprobante_url} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline block">
+                                  Ver comprobante
+                                </a>
+                              </div>
+                            )}
+                            
+                            {retiro.motivo_rechazo && (
+                              <div>
+                                <span className="text-sm font-semibold">Motivo de rechazo:</span>
+                                <p className="text-red-600">{retiro.motivo_rechazo}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        
+                        <div className="flex flex-col gap-2">
+                          {retiro.estado === 'pendiente' && (
+                            <>
+                              <Button 
+                                onClick={() => {
+                                  setRetiroSeleccionado(retiro);
+                                  setShowAprobarRetiro(true);
+                                }}
+                                className="bg-green-600 hover:bg-green-700"
+                              >
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Aprobar
+                              </Button>
+                              
+                              <Button 
+                                onClick={() => handleRechazarRetiro(retiro.id)}
+                                variant="destructive"
+                              >
+                                <XCircle className="w-4 h-4 mr-2" />
+                                Rechazar
+                              </Button>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            )}
+          </TabsContent>
         </Tabs>
       </div>
+      
+      {/* Modal para aprobar retiro */}
+      <Dialog open={showAprobarRetiro} onOpenChange={setShowAprobarRetiro}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Aprobar Retiro</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Monto a aprobar: <strong>{retiroSeleccionado && formatCurrency(retiroSeleccionado.monto)}</strong></p>
+            <p>Vendedor: <strong>{retiroSeleccionado?.vendedor?.name}</strong></p>
+            
+            <div>
+              <Label>URL del Comprobante de Transferencia</Label>
+              <Input
+                type="url"
+                value={comprobanteUrl}
+                onChange={(e) => setComprobanteUrl(e.target.value)}
+                placeholder="https://..."
+                required
+              />
+              <p className="text-xs text-gray-500 mt-1">
+                Sube el comprobante a un servicio como Imgur o Google Drive y pega la URL aquí
+              </p>
+            </div>
+            
+            <div className="flex gap-2">
+              <Button onClick={handleAprobarRetiro} className="flex-1 bg-green-600 hover:bg-green-700">
+                Aprobar y Enviar
+              </Button>
+              <Button onClick={() => setShowAprobarRetiro(false)} variant="outline" className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
