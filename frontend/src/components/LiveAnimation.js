@@ -145,16 +145,20 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
             <Badge className="bg-red-600 text-white text-lg px-6 py-2 mb-4 animate-bounce">
               🔴 EN VIVO
             </Badge>
-            <h2 className="text-4xl font-bold text-white mb-2 flex items-center justify-center gap-3">
-              <Trophy className="w-10 h-10 text-yellow-400" />
+            <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center gap-3">
+              <Trophy className="w-8 h-8 text-yellow-400" />
               {sorteo.titulo}
             </h2>
-            {currentPrize && (
-              <p className="text-yellow-400 text-xl font-semibold">
-                🎁 Sorteando: {currentPrize}
-              </p>
+            {currentPrize ? (
+              <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 p-1 rounded-xl mt-3">
+                <div className="bg-black rounded-xl px-6 py-3">
+                  <p className="text-yellow-300 text-sm font-semibold mb-1">PREMIO EN JUEGO:</p>
+                  <p className="text-white text-2xl font-bold">🎁 {currentPrize}</p>
+                </div>
+              </div>
+            ) : (
+              <p className="text-gray-300 text-lg mt-2">Sorteo en progreso...</p>
             )}
-            <p className="text-gray-300 text-lg">Sorteo en progreso...</p>
           </div>
 
           {isAnimating ? (
