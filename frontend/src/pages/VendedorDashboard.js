@@ -51,6 +51,12 @@ const VendedorDashboard = () => {
   const [retiroData, setRetiroData] = useState({
     monto: ''
   });
+  
+  // Estados para movimientos
+  const [movimientos, setMovimientos] = useState([]);
+  const [filtroTipoMovimiento, setFiltroTipoMovimiento] = useState('todos');
+  const [fechaDesde, setFechaDesde] = useState('');
+  const [fechaHasta, setFechaHasta] = useState('');
 
   useEffect(() => {
     isMounted.current = true;
