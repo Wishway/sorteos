@@ -410,6 +410,132 @@ const VendedorDashboard = () => {
           </Card>
         </div>
 
+        {/* Historial de Movimientos */}
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20 mb-8">
+          <CardHeader>
+            <CardTitle className="text-white text-2xl flex items-center gap-2">
+              <Clock className="w-6 h-6" />
+              Historial de Movimientos
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {/* Filtros */}
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+              <div>
+                <Label className="text-white mb-2">Tipo</Label>
+                <Select value={filtroTipoMovimiento} onValueChange={setFiltroTipoMovimiento}>
+                  <SelectTrigger className="bg-white/10 border-white/20 text-white">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todos">Todos</SelectItem>
+                    <SelectItem value="ingreso">Ingresos</SelectItem>
+                    <SelectItem value="egreso">Egresos</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              
+              <div>
+                <Label className="text-white mb-2">Desde</Label>
+                <Input 
+                  type="date"
+                  value={fechaDesde}
+                  onChange={(e) => setFechaDesde(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white"
+                />
+              </div>
+              
+              <div>
+                <Label className="text-white mb-2">Hasta</Label>
+                <Input 
+                  type="date"
+                  value={fechaHasta}
+                  onChange={(e) => setFechaHasta(e.target.value)}
+                  className="bg-white/10 border-white/20 text-white"
+                />
+              </div>
+            </div>
+
+            {/* Lista de movimientos */}
+            <div className="space-y-3 max-h-96 overflow-y-auto">
+              {movimientos.length === 0 ? (
+                <p className="text-center text-gray-300 py-8">No hay movimientos para mostrar</p>
+              ) : (
+                movimientos.map((mov) => (
+                  <div 
+                    key={mov.id}
+                    className={`p-4 rounded-lg ${
+                      mov.tipo === 'ingreso' 
+                        ? 'bg-green-500/10 border border-green-500/30' 
+                        : 'bg-red-500/10 border border-red-500/30'
+                    }`}
+                  >
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <div className="flex items-center gap-2 mb-2">
+                          {mov.tipo === 'ingreso' ? (
+                            <div className="w-8 h-8 rounded-full bg-green-500 flex items-center justify-center">
+                              <DollarSign className="w-5 h-5 text-white" />
+                            </div>
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-red-500 flex items-center justify-center">
+                              <CreditCard className="w-5 h-5 text-white" />
+                            </div>
+                          )}
+                          <div>
+                            <p className="font-semibold text-white">
+                              {mov.tipo === 'ingreso' ? 'Ingreso - Comisión' : 'Egreso - Pago realizado'}
+                            </p>
+                            <p className="text-xs text-gray-300">
+                              {new Date(mov.fecha).toLocaleString('es-EC', { 
+                                dateStyle: 'medium', 
+                                timeStyle: 'short' 
+                              })}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <p className="text-sm text-gray-200 mb-2">{mov.descripcion}</p>
+                        
+                        {/* Detalles específicos */}
+                        {mov.tipo === 'ingreso' && (
+                          <div className="text-xs text-gray-300 space-y-1">
+                            <p>• Sorteo: {mov.sorteo_titulo}</p>
+                            <p>• Boleto: #{mov.numero_boleto}</p>
+                            <p>• Comprador: {mov.comprador_nombre}</p>
+                          </div>
+                        )}
+                        
+                        {mov.tipo === 'egreso' && (
+                          <div className="text-xs text-gray-300 space-y-1">
+                            <p>• Banco: {mov.banco} - {mov.tipo_cuenta}</p>
+                            <p>• Cuenta: {mov.numero_cuenta}</p>
+                            {mov.comprobante_url && (
+                              <p>
+                                • <a href={mov.comprobante_url} target="_blank" rel="noopener noreferrer" className="text-blue-400 hover:underline">
+                                  Ver comprobante
+                                </a>
+                              </p>
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      
+                      <div className="text-right">
+                        <p className={`text-2xl font-bold ${
+                          mov.tipo === 'ingreso' ? 'text-green-400' : 'text-red-400'
+                        }`}>
+                          {mov.tipo === 'ingreso' ? '+' : '-'}${mov.monto.toFixed(2)}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Modales */}
         
         {/* Modal Editar Perfil */}
