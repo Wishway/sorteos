@@ -2039,6 +2039,29 @@ async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Reque
         }}
     )
     
+    # ACREDITAR COMISIÓN AL VENDEDOR si existe
+    if boleto_doc.get('vendedor_id'):
+        # Buscar comisión pendiente
+        comision = await db.comisiones.find_one({
+            'boleto_id': boleto_id,
+            'estado': ComisionEstado.PENDIENTE
+        })
+        
+        if comision:
+            # Marcar comisión como pagada
+            await db.comisiones.update_one(
+                {'id': comision['id']},
+                {'$set': {'estado': ComisionEstado.PAGADO}}
+            )
+            
+            # Acreditar a la wallet del vendedor
+            await db.users.update_one(
+                {'id': boleto_doc['vendedor_id']},
+                {'$inc': {'wallet_balance': comision['monto']}}
+            )
+            
+            logger.info(f"Comisión de ${comision['monto']} acreditada a vendedor {boleto_doc['vendedor_id']}")
+    
     # Actualizar progreso del sorteo y verificar transiciones
     sorteo_id = boleto_doc['sorteo_id']
     await actualizar_progreso_sorteo(sorteo_id)
