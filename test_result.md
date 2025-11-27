@@ -531,15 +531,18 @@ frontend:
 
   - task: "Seller Logout Post-Fix"
     implemented: true
-    working: true
+    working: false
     file: "/app/frontend/src/contexts/AuthContext.js"
-    stuck_count: 0
+    stuck_count: 1
     priority: "high"
     needs_retesting: false
     status_history:
       - working: true
         agent: "testing"
         comment: "✅ PASSED CRITICAL TEST: Seller logout functionality works correctly. Clicking 'Cerrar Sesión' button functions properly. NO React concurrent rendering errors found in console during logout process. Console monitoring confirmed no React-related errors during logout. All logout functionality working as expected."
+      - working: false
+        agent: "testing"
+        comment: "❌ FAILED CRITICAL TEST (2025-11-27): Concurrent rendering error CONFIRMED during seller logout. When logging out with carlos.vendedor@wishway.com/vendedor123, the exact error appears: 'There was an error during concurrent rendering but React was able to recover by instead synchronously rendering the entire root.' This error appears as a red overlay on the screen after logout. The logout redirect works (goes to home page) but the concurrent rendering error is present. This is the exact issue the user reported."
 
 test_plan:
   current_focus:
