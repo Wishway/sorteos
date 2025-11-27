@@ -261,7 +261,7 @@ const VendedorDashboard = () => {
             onClick={() => setShowEditarPerfil(true)}
             className="bg-indigo-600 hover:bg-indigo-700"
           >
-            <Phone className="w-4 h-4 mr-2" />
+            <User className="w-4 h-4 mr-2" />
             Mi Perfil
           </Button>
           
