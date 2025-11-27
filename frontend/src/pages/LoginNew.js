@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -13,41 +13,65 @@ const LOGO_URL = 'https://customer-assets.emergentagent.com/job_rafflehub-1/arti
 const Login = () => {
   const navigate = useNavigate();
   const { login, user, handleGoogleCallback, loading: authLoading } = useAuth();
+  const isMounted = useRef(true);
+  
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    isMounted.current = true;
+    
     if (!authLoading && user) {
       redirectBasedOnRole(user.role);
     }
+    
+    return () => {
+      isMounted.current = false;
+    };
   }, [user, authLoading]);
 
   useEffect(() => {
+    isMounted.current = true;
+    
     const processGoogleCallback = async () => {
       if (window.location.hash.includes('session_id=')) {
-        setLoading(true);
+        if (isMounted.current) {
+          setLoading(true);
+        }
         try {
           const userData = await handleGoogleCallback();
-          toast.success('¡Bienvenido de nuevo!', {
-            description: `Has iniciado sesión como ${userData.name}`,
-          });
-          redirectBasedOnRole(userData.role);
+          if (isMounted.current) {
+            toast.success('¡Bienvenido de nuevo!', {
+              description: `Has iniciado sesión como ${userData.name}`,
+            });
+            redirectBasedOnRole(userData.role);
+          }
         } catch (error) {
-          toast.error('Error al iniciar sesión', {
-            description: 'No se pudo completar el inicio de sesión con Google',
-          });
+          if (isMounted.current) {
+            toast.error('Error al iniciar sesión', {
+              description: 'No se pudo completar el inicio de sesión con Google',
+            });
+          }
         } finally {
-          setLoading(false);
+          if (isMounted.current) {
+            setLoading(false);
+          }
         }
       }
     };
     
     processGoogleCallback();
+    
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   const redirectBasedOnRole = (role) => {
+    if (!isMounted.current) return;
+    
     if (role === 'admin') {
       navigate('/admin');
     } else if (role === 'vendedor') {
@@ -67,17 +91,22 @@ const Login = () => {
       return;
     }
 
-    setLoading(true);
+    if (isMounted.current) {
+      setLoading(true);
+    }
 
     try {
       const userData = await login(email, password);
-      toast.success('¡Bienvenido de nuevo!', {
-        description: `Has iniciado sesión exitosamente`,
-      });
-      redirectBasedOnRole(userData.role);
+      if (isMounted.current) {
+        toast.success('¡Bienvenido de nuevo!', {
+          description: `Has iniciado sesión exitosamente`,
+        });
+        redirectBasedOnRole(userData.role);
+      }
     } catch (error) {
-      toast.error('Error al iniciar sesión', {
-        description: error.response?.data?.detail || 'Email o contraseña incorrectos',
+      if (isMounted.current) {
+        toast.error('Error al iniciar sesión', {
+          description: error.response?.data?.detail || 'Email o contraseña incorrectos',
       });
     } finally {
       setLoading(false);
