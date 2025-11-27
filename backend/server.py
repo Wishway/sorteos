@@ -247,6 +247,13 @@ class User(BaseModel):
     celular: Optional[str] = None
     datos_completos: bool = False
     bloqueado: bool = False
+    # Campos para vendedores
+    nombre_banco: Optional[str] = None
+    tipo_cuenta: Optional[str] = None
+    numero_cuenta: Optional[str] = None
+    telefono: Optional[str] = None
+    whatsapp: Optional[str] = None
+    datos_bancarios_completos: bool = False
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
 class UserSession(BaseModel):
