@@ -111,6 +111,13 @@ const VendedorDashboard = () => {
       abortController.abort();
     };
   }, [user, navigate]);
+  
+  // Recargar movimientos cuando cambien los filtros
+  useEffect(() => {
+    if (perfil) {
+      fetchMovimientos();
+    }
+  }, [filtroTipoMovimiento, fechaDesde, fechaHasta]);
 
   const fetchPerfil = async () => {
     if (!isMounted.current) return;
