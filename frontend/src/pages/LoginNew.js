@@ -107,9 +107,12 @@ const Login = () => {
       if (isMounted.current) {
         toast.error('Error al iniciar sesión', {
           description: error.response?.data?.detail || 'Email o contraseña incorrectos',
-      });
+        });
+      }
     } finally {
-      setLoading(false);
+      if (isMounted.current) {
+        setLoading(false);
+      }
     }
   };
 
