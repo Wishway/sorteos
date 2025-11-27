@@ -48,6 +48,7 @@ from websocket_manager import sio, emit_sorteo_state_changed, emit_sorteo_update
 # Import state machine and live service
 import state_machine
 import live_animation_service
+import vendedor_endpoints
 
 # Create the main app
 app = FastAPI()
