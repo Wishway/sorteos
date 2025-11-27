@@ -88,29 +88,48 @@ def setup_vendedor_endpoints(api_router, db, get_current_user, UserRole, EstadoR
         request: Request,
         tipo: str = None,
         fecha_desde: str = None,
-        fecha_hasta: str = None
+        fecha_hasta: str = None,
+        page: int = 1,
+        limit: int = 20
     ):
-        """Obtener historial de movimientos del vendedor con filtros"""
+        """Obtener historial de movimientos del vendedor con filtros y paginación"""
         user = await get_current_user(request)
         if user.role != UserRole.VENDEDOR:
             raise HTTPException(status_code=403, detail="Solo vendedores")
         
-        from movimientos_vendedor import obtener_movimientos_vendedor
         from datetime import datetime
         
-        # Convertir fechas si se proporcionan
-        fecha_desde_dt = datetime.fromisoformat(fecha_desde) if fecha_desde else None
-        fecha_hasta_dt = datetime.fromisoformat(fecha_hasta) if fecha_hasta else None
+        # Construir filtro
+        filtro = {"vendedor_id": user.id}
         
-        movimientos = await obtener_movimientos_vendedor(
-            db=db,
-            vendedor_id=user.id,
-            tipo=tipo,
-            fecha_desde=fecha_desde_dt,
-            fecha_hasta=fecha_hasta_dt
-        )
+        if tipo and tipo != "todos":
+            filtro["tipo"] = tipo
         
-        return movimientos
+        if fecha_desde or fecha_hasta:
+            filtro["fecha"] = {}
+            if fecha_desde:
+                filtro["fecha"]["$gte"] = datetime.fromisoformat(fecha_desde)
+            if fecha_hasta:
+                filtro["fecha"]["$lte"] = datetime.fromisoformat(fecha_hasta)
+        
+        # Contar total
+        total = await db.movimientos_vendedor.count_documents(filtro)
+        
+        # Calcular skip
+        skip = (page - 1) * limit
+        
+        # Obtener movimientos paginados
+        movimientos = await db.movimientos_vendedor.find(
+            filtro,
+            {"_id": 0}
+        ).sort("fecha", -1).skip(skip).limit(limit).to_list(limit)
+        
+        return {
+            "movimientos": movimientos,
+            "total": total,
+            "page": page,
+            "total_pages": (total + limit - 1) // limit
+        }
     
     @api_router.get("/vendedor/perfil")
     async def get_perfil_vendedor(request: Request):
