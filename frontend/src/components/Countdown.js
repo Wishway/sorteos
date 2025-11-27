@@ -41,28 +41,28 @@ const Countdown = ({ targetDate, onComplete, className = '' }) => {
     <div className={`flex gap-2 items-center ${className}`}>
       {days > 0 && (
         <div className="text-center">
-          <div className="text-2xl font-bold">{days}</div>
-          <div className="text-xs text-gray-600">días</div>
+          <div className="text-3xl font-bold text-white">{days}</div>
+          <div className="text-xs text-gray-300">días</div>
         </div>
       )}
       {(days > 0 || hours > 0) && (
         <>
-          {days > 0 && <span className="text-2xl font-bold">:</span>}
+          {days > 0 && <span className="text-3xl font-bold text-white">:</span>}
           <div className="text-center">
-            <div className="text-2xl font-bold">{String(hours).padStart(2, '0')}</div>
-            <div className="text-xs text-gray-600">hrs</div>
+            <div className="text-3xl font-bold text-white">{String(hours).padStart(2, '0')}</div>
+            <div className="text-xs text-gray-300">hrs</div>
           </div>
         </>
       )}
-      <span className="text-2xl font-bold">:</span>
+      <span className="text-3xl font-bold text-white">:</span>
       <div className="text-center">
-        <div className="text-2xl font-bold">{String(minutes).padStart(2, '0')}</div>
-        <div className="text-xs text-gray-600">min</div>
+        <div className="text-3xl font-bold text-white">{String(minutes).padStart(2, '0')}</div>
+        <div className="text-xs text-gray-300">min</div>
       </div>
-      <span className="text-2xl font-bold">:</span>
+      <span className="text-3xl font-bold text-white">:</span>
       <div className="text-center">
-        <div className="text-2xl font-bold">{String(seconds).padStart(2, '0')}</div>
-        <div className="text-xs text-gray-600">seg</div>
+        <div className="text-3xl font-bold text-white">{String(seconds).padStart(2, '0')}</div>
+        <div className="text-xs text-gray-300">seg</div>
       </div>
     </div>
   );
