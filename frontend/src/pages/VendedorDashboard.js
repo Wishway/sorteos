@@ -57,6 +57,9 @@ const VendedorDashboard = () => {
   const [filtroTipoMovimiento, setFiltroTipoMovimiento] = useState('todos');
   const [fechaDesde, setFechaDesde] = useState('');
   const [fechaHasta, setFechaHasta] = useState('');
+  const [paginaActual, setPaginaActual] = useState(1);
+  const [totalPaginas, setTotalPaginas] = useState(1);
+  const [totalMovimientos, setTotalMovimientos] = useState(0);
 
   useEffect(() => {
     isMounted.current = true;
