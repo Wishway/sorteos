@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
-import { Trophy, Sparkles, Star, Gift } from 'lucide-react';
+import { Trophy, Sparkles, Star, Gift, Zap } from 'lucide-react';
 import websocketService from '../services/websocket';
 
 const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
@@ -13,6 +13,8 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
   const [currentPrize, setCurrentPrize] = useState(null);
   const [prizeIndex, setPrizeIndex] = useState(0);
   const [wsParticipantes, setWsParticipantes] = useState([]);
+  const [displayedNames, setDisplayedNames] = useState([]);
+  const [displayedTickets, setDisplayedTickets] = useState([]);
   
   // Si el sorteo ya tiene ganadores guardados, mostrarlos directamente
   const yaTerminado = sorteo.ganadores && sorteo.ganadores.length > 0 && sorteo.estado === 'completed';
@@ -33,7 +35,8 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       // Escuchar inicio de animación
       const handleAnimationStart = (data) => {
         console.log('🎬 Animación LIVE iniciada', data);
-        setWsParticipantes(data.participantes || participantes);
+        const participants = data.participantes || participantes;
+        setWsParticipantes(participants);
         setIsAnimating(true);
       };
       
@@ -42,7 +45,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
         console.log('🎁 Sorteando premio', data);
         setCurrentPrize(data.premio_nombre);
         setPrizeIndex(data.premio_index);
-        setTimeLeft(data.duracion_segundos); // 60 segundos por premio
+        setTimeLeft(data.duracion_segundos);
         setIsAnimating(true);
       };
       
@@ -80,14 +83,22 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     }
   }, [sorteo.id, sorteo.estado]);
 
-  // Animación de rotación de participantes
+  // Animación MEJORADA - Múltiples nombres y boletos rotando
   useEffect(() => {
     if (!isAnimating || wsParticipantes.length === 0) return;
 
     const rotationInterval = setInterval(() => {
+      // Seleccionar 5 participantes aleatorios para mostrar
+      const shuffled = [...wsParticipantes].sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, Math.min(5, wsParticipantes.length));
+      
+      setDisplayedNames(selected.map(p => p.nombre || p.email || 'Participante'));
+      setDisplayedTickets(selected.map(p => p.numero_boleto));
+      
+      // También actualizar el participante principal
       const randomIndex = Math.floor(Math.random() * wsParticipantes.length);
       setCurrentParticipant(wsParticipantes[randomIndex]);
-    }, 150);
+    }, 300); // Cambiar cada 0.3 segundos
 
     return () => clearInterval(rotationInterval);
   }, [isAnimating, wsParticipantes]);
@@ -138,7 +149,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
           </div>
 
           {isAnimating ? (
-            // Animación en progreso
+            // Animación en progreso - MEJORADA
             <div className="space-y-6">
               {/* Contador regresivo */}
               <div className="text-center">
@@ -148,22 +159,62 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
                 </div>
               </div>
 
-              {/* Participante actual rotando */}
+              {/* NUEVO: Lista de nombres rotando rápido */}
+              <div className="bg-gradient-to-br from-purple-900 via-pink-800 to-red-900 p-4 rounded-xl">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Zap className="w-6 h-6 text-yellow-400 animate-pulse" />
+                  <p className="text-yellow-300 text-lg font-semibold">Participantes en Juego</p>
+                  <Zap className="w-6 h-6 text-yellow-400 animate-pulse" />
+                </div>
+                <div className="grid grid-cols-1 gap-2">
+                  {displayedNames.map((name, idx) => (
+                    <div 
+                      key={idx} 
+                      className="bg-black/50 px-4 py-2 rounded-lg text-white text-center font-bold text-lg animate-pulse"
+                      style={{ animationDelay: `${idx * 0.1}s` }}
+                    >
+                      {name}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* NUEVO: Lista de boletos rotando */}
+              <div className="bg-gradient-to-br from-yellow-600 via-orange-600 to-red-600 p-4 rounded-xl">
+                <div className="flex items-center justify-center gap-2 mb-3">
+                  <Trophy className="w-6 h-6 text-white animate-spin" />
+                  <p className="text-white text-lg font-semibold">Números en Sorteo</p>
+                  <Trophy className="w-6 h-6 text-white animate-spin" />
+                </div>
+                <div className="flex flex-wrap justify-center gap-3">
+                  {displayedTickets.map((ticket, idx) => (
+                    <div 
+                      key={idx}
+                      className="bg-white text-black px-4 py-2 rounded-full font-bold text-xl animate-bounce"
+                      style={{ animationDelay: `${idx * 0.15}s` }}
+                    >
+                      #{ticket}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Participante principal destacado */}
               {currentParticipant && (
                 <div className="bg-gradient-to-br from-yellow-500 via-red-600 to-purple-700 p-1 rounded-2xl animate-pulse">
-                  <div className="bg-black rounded-2xl p-8">
-                    <div className="flex items-center justify-center gap-4 mb-4">
-                      <Sparkles className="w-8 h-8 text-yellow-400 animate-spin" />
-                      <p className="text-yellow-400 text-xl font-semibold">Seleccionando ganador...</p>
-                      <Sparkles className="w-8 h-8 text-yellow-400 animate-spin" />
+                  <div className="bg-black rounded-2xl p-6">
+                    <div className="flex items-center justify-center gap-4 mb-3">
+                      <Sparkles className="w-6 h-6 text-yellow-400 animate-spin" />
+                      <p className="text-yellow-400 text-lg font-semibold">Seleccionando ganador...</p>
+                      <Sparkles className="w-6 h-6 text-yellow-400 animate-spin" />
                     </div>
                     
                     <div className="text-center">
-                      <div className="text-5xl font-bold text-white mb-3 animate-pulse">
+                      <div className="text-4xl font-bold text-white mb-2 animate-pulse">
                         {currentParticipant.nombre || currentParticipant.email}
                       </div>
-                      <div className="flex items-center justify-center gap-3 text-3xl text-yellow-400">
-                        <Trophy className="w-8 h-8" />
+                      <div className="flex items-center justify-center gap-2 text-2xl text-yellow-400">
+                        <Trophy className="w-6 h-6" />
                         <span className="font-bold">Boleto #{currentParticipant.numero_boleto}</span>
                       </div>
                     </div>
@@ -180,7 +231,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
 
               {/* Indicador de participantes */}
               <div className="text-center text-gray-400 text-sm">
-                {participantes.length} participante{participantes.length !== 1 ? 's' : ''} en total
+                {wsParticipantes.length} participante{wsParticipantes.length !== 1 ? 's' : ''} en total
               </div>
             </div>
           ) : showWinners ? (
