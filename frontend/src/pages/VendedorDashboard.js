@@ -131,11 +131,19 @@ const VendedorDashboard = () => {
   };
 
   const handleLogout = async () => {
+    // Cerrar todos los modales primero
+    setShowDatosBancarios(false);
+    setShowEditarPerfil(false);
+    setShowCambiarPassword(false);
+    setShowSolicitarRetiro(false);
+    
     try {
-      await logout();
+      // Ejecutar logout sin esperar la respuesta
+      logout().catch(() => {});
+      // Navegar inmediatamente
       navigate('/', { replace: true });
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      // Si hay error, navegar de todas formas
       navigate('/', { replace: true });
     }
   };
