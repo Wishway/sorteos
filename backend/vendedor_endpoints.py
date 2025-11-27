@@ -222,6 +222,21 @@ def setup_vendedor_endpoints(api_router, db, get_current_user, UserRole, EstadoR
             {'$inc': {'wallet_balance': -retiro_doc['monto']}}
         )
         
+        # Registrar movimiento de egreso
+        from movimientos_vendedor import registrar_movimiento_egreso
+        vendedor_doc = await db.users.find_one({'id': retiro_doc['vendedor_id']}, {"_id": 0})
+        
+        await registrar_movimiento_egreso(
+            db=db,
+            vendedor_id=retiro_doc['vendedor_id'],
+            monto=retiro_doc['monto'],
+            retiro_id=retiro_id,
+            comprobante_url=data.comprobante_url,
+            banco=vendedor_doc.get('nombre_banco', 'N/A') if vendedor_doc else 'N/A',
+            numero_cuenta=vendedor_doc.get('numero_cuenta', 'N/A') if vendedor_doc else 'N/A',
+            tipo_cuenta=vendedor_doc.get('tipo_cuenta', 'N/A') if vendedor_doc else 'N/A'
+        )
+        
         return {"message": "Retiro aprobado y procesado correctamente"}
     
     @api_router.post("/admin/retiro/{retiro_id}/rechazar")
