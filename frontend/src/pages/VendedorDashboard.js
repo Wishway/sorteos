@@ -87,8 +87,13 @@ const VendedorDashboard = () => {
   };
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/');
+    try {
+      await logout();
+      navigate('/', { replace: true });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+      navigate('/', { replace: true });
+    }
   };
 
   const copyLink = () => {
