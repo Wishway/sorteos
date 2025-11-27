@@ -436,7 +436,7 @@ const VendedorDashboard = () => {
           </CardHeader>
           <CardContent>
             {/* Filtros */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <div>
                 <Label className="text-white mb-2">Tipo</Label>
                 <Select value={filtroTipoMovimiento} onValueChange={setFiltroTipoMovimiento}>
@@ -469,6 +469,15 @@ const VendedorDashboard = () => {
                   onChange={(e) => setFechaHasta(e.target.value)}
                   className="bg-white/10 border-white/20 text-white"
                 />
+              </div>
+              
+              <div className="flex items-end">
+                <Button 
+                  onClick={handleBuscarMovimientos}
+                  className="w-full bg-blue-600 hover:bg-blue-700"
+                >
+                  Buscar
+                </Button>
               </div>
             </div>
 
