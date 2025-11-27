@@ -25,6 +25,7 @@ const VendedorDashboard = () => {
   
   // Estados para modales
   const [showDatosBancarios, setShowDatosBancarios] = useState(false);
+  const [showEditarPerfil, setShowEditarPerfil] = useState(false);
   const [showCambiarPassword, setShowCambiarPassword] = useState(false);
   const [showSolicitarRetiro, setShowSolicitarRetiro] = useState(false);
   
@@ -32,9 +33,13 @@ const VendedorDashboard = () => {
   const [datosBancarios, setDatosBancarios] = useState({
     nombre_banco: '',
     tipo_cuenta: 'ahorro',
-    numero_cuenta: '',
-    telefono: '',
-    whatsapp: ''
+    numero_cuenta: ''
+  });
+  
+  const [perfilData, setPerfilData] = useState({
+    name: '',
+    cedula: '',
+    celular: ''
   });
   
   const [passwordData, setPasswordData] = useState({
