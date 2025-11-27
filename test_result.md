@@ -543,13 +543,14 @@ frontend:
 
 test_plan:
   current_focus:
-    - "Vendedor Login Authentication"
-    - "Vendedor Dashboard Access"
-    - "Mi Perfil Modal Functionality"
-    - "Datos Bancarios Modal Functionality"
-    - "Datos Bancarios Form Validation"
+    - "Admin Retiros Panel Post-Fix"
+    - "Seller Dashboard Complete Post-Fix"
+    - "Mi Perfil Modal Post-Fix"
+    - "Change Password Modal Post-Fix"
+    - "Banking Data 3-Field Modal Post-Fix"
+    - "Seller Logout Post-Fix"
   stuck_tasks: []
-  test_all: false
+  test_all: true
   test_priority: "high_first"
 
 agent_communication:
