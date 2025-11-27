@@ -292,3 +292,104 @@ Both critical bugs reported by user have been successfully fixed and tested:
 2. ✅ Ticket validation only fires on button click, not on keystroke
 
 **Next Steps**: Full end-to-end testing of automatic state machine flow as mentioned in Issue #3.
+
+---
+
+## Testing Session - 2025-01-27
+
+### Sistema de Vendedores - Nuevos Cambios Testing
+
+**Contexto**: Testing del sistema de vendedores con cambios específicos:
+1. Formulario de Datos Bancarios debe tener SOLO 3 campos: Nombre del banco, Tipo de cuenta, Número de cuenta
+2. Formulario Mi Perfil permite editar: Nombre completo, Cédula, Celular (correo NO editable)
+3. Validaciones: Cédula y celular únicos, número de cuenta no vacío
+
+**Credenciales**: juan.vendedor@wishway.com / password123
+
+frontend:
+  - task: "Vendedor Login Authentication"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/LoginNew.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test vendedor login with credentials juan.vendedor@wishway.com / password123 and verify redirect to /vendedor-dashboard"
+
+  - task: "Vendedor Dashboard Access"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/VendedorDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to verify dashboard shows 4 buttons: Mi Perfil, Datos Bancarios, Cambiar Contraseña, Solicitar Retiro"
+
+  - task: "Mi Perfil Modal Functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/VendedorDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test Mi Perfil modal has editable fields: Nombre Completo, Cédula, Celular. Email should be non-editable with '(no editable)' message"
+
+  - task: "Datos Bancarios Modal Functionality"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/VendedorDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "CRITICAL: Need to verify modal has ONLY 3 fields: Nombre del Banco, Tipo de Cuenta (dropdown: Ahorros/Corriente), Número de Cuenta. NO phone/WhatsApp fields should exist"
+
+  - task: "Datos Bancarios Form Validation"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/VendedorDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test form validation: all fields required, successful save enables 'Solicitar Retiro' button"
+
+  - task: "Profile Validation (Unique Cedula/Celular)"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/VendedorDashboard.js"
+    stuck_count: 0
+    priority: "medium"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "Need to test that cédula and celular validation works (should not allow duplicates with other users)"
+
+test_plan:
+  current_focus:
+    - "Vendedor Login Authentication"
+    - "Vendedor Dashboard Access"
+    - "Mi Perfil Modal Functionality"
+    - "Datos Bancarios Modal Functionality"
+    - "Datos Bancarios Form Validation"
+  stuck_tasks: []
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "Starting comprehensive testing of Sistema de Vendedores with specific focus on: 1) Banking form has ONLY 3 fields (no phone/WhatsApp), 2) Profile form has non-editable email, 3) All validations work correctly. Using credentials: juan.vendedor@wishway.com / password123"
