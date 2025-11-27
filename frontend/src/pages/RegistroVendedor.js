@@ -83,110 +83,110 @@ const RegistroVendedor = () => {
           Volver al Inicio
         </Button>
 
-        <Card className=\"bg-white/10 backdrop-blur-lg border-white/20\">
+        <Card className="bg-white/10 backdrop-blur-lg border-white/20">
           <CardHeader>
-            <CardTitle className=\"text-center text-white text-3xl flex items-center justify-center gap-2\">
-              <UserPlus className=\"w-8 h-8\" />
+            <CardTitle className="text-center text-white text-3xl flex items-center justify-center gap-2">
+              <UserPlus className="w-8 h-8" />
               Conviértete en Vendedor
             </CardTitle>
-            <p className=\"text-center text-purple-200 mt-2\">
+            <p className="text-center text-purple-200 mt-2">
               Gana comisiones vendiendo sorteos de WishWay
             </p>
           </CardHeader>
           
           <CardContent>
-            <form onSubmit={handleSubmit} className=\"space-y-4\">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label className=\"text-white\">Nombre Completo</Label>
+                <Label className="text-white">Nombre Completo</Label>
                 <Input
-                  type=\"text\"
-                  name=\"name\"
+                  type="text"
+                  name="name"
                   value={formData.name}
                   onChange={handleChange}
                   required
-                  className=\"bg-white/10 border-white/20 text-white placeholder:text-white/50\"
-                  placeholder=\"Ej: Juan Pérez\"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  placeholder="Ej: Juan Pérez"
                 />
               </div>
 
               <div>
-                <Label className=\"text-white\">Cédula</Label>
+                <Label className="text-white">Cédula</Label>
                 <Input
-                  type=\"text\"
-                  name=\"cedula\"
+                  type="text"
+                  name="cedula"
                   value={formData.cedula}
                   onChange={handleChange}
                   required
-                  className=\"bg-white/10 border-white/20 text-white placeholder:text-white/50\"
-                  placeholder=\"Ej: 1234567890\"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  placeholder="Ej: 1234567890"
                 />
               </div>
 
               <div>
-                <Label className=\"text-white\">Celular</Label>
+                <Label className="text-white">Celular</Label>
                 <Input
-                  type=\"tel\"
-                  name=\"celular\"
+                  type="tel"
+                  name="celular"
                   value={formData.celular}
                   onChange={handleChange}
                   required
-                  className=\"bg-white/10 border-white/20 text-white placeholder:text-white/50\"
-                  placeholder=\"Ej: 0999999999\"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  placeholder="Ej: 0999999999"
                 />
               </div>
 
               <div>
-                <Label className=\"text-white\">Correo Electrónico</Label>
+                <Label className="text-white">Correo Electrónico</Label>
                 <Input
-                  type=\"email\"
-                  name=\"email\"
+                  type="email"
+                  name="email"
                   value={formData.email}
                   onChange={handleChange}
                   required
-                  className=\"bg-white/10 border-white/20 text-white placeholder:text-white/50\"
-                  placeholder=\"tu@email.com\"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  placeholder="tu@email.com"
                 />
               </div>
 
               <div>
-                <Label className=\"text-white\">Contraseña</Label>
+                <Label className="text-white">Contraseña</Label>
                 <Input
-                  type=\"password\"
-                  name=\"password\"
+                  type="password"
+                  name="password"
                   value={formData.password}
                   onChange={handleChange}
                   required
                   minLength={6}
-                  className=\"bg-white/10 border-white/20 text-white placeholder:text-white/50\"
-                  placeholder=\"Mínimo 6 caracteres\"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  placeholder="Mínimo 6 caracteres"
                 />
               </div>
 
               <div>
-                <Label className=\"text-white\">Confirmar Contraseña</Label>
+                <Label className="text-white">Confirmar Contraseña</Label>
                 <Input
-                  type=\"password\"
-                  name=\"confirmPassword\"
+                  type="password"
+                  name="confirmPassword"
                   value={formData.confirmPassword}
                   onChange={handleChange}
                   required
                   minLength={6}
-                  className=\"bg-white/10 border-white/20 text-white placeholder:text-white/50\"
-                  placeholder=\"Confirma tu contraseña\"
+                  className="bg-white/10 border-white/20 text-white placeholder:text-white/50"
+                  placeholder="Confirma tu contraseña"
                 />
               </div>
 
               <Button
-                type=\"submit\"
+                type="submit"
                 disabled={loading}
-                className=\"w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3\"
+                className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-3"
               >
                 {loading ? 'Registrando...' : 'Registrarme como Vendedor'}
               </Button>
 
-              <p className=\"text-center text-purple-200 text-sm mt-4\">
+              <p className="text-center text-purple-200 text-sm mt-4">
                 ¿Ya tienes cuenta?{' '}
-                <Link to=\"/login\" className=\"text-white font-semibold hover:underline\">
+                <Link to="/login" className="text-white font-semibold hover:underline">
                   Inicia Sesión
                 </Link>
               </p>
@@ -194,10 +194,10 @@ const RegistroVendedor = () => {
           </CardContent>
         </Card>
         
-        <Card className=\"mt-6 bg-white/5 backdrop-blur-lg border-white/20\">
-          <CardContent className=\"p-6\">
-            <h3 className=\"text-white font-bold text-lg mb-3\">Beneficios de ser vendedor:</h3>
-            <ul className=\"text-purple-200 space-y-2\">
+        <Card className="mt-6 bg-white/5 backdrop-blur-lg border-white/20">
+          <CardContent className="p-6">
+            <h3 className="text-white font-bold text-lg mb-3">Beneficios de ser vendedor:</h3>
+            <ul className="text-purple-200 space-y-2">
               <li>✅ Gana comisiones por cada venta realizada</li>
               <li>✅ Link único personalizado para compartir</li>
               <li>✅ Panel de control con estadísticas</li>
