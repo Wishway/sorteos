@@ -110,6 +110,18 @@ const VendedorDashboard = () => {
       toast.error(error.response?.data?.detail || 'Error al actualizar datos bancarios');
     }
   };
+  
+  const handleEditarPerfil = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.put(`${API}/vendedor/perfil`, perfilData, { withCredentials: true });
+      toast.success('Perfil actualizado correctamente');
+      setShowEditarPerfil(false);
+      fetchPerfil();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al actualizar perfil');
+    }
+  };
 
   const handleCambiarPassword = async (e) => {
     e.preventDefault();
