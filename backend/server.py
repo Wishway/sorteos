@@ -1603,12 +1603,24 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
             detail=f"Los siguientes números ya están ocupados o reservados: {', '.join(map(str, numeros_ocupados))}"
         )
     
-    # Get vendedor if link provided
+    # Get vendedor from ID or link
     vendedor_id = None
-    if data.vendedor_link:
+    
+    # Prioridad 1: vendedor_id directo desde el frontend
+    if data.vendedor_id:
+        vendedor_doc = await db.users.find_one({'id': data.vendedor_id, 'role': 'vendedor'})
+        if vendedor_doc:
+            vendedor_id = vendedor_doc['id']
+            logger.info(f"Vendedor detectado desde ID: {vendedor_id}")
+        else:
+            logger.warning(f"Vendedor ID {data.vendedor_id} no encontrado o no es vendedor")
+    
+    # Fallback: vendedor_link (legacy)
+    elif data.vendedor_link:
         vendedor_doc = await db.users.find_one({'link_unico': data.vendedor_link})
         if vendedor_doc:
             vendedor_id = vendedor_doc['id']
+            logger.info(f"Vendedor detectado desde link: {vendedor_id}")
     
     # Determine etapas participantes
     etapas_participantes = []
