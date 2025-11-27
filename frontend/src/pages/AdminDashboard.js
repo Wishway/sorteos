@@ -97,6 +97,53 @@ const AdminDashboard = () => {
       setLoading(false);
     }
   };
+  
+  const fetchRetiros = async () => {
+    setLoadingRetiros(true);
+    try {
+      const response = await axios.get(`${API}/admin/retiros-pendientes`, { withCredentials: true });
+      setRetiros(response.data);
+    } catch (error) {
+      console.error('Error al cargar retiros:', error);
+      toast.error('Error al cargar retiros');
+    } finally {
+      setLoadingRetiros(false);
+    }
+  };
+  
+  const handleAprobarRetiro = async () => {
+    if (!comprobanteUrl.trim()) {
+      toast.error('Debe ingresar la URL del comprobante');
+      return;
+    }
+    
+    try {
+      await axios.post(`${API}/admin/retiro/${retiroSeleccionado.id}/aprobar`, {
+        comprobante_url: comprobanteUrl
+      }, { withCredentials: true });
+      
+      toast.success('Retiro aprobado correctamente');
+      setShowAprobarRetiro(false);
+      setComprobanteUrl('');
+      setRetiroSeleccionado(null);
+      fetchRetiros();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al aprobar retiro');
+    }
+  };
+  
+  const handleRechazarRetiro = async (retiroId) => {
+    const motivo = prompt('Ingrese el motivo del rechazo:');
+    if (!motivo) return;
+    
+    try {
+      await axios.post(`${API}/admin/retiro/${retiroId}/rechazar?motivo=${encodeURIComponent(motivo)}`, {}, { withCredentials: true });
+      toast.success('Retiro rechazado');
+      fetchRetiros();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al rechazar retiro');
+    }
+  };
 
   const handleLogout = async () => {
     await logout();
