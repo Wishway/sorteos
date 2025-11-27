@@ -130,22 +130,26 @@ const VendedorDashboard = () => {
     }
   };
 
-  const handleLogout = async () => {
-    // Cerrar todos los modales primero
-    setShowDatosBancarios(false);
-    setShowEditarPerfil(false);
-    setShowCambiarPassword(false);
-    setShowSolicitarRetiro(false);
+  const handleLogout = () => {
+    // Usar startTransition para cerrar modales sin causar errores de concurrent rendering
+    React.startTransition(() => {
+      setShowDatosBancarios(false);
+      setShowEditarPerfil(false);
+      setShowCambiarPassword(false);
+      setShowSolicitarRetiro(false);
+    });
     
-    try {
-      // Ejecutar logout sin esperar la respuesta
-      logout().catch(() => {});
-      // Navegar inmediatamente
-      navigate('/', { replace: true });
-    } catch (error) {
+    // Ejecutar logout de forma asíncrona sin bloquear
+    Promise.resolve().then(() => {
+      logout();
+      // Navegar después de un pequeño delay
+      setTimeout(() => {
+        navigate('/', { replace: true });
+      }, 10);
+    }).catch(() => {
       // Si hay error, navegar de todas formas
       navigate('/', { replace: true });
-    }
+    });
   };
 
   const copyLink = () => {
