@@ -72,14 +72,14 @@ const RegistroVendedor = () => {
   };
 
   return (
-    <div className=\"min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 py-12 px-4\">
-      <div className=\"max-w-md mx-auto\">
+    <div className="min-h-screen bg-gradient-to-br from-purple-900 via-purple-800 to-indigo-900 py-12 px-4">
+      <div className="max-w-md mx-auto">
         <Button 
           onClick={() => navigate('/')} 
-          variant=\"outline\" 
-          className=\"mb-6 bg-white/10 text-white hover:bg-white/20 border-white/30\"
+          variant="outline" 
+          className="mb-6 bg-white/10 text-white hover:bg-white/20 border-white/30"
         >
-          <ArrowLeft className=\"w-4 h-4 mr-2\" />
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Volver al Inicio
         </Button>
 
