@@ -1462,11 +1462,22 @@ async def completar_sorteo(sorteo_id: str):
                 boleto_id=ganador_data['boleto_id'],
                 usuario_id=ganador_data['usuario_id'],
                 premio=ganador_data.get('premio', 'Premio Principal'),
+                etapa_numero=ganador_data.get('etapa_numero'),
                 fecha_sorteo=datetime.now(timezone.utc)
             )
             
             ganador_dict = ganador.model_dump()
             ganador_dict['fecha_sorteo'] = ganador_dict['fecha_sorteo'].isoformat()
+            
+            # Agregar campos adicionales que no están en el modelo Ganador
+            ganador_dict['premio_nombre'] = ganador_data.get('premio', 'Premio Principal')
+            ganador_dict['premio_imagen'] = ganador_data.get('premio_imagen')
+            ganador_dict['premio_video'] = ganador_data.get('premio_video')
+            ganador_dict['usuario_nombre'] = ganador_data.get('nombre', '')
+            ganador_dict['usuario_email'] = ganador_data.get('email', '')
+            ganador_dict['numero_boleto'] = ganador_data.get('numero_boleto', 0)
+            ganador_dict['sorteo_titulo'] = sorteo_doc.get('titulo', '')
+            
             await db.ganadores.insert_one(ganador_dict)
     
     return {"message": "Sorteo completado exitosamente", "ganadores_guardados": len(ganadores)}
