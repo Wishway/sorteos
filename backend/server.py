@@ -1054,19 +1054,40 @@ async def seleccionar_ganadores_sorteo(sorteo_id: str):
         # Obtener info del usuario
         usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
         
-        # Determinar premio
+        # Determinar premio y etapa
+        premio_info = None
+        etapa_numero = None
+        premio_nombre = ""
+        premio_imagen = None
+        premio_video = None
+        
         if sorteo.tipo == 'unico':
-            premio_nombre = sorteo.premios[i].nombre if i < len(sorteo.premios) else "Premio Principal"
+            if i < len(sorteo.premios):
+                premio = sorteo.premios[i]
+                premio_nombre = premio.nombre
+                premio_imagen = premio.imagen
+                premio_video = premio.video
         else:
-            premio_nombre = sorteo.etapas[i].premio if i < len(sorteo.etapas) else f"Premio {i+1}"
+            if i < len(sorteo.etapas):
+                etapa = sorteo.etapas[i]
+                premio_nombre = etapa.premio
+                etapa_numero = etapa.numero
+                # Si la etapa tiene imagen/video asociado
+                if hasattr(etapa, 'imagen'):
+                    premio_imagen = etapa.imagen
+                if hasattr(etapa, 'video'):
+                    premio_video = etapa.video
         
         ganadores.append({
             'boleto_id': boleto_ganador['id'],
             'usuario_id': boleto_ganador['usuario_id'],
-            'nombre': usuario.get('name', '') if usuario else '',  # Usar 'name' en vez de 'nombre'
-            'email': usuario.get('email', '') if usuario else '',  # Cambiar a 'email' para consistencia
+            'nombre': usuario.get('name', '') if usuario else '',
+            'email': usuario.get('email', '') if usuario else '',
             'numero_boleto': boleto_ganador['numero_boleto'],
             'premio': premio_nombre,
+            'premio_imagen': premio_imagen,
+            'premio_video': premio_video,
+            'etapa_numero': etapa_numero,
             'fecha_seleccion': datetime.now(timezone.utc).isoformat()
         })
     
