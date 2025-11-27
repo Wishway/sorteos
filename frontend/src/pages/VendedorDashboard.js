@@ -52,6 +52,7 @@ const VendedorDashboard = () => {
 
   useEffect(() => {
     let isMounted = true;
+    const abortController = new AbortController();
     
     if (!user || user.role !== 'vendedor') {
       navigate('/login');
@@ -59,8 +60,39 @@ const VendedorDashboard = () => {
     }
     
     const loadPerfil = async () => {
-      if (isMounted) {
-        await fetchPerfil();
+      try {
+        const response = await axios.get(`${API}/vendedor/perfil`, { 
+          withCredentials: true,
+          signal: abortController.signal
+        });
+        
+        if (isMounted) {
+          setPerfil(response.data);
+          
+          // Prellenar datos bancarios si existen
+          if (response.data.datos_bancarios_completos) {
+            setDatosBancarios({
+              nombre_banco: response.data.nombre_banco || '',
+              tipo_cuenta: response.data.tipo_cuenta || 'ahorro',
+              numero_cuenta: response.data.numero_cuenta || ''
+            });
+          }
+          
+          // Prellenar datos de perfil
+          setPerfilData({
+            name: response.data.name || '',
+            cedula: response.data.cedula || '',
+            celular: response.data.celular || ''
+          });
+          
+          setLoading(false);
+        }
+      } catch (error) {
+        if (error.name !== 'CanceledError' && isMounted) {
+          console.error('Error al cargar perfil:', error);
+          toast.error('Error al cargar perfil');
+          setLoading(false);
+        }
       }
     };
     
@@ -68,8 +100,9 @@ const VendedorDashboard = () => {
     
     return () => {
       isMounted = false;
+      abortController.abort();
     };
-  }, [user]);
+  }, [user, navigate]);
 
   const fetchPerfil = async () => {
     try {
@@ -93,9 +126,7 @@ const VendedorDashboard = () => {
       });
     } catch (error) {
       console.error('Error al cargar perfil:', error);
-      toast.error('Error al cargar perfil');
-    } finally {
-      setLoading(false);
+      // No mostrar toast aquí para evitar errores durante el unmount
     }
   };
 
