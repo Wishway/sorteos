@@ -543,6 +543,9 @@ frontend:
       - working: false
         agent: "testing"
         comment: "❌ FAILED CRITICAL TEST (2025-11-27): Concurrent rendering error CONFIRMED during seller logout. When logging out with carlos.vendedor@wishway.com/vendedor123, the exact error appears: 'There was an error during concurrent rendering but React was able to recover by instead synchronously rendering the entire root.' This error appears as a red overlay on the screen after logout. The logout redirect works (goes to home page) but the concurrent rendering error is present. This is the exact issue the user reported."
+      - working: false
+        agent: "testing"
+        comment: "❌ FAILED POST-FIX VERIFICATION (2025-01-27): Comprehensive testing CONFIRMS the concurrent rendering error PERSISTS after attempted fix. Multiple test runs show: 1) Logout redirects correctly to home page ✅, 2) Red error overlay with 'Uncaught runtime errors' appears consistently ❌, 3) Error message 'There was an error during concurrent rendering but React was able to recover by instead synchronously rendering the entire root' is visible in the error overlay ❌, 4) Console shows related errors: 'Cannot read properties of null (reading 'id')' and VendedorDashboard component errors. The user's reported issue is CONFIRMED - the fix did NOT resolve the concurrent rendering error during seller logout."
 
 test_plan:
   current_focus:
