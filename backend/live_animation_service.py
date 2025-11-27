@@ -52,6 +52,7 @@ async def ejecutar_animacion_live(sorteo_id: str):
     from websocket_manager import (
         emit_live_animation_start,
         emit_live_prize_drawing,
+        emit_live_time_update,
         emit_live_winner_announced,
         emit_live_animation_complete,
         emit_sorteo_state_changed
