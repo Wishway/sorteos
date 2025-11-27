@@ -68,11 +68,16 @@ const VendedorDashboard = () => {
         setDatosBancarios({
           nombre_banco: response.data.nombre_banco || '',
           tipo_cuenta: response.data.tipo_cuenta || 'ahorro',
-          numero_cuenta: response.data.numero_cuenta || '',
-          telefono: response.data.telefono || '',
-          whatsapp: response.data.whatsapp || ''
+          numero_cuenta: response.data.numero_cuenta || ''
         });
       }
+      
+      // Prellenar datos de perfil
+      setPerfilData({
+        name: response.data.name || '',
+        cedula: response.data.cedula || '',
+        celular: response.data.celular || ''
+      });
     } catch (error) {
       console.error('Error al cargar perfil:', error);
       toast.error('Error al cargar perfil');
