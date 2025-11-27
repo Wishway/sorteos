@@ -546,14 +546,10 @@ frontend:
 
 test_plan:
   current_focus:
-    - "Admin Retiros Panel Post-Fix"
-    - "Seller Dashboard Complete Post-Fix"
-    - "Mi Perfil Modal Post-Fix"
-    - "Change Password Modal Post-Fix"
-    - "Banking Data 3-Field Modal Post-Fix"
     - "Seller Logout Post-Fix"
-  stuck_tasks: []
-  test_all: true
+  stuck_tasks:
+    - "Seller Logout Post-Fix"
+  test_all: false
   test_priority: "high_first"
 
 agent_communication:
