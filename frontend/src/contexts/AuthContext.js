@@ -57,6 +57,35 @@ export const AuthProvider = ({ children }) => {
     return response.data;
   };
 
+  const handleGoogleCallback = async () => {
+    try {
+      const hash = window.location.hash;
+      const sessionId = new URLSearchParams(hash.substring(1)).get('session_id');
+      
+      if (!sessionId) {
+        throw new Error('No session ID found');
+      }
+
+      const response = await axios.post(
+        `${API}/auth/google/callback`,
+        { session_id: sessionId },
+        { withCredentials: true }
+      );
+
+      if (isMounted.current) {
+        setUser(response.data);
+      }
+      
+      // Limpiar el hash de la URL
+      window.history.replaceState(null, '', window.location.pathname);
+      
+      return response.data;
+    } catch (error) {
+      console.error('Error en Google callback:', error);
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       // Hacer la llamada de logout al backend
@@ -79,7 +108,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ user, setUser, login, register, logout, loading, checkAuth }}>
+    <AuthContext.Provider value={{ user, setUser, login, register, logout, loading, checkAuth, handleGoogleCallback }}>
       {children}
     </AuthContext.Provider>
   );
