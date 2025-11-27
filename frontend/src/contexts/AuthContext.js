@@ -1,40 +1,44 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-const AuthContext = createContext(null);
+const API = process.env.REACT_APP_BACKEND_URL + '/api';
+
+const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
-    throw new Error('useAuth debe usarse dentro de AuthProvider');
+    throw new Error('useAuth debe ser usado dentro de un AuthProvider');
   }
   return context;
 };
 
-const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
-const API = `${BACKEND_URL}/api`;
-
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const isLoggingOutRef = React.useRef(false);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
     checkAuth();
+    
+    return () => {
+      isMounted.current = false;
+    };
   }, []);
 
   const checkAuth = async () => {
     try {
       const response = await axios.get(`${API}/auth/me`, { withCredentials: true });
-      if (!isLoggingOutRef.current) {
+      if (isMounted.current) {
         setUser(response.data);
       }
     } catch (error) {
-      if (!isLoggingOutRef.current) {
+      if (isMounted.current) {
         setUser(null);
       }
     } finally {
-      if (!isLoggingOutRef.current) {
+      if (isMounted.current) {
         setLoading(false);
       }
     }
@@ -42,7 +46,9 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const response = await axios.post(`${API}/auth/login`, { email, password }, { withCredentials: true });
-    setUser(response.data);
+    if (isMounted.current) {
+      setUser(response.data);
+    }
     return response.data;
   };
 
@@ -52,50 +58,28 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    // Marcar que estamos en proceso de logout
-    isLoggingOutRef.current = true;
-    
-    // Limpiar el estado inmediatamente usando startTransition para evitar errores de concurrent rendering
-    React.startTransition(() => {
-      setUser(null);
-    });
-    
-    // Limpiar localStorage
     try {
-      localStorage.removeItem('vendedor_id');
-    } catch (e) {
-      // Ignorar errores
-    }
-    
-    // Hacer la llamada al backend sin bloquear ni esperar
-    setTimeout(() => {
-      axios.post(`${API}/auth/logout`, {}, { withCredentials: true }).catch(() => {});
-    }, 0);
-  };
-
-  const handleGoogleCallback = async () => {
-    const hash = window.location.hash;
-    if (hash.includes('session_id=')) {
-      const sessionId = hash.split('session_id=')[1].split('&')[0];
+      // Hacer la llamada de logout al backend
+      await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
+    } catch (error) {
+      console.error('Error al cerrar sesión:', error);
+    } finally {
+      // Solo actualizar estado si el componente sigue montado
+      if (isMounted.current) {
+        setUser(null);
+      }
       
+      // Limpiar localStorage independientemente
       try {
-        const response = await axios.get(`${API}/auth/session-data`, {
-          headers: { 'X-Session-ID': sessionId },
-          withCredentials: true
-        });
-        
-        setUser(response.data);
-        window.history.replaceState(null, '', window.location.pathname);
-        return response.data;
-      } catch (error) {
-        console.error('Error en callback de Google:', error);
-        throw error;
+        localStorage.removeItem('vendedor_id');
+      } catch (e) {
+        // Ignorar errores de localStorage
       }
     }
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout, checkAuth, handleGoogleCallback }}>
+    <AuthContext.Provider value={{ user, setUser, login, register, logout, loading, checkAuth }}>
       {children}
     </AuthContext.Provider>
   );
