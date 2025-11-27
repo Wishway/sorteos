@@ -17,6 +17,7 @@ const API = `${BACKEND_URL}/api`;
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
+  const isLoggingOutRef = React.useRef(false);
 
   useEffect(() => {
     checkAuth();
@@ -25,11 +26,17 @@ export const AuthProvider = ({ children }) => {
   const checkAuth = async () => {
     try {
       const response = await axios.get(`${API}/auth/me`, { withCredentials: true });
-      setUser(response.data);
+      if (!isLoggingOutRef.current) {
+        setUser(response.data);
+      }
     } catch (error) {
-      setUser(null);
+      if (!isLoggingOutRef.current) {
+        setUser(null);
+      }
     } finally {
-      setLoading(false);
+      if (!isLoggingOutRef.current) {
+        setLoading(false);
+      }
     }
   };
 
@@ -45,23 +52,25 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = async () => {
-    // Limpiar el estado PRIMERO
-    setUser(null);
+    // Marcar que estamos en proceso de logout
+    isLoggingOutRef.current = true;
+    
+    // Limpiar el estado inmediatamente usando startTransition para evitar errores de concurrent rendering
+    React.startTransition(() => {
+      setUser(null);
+    });
     
     // Limpiar localStorage
     try {
       localStorage.removeItem('vendedor_id');
     } catch (e) {
-      console.error('Error limpiando localStorage:', e);
+      // Ignorar errores
     }
     
-    // Hacer la llamada al backend sin bloquear
-    try {
-      // No esperar la respuesta, hacerlo en segundo plano
+    // Hacer la llamada al backend sin bloquear ni esperar
+    setTimeout(() => {
       axios.post(`${API}/auth/logout`, {}, { withCredentials: true }).catch(() => {});
-    } catch (error) {
-      // Ignorar errores del logout del backend
-    }
+    }, 0);
   };
 
   const handleGoogleCallback = async () => {
