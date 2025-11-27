@@ -80,6 +80,7 @@ const AdminDashboard = () => {
     }
     fetchData();
     fetchBoletosPendientes();
+    fetchRetiros();
   }, [user]);
 
   const fetchData = async () => {
