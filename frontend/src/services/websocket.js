@@ -98,6 +98,12 @@ class WebSocketService {
     }
   }
 
+  onLiveTimeUpdate(callback) {
+    if (this.socket) {
+      this.socket.on('live_time_update', callback);
+    }
+  }
+
   onLiveWinnerAnnounced(callback) {
     if (this.socket) {
       this.socket.on('live_winner_announced', callback);
