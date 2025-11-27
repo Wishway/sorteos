@@ -85,23 +85,26 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
 
   // Animación MEJORADA - Múltiples nombres y boletos rotando
   useEffect(() => {
-    if (!isAnimating || wsParticipantes.length === 0) return;
+    // Usar wsParticipantes si existe, sino usar participantes del prop
+    const activeParticipants = wsParticipantes.length > 0 ? wsParticipantes : participantes;
+    
+    if (!isAnimating || activeParticipants.length === 0) return;
 
     const rotationInterval = setInterval(() => {
       // Seleccionar 5 participantes aleatorios para mostrar
-      const shuffled = [...wsParticipantes].sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, Math.min(5, wsParticipantes.length));
+      const shuffled = [...activeParticipants].sort(() => Math.random() - 0.5);
+      const selected = shuffled.slice(0, Math.min(5, activeParticipants.length));
       
-      setDisplayedNames(selected.map(p => p.nombre || p.email || 'Participante'));
+      setDisplayedNames(selected.map(p => p.nombre || p.name || p.email || 'Participante'));
       setDisplayedTickets(selected.map(p => p.numero_boleto));
       
       // También actualizar el participante principal
-      const randomIndex = Math.floor(Math.random() * wsParticipantes.length);
-      setCurrentParticipant(wsParticipantes[randomIndex]);
+      const randomIndex = Math.floor(Math.random() * activeParticipants.length);
+      setCurrentParticipant(activeParticipants[randomIndex]);
     }, 300); // Cambiar cada 0.3 segundos
 
     return () => clearInterval(rotationInterval);
-  }, [isAnimating, wsParticipantes]);
+  }, [isAnimating, wsParticipantes, participantes]);
 
   // Countdown timer
   useEffect(() => {
