@@ -1830,24 +1830,43 @@ async def get_ganadores_recientes():
         # Get sorteo info
         sorteo_doc = await db.sorteos.find_one({'id': ganador['sorteo_id']}, {"_id": 0})
         if sorteo_doc:
+            ganador['sorteo_titulo'] = sorteo_doc.get('titulo', '')
             ganador['sorteo'] = {
                 'titulo': sorteo_doc.get('titulo', ''),
                 'imagenes': sorteo_doc.get('imagenes', []),
-                'landing_slug': sorteo_doc.get('landing_slug', '')
+                'landing_slug': sorteo_doc.get('landing_slug', ''),
+                'tipo': sorteo_doc.get('tipo', 'unico')
             }
+            
+            # Si es sorteo por etapas y tiene etapa_numero, obtener info de la etapa
+            if ganador.get('etapa_numero') is not None and sorteo_doc.get('tipo') == 'etapas':
+                etapas = sorteo_doc.get('etapas', [])
+                etapa_info = next((e for e in etapas if e.get('numero') == ganador['etapa_numero']), None)
+                if etapa_info:
+                    ganador['etapa'] = {
+                        'numero': etapa_info.get('numero'),
+                        'premio': etapa_info.get('premio', ''),
+                        'imagen': etapa_info.get('imagen'),
+                        'video': etapa_info.get('video')
+                    }
         
-        # Get user info
-        user_doc = await db.users.find_one({'id': ganador['usuario_id']}, {"_id": 0})
-        if user_doc:
-            ganador['usuario'] = {
-                'name': user_doc.get('name', 'Anónimo'),
-                'email': user_doc.get('email', '')
-            }
+        # Si ya tiene la info guardada directamente, usarla
+        if not ganador.get('usuario_nombre'):
+            # Get user info
+            user_doc = await db.users.find_one({'id': ganador['usuario_id']}, {"_id": 0})
+            if user_doc:
+                ganador['usuario_nombre'] = user_doc.get('name', 'Anónimo')
+                ganador['usuario_email'] = user_doc.get('email', '')
         
-        # Get boleto info
-        boleto_doc = await db.boletos.find_one({'id': ganador['boleto_id']}, {"_id": 0})
-        if boleto_doc:
-            ganador['numero_boleto'] = boleto_doc.get('numero_boleto', 0)
+        # Si no tiene numero_boleto, buscarlo
+        if not ganador.get('numero_boleto'):
+            boleto_doc = await db.boletos.find_one({'id': ganador['boleto_id']}, {"_id": 0})
+            if boleto_doc:
+                ganador['numero_boleto'] = boleto_doc.get('numero_boleto', 0)
+        
+        # Asegurar que premio_nombre existe
+        if not ganador.get('premio_nombre'):
+            ganador['premio_nombre'] = ganador.get('premio', 'Premio Principal')
     
     # Ordenar por fecha descendente (más recientes primero)
     ganadores.sort(key=lambda x: x['fecha_sorteo'], reverse=True)
