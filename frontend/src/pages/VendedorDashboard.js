@@ -387,6 +387,58 @@ const VendedorDashboard = () => {
           </CardContent>
         </Card>
 
+        {/* Modal Editar Perfil */}
+        <Dialog open={showEditarPerfil} onOpenChange={setShowEditarPerfil}>
+          <DialogContent className="bg-purple-900 text-white border-purple-700">
+            <DialogHeader>
+              <DialogTitle>Mi Perfil</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleEditarPerfil} className="space-y-4">
+              <div>
+                <Label>Nombre Completo</Label>
+                <Input 
+                  value={perfilData.name}
+                  onChange={(e) => setPerfilData({...perfilData, name: e.target.value})}
+                  required
+                  className="bg-white/10 border-white/20 text-white"
+                />
+              </div>
+              
+              <div>
+                <Label>Cédula</Label>
+                <Input 
+                  value={perfilData.cedula}
+                  onChange={(e) => setPerfilData({...perfilData, cedula: e.target.value})}
+                  required
+                  className="bg-white/10 border-white/20 text-white"
+                  placeholder="Ej: 1234567890"
+                />
+              </div>
+              
+              <div>
+                <Label>Celular</Label>
+                <Input 
+                  value={perfilData.celular}
+                  onChange={(e) => setPerfilData({...perfilData, celular: e.target.value})}
+                  required
+                  className="bg-white/10 border-white/20 text-white"
+                  placeholder="Ej: 0999999999"
+                />
+              </div>
+              
+              <div className="bg-white/5 p-3 rounded">
+                <p className="text-purple-200 text-sm">
+                  <strong>Correo:</strong> {perfil?.email} <span className="text-yellow-300">(no editable)</span>
+                </p>
+              </div>
+              
+              <Button type="submit" className="w-full bg-indigo-600 hover:bg-indigo-700">
+                Guardar Cambios
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
+
         {/* Modal Datos Bancarios */}
         <Dialog open={showDatosBancarios} onOpenChange={setShowDatosBancarios}>
           <DialogContent className="bg-purple-900 text-white border-purple-700">
@@ -401,6 +453,7 @@ const VendedorDashboard = () => {
                   onChange={(e) => setDatosBancarios({...datosBancarios, nombre_banco: e.target.value})}
                   required
                   className="bg-white/10 border-white/20 text-white"
+                  placeholder="Ej: Banco Pichincha"
                 />
               </div>
               
@@ -414,7 +467,7 @@ const VendedorDashboard = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="ahorro">Ahorro</SelectItem>
+                    <SelectItem value="ahorro">Ahorros</SelectItem>
                     <SelectItem value="corriente">Corriente</SelectItem>
                   </SelectContent>
                 </Select>
@@ -427,28 +480,14 @@ const VendedorDashboard = () => {
                   onChange={(e) => setDatosBancarios({...datosBancarios, numero_cuenta: e.target.value})}
                   required
                   className="bg-white/10 border-white/20 text-white"
+                  placeholder="Ej: 2100154343"
                 />
               </div>
               
-              <div>
-                <Label>Teléfono</Label>
-                <Input 
-                  value={datosBancarios.telefono}
-                  onChange={(e) => setDatosBancarios({...datosBancarios, telefono: e.target.value})}
-                  required
-                  placeholder="0999999999"
-                  className="bg-white/10 border-white/20 text-white"
-                />
-              </div>
-              
-              <div>
-                <Label>WhatsApp (opcional, si es diferente al teléfono)</Label>
-                <Input 
-                  value={datosBancarios.whatsapp}
-                  onChange={(e) => setDatosBancarios({...datosBancarios, whatsapp: e.target.value})}
-                  placeholder="0999999999"
-                  className="bg-white/10 border-white/20 text-white"
-                />
+              <div className="bg-blue-500/10 border border-blue-400/30 p-3 rounded">
+                <p className="text-blue-200 text-sm">
+                  ℹ️ Estos datos son necesarios para procesar tus retiros de comisiones.
+                </p>
               </div>
               
               <Button type="submit" className="w-full bg-green-600 hover:bg-green-700">
