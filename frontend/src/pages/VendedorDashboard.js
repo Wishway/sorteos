@@ -153,6 +153,7 @@ const VendedorDashboard = () => {
   };
 
   const copyLink = () => {
+    if (!user || !user.id) return;
     const link = `${window.location.origin}/?vendedor=${user.id}`;
     navigator.clipboard.writeText(link);
     setCopied(true);
