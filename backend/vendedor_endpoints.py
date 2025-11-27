@@ -92,18 +92,21 @@ def setup_vendedor_endpoints(api_router, db, get_current_user, UserRole, EstadoR
         
         user_doc = await db.users.find_one({'id': user.id}, {"_id": 0, "password_hash": 0})
         
+        if not user_doc:
+            raise HTTPException(status_code=404, detail="Vendedor no encontrado")
+        
         # Obtener comisiones
         comisiones = await db.comisiones.find({'vendedor_id': user.id}, {"_id": 0}).to_list(1000)
-        total_comisiones = sum(c['monto'] for c in comisiones)
-        comisiones_disponibles = user.wallet_balance
+        total_comisiones = sum(c.get('monto', 0) for c in comisiones)
+        wallet_balance = user_doc.get('wallet_balance', 0.0)
         
         # Obtener retiros
         retiros = await db.retiros.find({'vendedor_id': user.id}, {"_id": 0}).sort('fecha_solicitud', -1).to_list(100)
         
         return {
             **user_doc,
+            'wallet_balance': wallet_balance,
             'total_comisiones': total_comisiones,
-            'comisiones_disponibles': comisiones_disponibles,
             'comisiones': comisiones,
             'retiros': retiros
         }
