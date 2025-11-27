@@ -14,6 +14,7 @@ import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
 import { Calendar, DollarSign, Trophy, CheckCircle, Clock, AlertCircle, Copy } from 'lucide-react';
 import { toast } from 'sonner';
 import Countdown from '../components/Countdown';
+import referralService from '../services/referralService';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
 const API = `${BACKEND_URL}/api`;
