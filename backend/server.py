@@ -2181,6 +2181,23 @@ async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Reque
                 {'$inc': {'wallet_balance': comision['monto']}}
             )
             
+            # Registrar movimiento de ingreso
+            from movimientos_vendedor import registrar_movimiento_ingreso
+            sorteo_doc = await db.sorteos.find_one({'id': boleto_doc['sorteo_id']}, {"_id": 0})
+            comprador_doc = await db.users.find_one({'id': boleto_doc['usuario_id']}, {"_id": 0})
+            
+            await registrar_movimiento_ingreso(
+                db=db,
+                vendedor_id=boleto_doc['vendedor_id'],
+                monto=comision['monto'],
+                sorteo_id=boleto_doc['sorteo_id'],
+                sorteo_titulo=sorteo_doc.get('titulo', 'Sorteo') if sorteo_doc else 'Sorteo',
+                boleto_id=boleto_id,
+                numero_boleto=boleto_doc.get('numero_boleto', 0),
+                comprador_id=boleto_doc['usuario_id'],
+                comprador_nombre=comprador_doc.get('name', 'Usuario') if comprador_doc else 'Usuario'
+            )
+            
             logger.info(f"Comisión de ${comision['monto']} acreditada a vendedor {boleto_doc['vendedor_id']}")
     
     # Actualizar progreso del sorteo y verificar transiciones
