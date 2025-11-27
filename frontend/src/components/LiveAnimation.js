@@ -30,6 +30,13 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     
     // Si está en estado LIVE, conectar WebSocket
     if (sorteo.estado === 'live') {
+      // Si tenemos participantes del prop, usarlos inmediatamente
+      if (participantes && participantes.length > 0) {
+        setWsParticipantes(participantes);
+        setIsAnimating(true);
+        setTimeLeft(120); // 2 minutos por defecto
+      }
+      
       websocketService.joinSorteo(sorteo.id);
       
       // Escuchar inicio de animación
