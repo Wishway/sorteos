@@ -9,6 +9,7 @@ import referralService from '@/services/referralService';
 import Home from '@/pages/Home';
 import Login from '@/pages/LoginNew';
 import Register from '@/pages/Register';
+import RegistroVendedor from '@/pages/RegistroVendedor';
 import CompletarDatos from '@/pages/CompletarDatos';
 import ForgotPassword from '@/pages/ForgotPassword';
 import ResetPassword from '@/pages/ResetPassword';
