@@ -420,6 +420,7 @@ class BoletoCompra(BaseModel):
     sorteo_id: str
     numeros_boletos: List[int]
     metodo_pago: MetodoPago
+    vendedor_id: Optional[str] = None  # ID del vendedor desde el frontend
     vendedor_link: Optional[str] = None
     comprobante_url: Optional[str] = None
 
