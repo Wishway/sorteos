@@ -256,13 +256,21 @@ const VendedorDashboard = () => {
         </div>
 
         {/* Botones de Acciones */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Button 
+            onClick={() => setShowEditarPerfil(true)}
+            className="bg-indigo-600 hover:bg-indigo-700"
+          >
+            <Phone className="w-4 h-4 mr-2" />
+            Mi Perfil
+          </Button>
+          
           <Button 
             onClick={() => setShowDatosBancarios(true)}
             className="bg-blue-600 hover:bg-blue-700"
           >
             <Building className="w-4 h-4 mr-2" />
-            {perfil?.datos_bancarios_completos ? 'Editar Datos Bancarios' : 'Completar Datos Bancarios'}
+            {perfil?.datos_bancarios_completos ? 'Datos Bancarios' : 'Completar Datos Bancarios'}
           </Button>
           
           <Button 
