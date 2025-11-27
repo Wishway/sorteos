@@ -90,7 +90,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     }
   }, [sorteo.id, sorteo.estado]);
 
-  // Animación MEJORADA - Múltiples nombres y boletos rotando
+  // Animación MEJORADA - TODOS los nombres y boletos rotando
   useEffect(() => {
     // Usar wsParticipantes si existe, sino usar participantes del prop
     const activeParticipants = wsParticipantes.length > 0 ? wsParticipantes : participantes;
@@ -98,12 +98,12 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     if (!isAnimating || activeParticipants.length === 0) return;
 
     const rotationInterval = setInterval(() => {
-      // Seleccionar 5 participantes aleatorios para mostrar
+      // MOSTRAR TODOS LOS PARTICIPANTES, no solo 5
       const shuffled = [...activeParticipants].sort(() => Math.random() - 0.5);
-      const selected = shuffled.slice(0, Math.min(5, activeParticipants.length));
       
-      setDisplayedNames(selected.map(p => p.nombre || p.name || p.email || 'Participante'));
-      setDisplayedTickets(selected.map(p => p.numero_boleto));
+      // Extraer TODOS los nombres y boletos
+      setDisplayedNames(shuffled.map(p => p.nombre || p.name || p.email || 'Participante'));
+      setDisplayedTickets(shuffled.map(p => p.numero_boleto));
       
       // También actualizar el participante principal
       const randomIndex = Math.floor(Math.random() * activeParticipants.length);
