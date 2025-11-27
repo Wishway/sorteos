@@ -519,6 +519,78 @@ async def register(data: RegisterRequest):
     
     return {"message": "Usuario registrado exitosamente.", "user_id": user.id}
 
+@api_router.post("/auth/registro-vendedor")
+async def registro_vendedor(data: RegisterRequest, response: Response):
+    """Registrar un nuevo vendedor y crear sesión automáticamente"""
+    # Check if email exists
+    existing_email = await db.users.find_one({'email': data.email})
+    if existing_email:
+        raise HTTPException(status_code=400, detail="El email ya está registrado")
+    
+    # Check if cedula exists
+    existing_cedula = await db.users.find_one({'cedula': data.cedula})
+    if existing_cedula:
+        raise HTTPException(status_code=400, detail="La cédula ya está registrada")
+    
+    # Check if celular exists
+    existing_celular = await db.users.find_one({'celular': data.celular})
+    if existing_celular:
+        raise HTTPException(status_code=400, detail="El celular ya está registrado")
+    
+    # Generar link único para vendedor
+    link_unico = str(uuid.uuid4())[:8]
+    
+    # Create user as VENDEDOR
+    user = User(
+        email=data.email,
+        name=data.name,
+        password_hash=hash_password(data.password),
+        cedula=data.cedula,
+        celular=data.celular,
+        role=UserRole.VENDEDOR,  # VENDEDOR role
+        link_unico=link_unico,
+        datos_completos=True,
+        verification_token=str(uuid.uuid4())
+    )
+    
+    user_dict = user.model_dump()
+    user_dict['created_at'] = user_dict['created_at'].isoformat()
+    await db.users.insert_one(user_dict)
+    
+    # Create session automatically
+    session_token = str(uuid.uuid4())
+    session = UserSession(
+        user_id=user.id,
+        session_token=session_token,
+        expires_at=datetime.now(timezone.utc) + timedelta(days=JWT_EXPIRATION_DAYS)
+    )
+    
+    session_dict = session.model_dump()
+    session_dict['expires_at'] = session_dict['expires_at'].isoformat()
+    await db.sessions.insert_one(session_dict)
+    
+    # Set cookie
+    response.set_cookie(
+        key="session_token",
+        value=session_token,
+        httponly=True,
+        max_age=JWT_EXPIRATION_DAYS * 24 * 60 * 60,
+        samesite="lax"
+    )
+    
+    logger.info(f"Nuevo vendedor registrado: {user.email} con link {link_unico}")
+    
+    return {
+        "message": "Vendedor registrado exitosamente",
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "name": user.name,
+            "role": user.role,
+            "link_unico": link_unico
+        }
+    }
+
 @api_router.post("/auth/login")
 async def login(data: LoginRequest, response: Response):
     # Find user
