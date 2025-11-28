@@ -61,6 +61,19 @@ const UsuarioDashboard = () => {
       setLoading(false);
     }
   };
+
+  const fetchMisPremios = async () => {
+    setLoadingPremios(true);
+    try {
+      const response = await axios.get(`${API}/usuario/mis-premios`, { withCredentials: true });
+      setPremiosGanados(response.data);
+    } catch (error) {
+      console.error('Error al cargar premios ganados:', error);
+      // No mostrar toast error si no hay premios
+    } finally {
+      setLoadingPremios(false);
+    }
+  };
   
   const boletosFiltrados = () => {
     let resultado = [...boletos];
