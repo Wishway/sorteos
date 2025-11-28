@@ -1,6 +1,6 @@
 """
 Servicio para manejar animaciones LIVE en tiempo real
-1 minuto por premio
+2 minutos (120 segundos) por premio - OBLIGATORIO
 """
 import asyncio
 from datetime import datetime, timezone
