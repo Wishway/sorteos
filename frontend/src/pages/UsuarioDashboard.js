@@ -30,6 +30,8 @@ const UsuarioDashboard = () => {
   const [filtroSorteo, setFiltroSorteo] = useState('todos');
   const [filtroNumeroBoleto, setFiltroNumeroBoleto] = useState('');
   const [sorteos, setSorteos] = useState([]);
+  const [premiosGanados, setPremiosGanados] = useState([]);
+  const [loadingPremios, setLoadingPremios] = useState(false);
 
   useEffect(() => {
     if (!user) {
