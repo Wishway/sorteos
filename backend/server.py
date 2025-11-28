@@ -1876,6 +1876,68 @@ async def get_ganadores_recientes():
 
 # Removed duplicate endpoint
 
+@api_router.get("/usuario/mis-premios")
+async def get_mis_premios_ganados(request: Request):
+    """Obtiene todos los premios ganados por el usuario autenticado"""
+    user = await get_current_user(request)
+    
+    # Buscar todos los ganadores donde el usuario_id coincide
+    ganadores = await db.ganadores.find({
+        'usuario_id': user.id
+    }, {"_id": 0}).to_list(1000)
+    
+    # Enriquecer con información del sorteo y premio
+    premios_ganados = []
+    for ganador in ganadores:
+        # Obtener información del sorteo
+        sorteo_doc = await db.sorteos.find_one({'id': ganador['sorteo_id']}, {"_id": 0})
+        if not sorteo_doc:
+            continue
+        
+        premio_info = {
+            'id': ganador.get('id'),
+            'fecha_sorteo': ganador.get('fecha_sorteo'),
+            'numero_boleto': ganador.get('numero_boleto'),
+            'sorteo': {
+                'id': sorteo_doc['id'],
+                'titulo': sorteo_doc.get('titulo', ''),
+                'imagenes': sorteo_doc.get('imagenes', []),
+                'landing_slug': sorteo_doc.get('landing_slug', '')
+            }
+        }
+        
+        # Determinar información del premio según el tipo de sorteo
+        if sorteo_doc.get('tipo') == 'etapas' and ganador.get('etapa_numero') is not None:
+            # Sorteo por etapas - obtener info de la etapa
+            etapas = sorteo_doc.get('etapas', [])
+            etapa_num = ganador.get('etapa_numero')
+            etapa_info = next((e for e in etapas if e.get('numero') == etapa_num), None)
+            
+            if etapa_info:
+                premio_info['premio'] = {
+                    'nombre': etapa_info.get('premio', ''),
+                    'imagen': etapa_info.get('imagen'),
+                    'etapa_numero': etapa_num
+                }
+            else:
+                premio_info['premio'] = {
+                    'nombre': ganador.get('premio', 'Premio'),
+                    'etapa_numero': etapa_num
+                }
+        else:
+            # Sorteo único
+            premio_info['premio'] = {
+                'nombre': ganador.get('premio', 'Premio Principal'),
+                'imagen': sorteo_doc.get('imagenes', [None])[0] if sorteo_doc.get('imagenes') else None
+            }
+        
+        premios_ganados.append(premio_info)
+    
+    # Ordenar por fecha descendente
+    premios_ganados.sort(key=lambda x: x.get('fecha_sorteo', ''), reverse=True)
+    
+    return premios_ganados
+
 # ============ ADMIN ENDPOINTS ============
 @api_router.post("/admin/ejecutar-sorteo")
 async def ejecutar_sorteo(data: EjecutarSorteoRequest, request: Request):
