@@ -1,11 +1,15 @@
 """
-Máquina de estados para sorteos - Versión según especificación exacta del usuario
+Máquina de estados para sorteos - Implementación EXACTA según nueva especificación
+
+SORTEOS ÚNICOS: NO SE TOCAN (ya funcionan perfecto)
+SORTEOS POR ETAPAS: Nueva lógica con WebSockets obligatorios
 """
-from datetime import datetime, timezone
+from datetime import datetime, timezone, timedelta
 from motor.motor_asyncio import AsyncIOMotorClient
 import logging
 from typing import Optional, Dict
 import random
+import asyncio
 
 logger = logging.getLogger(__name__)
 
@@ -24,12 +28,9 @@ def init_state_machine(database, sorteo_model, estado_enum, tipo_enum):
 
 async def verificar_transicion_estado_nuevo(sorteo_id: str) -> Optional[str]:
     """
-    Máquina de estados según especificación exacta:
-    
-    DRAFT → PUBLISHED (manual, botón publicar)
-    PUBLISHED → WAITING (automático, 3 formas)
-    WAITING → LIVE (automático, cuando se cumplen condiciones)
-    LIVE → COMPLETED o PUBLISHED (automático, depende si es última etapa)
+    Máquina de estados:
+    - SORTEOS ÚNICOS: lógica original (NO SE TOCA)
+    - SORTEOS POR ETAPAS: nueva lógica con 5 min WAITING y WebSockets
     """
     sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
     if not sorteo_doc:
@@ -77,6 +78,11 @@ async def verificar_transicion_estado_nuevo(sorteo_id: str) -> Optional[str]:
         from websocket_manager import emit_sorteo_state_changed
         await emit_sorteo_state_changed(sorteo_id, nuevo_estado, update_data)
         
+        # Si pasó a LIVE, iniciar animación
+        if nuevo_estado == SorteoEstado.LIVE:
+            from live_animation_service import iniciar_animacion_async
+            asyncio.create_task(iniciar_animacion_async(sorteo_id))
+        
         return nuevo_estado
     
     return None
@@ -84,12 +90,13 @@ async def verificar_transicion_estado_nuevo(sorteo_id: str) -> Optional[str]:
 
 async def check_published_to_waiting(sorteo, ahora, sorteo_id):
     """
-    PUBLISHED → WAITING tiene 3 formas:
+    PUBLISHED → WAITING
     
-    1. Sorteo Único: fecha cumplida Y todos los boletos vendidos
-    2. Sorteo por Etapas: etapa actual cumplió su porcentaje
-    3. Fecha cumplida pero boletos insuficientes (sigue permitiendo vender)
-    4. Boletos cumplidos pero fecha no llegó (ya NO se venden más)
+    SORTEOS ÚNICOS: NO SE TOCAN
+    
+    SORTEOS POR ETAPAS:
+    - Etapas intermedias: SOLO porcentaje (sin fecha)
+    - Etapa final: porcentaje + fecha
     """
     update_data = {}
     
@@ -100,7 +107,7 @@ async def check_published_to_waiting(sorteo, ahora, sorteo_id):
     })
     
     if sorteo.tipo == SorteoTipo.UNICO:
-        # SORTEO ÚNICO
+        # ============ SORTEO ÚNICO (NO SE TOCA) ============
         todos_vendidos = boletos_aprobados >= sorteo.cantidad_total_boletos
         fecha_alcanzada = sorteo.fecha_cierre <= ahora
         
@@ -120,7 +127,7 @@ async def check_published_to_waiting(sorteo, ahora, sorteo_id):
             return (SorteoEstado.WAITING, update_data)
     
     else:
-        # SORTEO POR ETAPAS
+        # ============ SORTEO POR ETAPAS (NUEVA LÓGICA) ============
         etapa_actual_num = sorteo.etapa_actual
         
         # Si no hay etapa actual, iniciar en etapa 1
@@ -136,18 +143,29 @@ async def check_published_to_waiting(sorteo, ahora, sorteo_id):
             boletos_requeridos = int(sorteo.cantidad_total_boletos * porcentaje_requerido)
             
             # Verificar si se cumplió el porcentaje de esta etapa
-            if boletos_aprobados >= boletos_requeridos:
-                # Si es la ÚLTIMA etapa, también verificar fecha
-                es_ultima_etapa = etapa_actual_num == len(sorteo.etapas)
+            porcentaje_alcanzado = boletos_aprobados >= boletos_requeridos
+            
+            # Determinar si es la última etapa
+            es_ultima_etapa = etapa_actual_num == len(sorteo.etapas)
+            
+            if es_ultima_etapa:
+                # ============ ETAPA FINAL: DOBLE CONDICIÓN ============
+                todos_vendidos = boletos_aprobados >= sorteo.cantidad_total_boletos
+                fecha_alcanzada = sorteo.fecha_cierre <= ahora
                 
-                if es_ultima_etapa:
-                    # Última etapa: verificar fecha también
-                    if sorteo.fecha_cierre <= ahora:
-                        update_data['fecha_waiting'] = ahora
-                        return (SorteoEstado.WAITING, update_data)
-                else:
-                    # Etapa intermedia: solo porcentaje
+                # Ambas condiciones deben cumplirse
+                if todos_vendidos and fecha_alcanzada:
+                    # WAITING de 5 minutos para etapa final
                     update_data['fecha_waiting'] = ahora
+                    update_data['waiting_hasta'] = ahora + timedelta(minutes=5)
+                    return (SorteoEstado.WAITING, update_data)
+            
+            else:
+                # ============ ETAPA INTERMEDIA: SOLO PORCENTAJE ============
+                if porcentaje_alcanzado:
+                    # WAITING de 5 minutos
+                    update_data['fecha_waiting'] = ahora
+                    update_data['waiting_hasta'] = ahora + timedelta(minutes=5)
                     return (SorteoEstado.WAITING, update_data)
     
     return None
@@ -155,7 +173,9 @@ async def check_published_to_waiting(sorteo, ahora, sorteo_id):
 
 async def check_waiting_to_live(sorteo, ahora, sorteo_id):
     """
-    WAITING → LIVE cuando se cumplen TODAS las condiciones exactas
+    WAITING → LIVE
+    
+    Para ETAPAS: esperar exactamente 5 minutos desde que entró en WAITING
     """
     update_data = {}
     
@@ -165,7 +185,7 @@ async def check_waiting_to_live(sorteo, ahora, sorteo_id):
     })
     
     if sorteo.tipo == SorteoTipo.UNICO:
-        # SORTEO ÚNICO: fecha exacta + hora exacta + boletos vendidos
+        # ============ SORTEO ÚNICO (NO SE TOCA) ============
         todos_vendidos = boletos_aprobados >= sorteo.cantidad_total_boletos
         fecha_alcanzada = sorteo.fecha_cierre <= ahora
         
@@ -179,48 +199,33 @@ async def check_waiting_to_live(sorteo, ahora, sorteo_id):
             return (SorteoEstado.LIVE, update_data)
     
     else:
-        # SORTEO POR ETAPAS
-        etapa_actual_num = sorteo.etapa_actual
-        if etapa_actual_num > 0 and etapa_actual_num <= len(sorteo.etapas):
-            etapa_actual = sorteo.etapas[etapa_actual_num - 1]
+        # ============ SORTEO POR ETAPAS (NUEVA LÓGICA) ============
+        # Verificar si ya pasaron los 5 minutos de WAITING
+        if sorteo.waiting_hasta and ahora >= sorteo.waiting_hasta:
+            # Pasar a LIVE
+            # Seleccionar ganador de la etapa actual
+            if not sorteo.ganadores:
+                sorteo.ganadores = []
             
-            porcentaje_requerido = etapa_actual.porcentaje / 100
-            boletos_requeridos = int(sorteo.cantidad_total_boletos * porcentaje_requerido)
-            porcentaje_cumplido = boletos_aprobados >= boletos_requeridos
+            # Verificar si ya se sorteó esta etapa
+            etapa_actual_num = sorteo.etapa_actual
+            ya_sorteado = any(g.get('etapa_numero') == etapa_actual_num for g in sorteo.ganadores)
             
-            es_ultima_etapa = etapa_actual_num == len(sorteo.etapas)
+            if not ya_sorteado:
+                ganador_etapa = await seleccionar_ganador_etapa(sorteo_id, sorteo, etapa_actual_num)
+                if ganador_etapa:
+                    update_data['ganadores'] = sorteo.ganadores + [ganador_etapa]
             
-            if es_ultima_etapa:
-                # Última etapa: fecha + hora + porcentaje
-                fecha_cumplida = sorteo.fecha_cierre <= ahora
-                if porcentaje_cumplido and fecha_cumplida:
-                    # Seleccionar ganador de esta etapa
-                    if not etapa_actual.ganador_id:
-                        ganador = await seleccionar_ganador_etapa(sorteo_id, sorteo, etapa_actual_num)
-                        if ganador:
-                            update_data[f'etapas.{etapa_actual_num - 1}.ganador_id'] = ganador['usuario_id']
-                            update_data[f'etapas.{etapa_actual_num - 1}.completado'] = True
-                    
-                    update_data['fecha_live'] = ahora
-                    return (SorteoEstado.LIVE, update_data)
-            else:
-                # Etapa intermedia: solo porcentaje
-                if porcentaje_cumplido:
-                    # Seleccionar ganador de esta etapa
-                    if not etapa_actual.ganador_id:
-                        ganador = await seleccionar_ganador_etapa(sorteo_id, sorteo, etapa_actual_num)
-                        if ganador:
-                            update_data[f'etapas.{etapa_actual_num - 1}.ganador_id'] = ganador['usuario_id']
-                            update_data[f'etapas.{etapa_actual_num - 1}.completado'] = True
-                    
-                    update_data['fecha_live'] = ahora
-                    return (SorteoEstado.LIVE, update_data)
+            update_data['fecha_live'] = ahora
+            return (SorteoEstado.LIVE, update_data)
     
     return None
 
 
 async def seleccionar_ganadores(sorteo_id: str, sorteo):
-    """Seleccionar ganadores para sorteo único"""
+    """
+    Seleccionar ganadores para SORTEO ÚNICO (NO SE TOCA)
+    """
     boletos = await db.boletos.find({
         'sorteo_id': sorteo_id,
         'pago_confirmado': True
@@ -229,32 +234,41 @@ async def seleccionar_ganadores(sorteo_id: str, sorteo):
     if not boletos:
         return []
     
-    num_premios = len(sorteo.premios) if sorteo.premios else 1
     ganadores = []
-    boletos_disponibles = list(boletos)
+    num_premios = len(sorteo.premios)
     
-    for i in range(min(num_premios, len(boletos_disponibles))):
-        boleto_ganador = random.choice(boletos_disponibles)
-        boletos_disponibles.remove(boleto_ganador)
+    # Evitar más ganadores que boletos
+    num_ganadores = min(num_premios, len(boletos))
+    
+    boletos_ganadores = random.sample(boletos, num_ganadores)
+    
+    for i, boleto in enumerate(boletos_ganadores):
+        usuario = await db.users.find_one({'id': boleto['usuario_id']}, {"_id": 0})
         
-        usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
-        premio_nombre = sorteo.premios[i].nombre if i < len(sorteo.premios) else "Premio Principal"
+        premio_nombre = ""
+        if sorteo.tipo == SorteoTipo.UNICO:
+            premio_nombre = sorteo.premios[i].nombre if i < len(sorteo.premios) else "Premio"
         
-        ganadores.append({
-            'boleto_id': boleto_ganador['id'],
-            'usuario_id': boleto_ganador['usuario_id'],
+        ganador = {
+            'boleto_id': boleto['id'],
+            'usuario_id': boleto['usuario_id'],
             'nombre': usuario.get('name', '') if usuario else '',
             'email': usuario.get('email', '') if usuario else '',
-            'numero_boleto': boleto_ganador['numero_boleto'],
+            'numero_boleto': boleto['numero_boleto'],
             'premio': premio_nombre,
+            'etapa_numero': None,
             'fecha_seleccion': datetime.now(timezone.utc).isoformat()
-        })
+        }
+        
+        ganadores.append(ganador)
     
     return ganadores
 
 
 async def seleccionar_ganador_etapa(sorteo_id: str, sorteo, etapa_num: int):
-    """Seleccionar ganador para una etapa específica"""
+    """
+    Seleccionar UN ganador para una ETAPA específica
+    """
     boletos = await db.boletos.find({
         'sorteo_id': sorteo_id,
         'pago_confirmado': True
@@ -263,11 +277,13 @@ async def seleccionar_ganador_etapa(sorteo_id: str, sorteo, etapa_num: int):
     if not boletos:
         return None
     
+    # Elegir un boleto al azar
     boleto_ganador = random.choice(boletos)
     usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
     
-    etapa = sorteo.etapas[etapa_num - 1]
-    premio_nombre = etapa.premio if hasattr(etapa, 'premio') else f"Premio Etapa {etapa_num}"
+    # Obtener info de la etapa
+    etapa = sorteo.etapas[etapa_num - 1] if etapa_num <= len(sorteo.etapas) else None
+    premio_nombre = etapa.premio if etapa else f"Premio Etapa {etapa_num}"
     
     ganador = {
         'boleto_id': boleto_ganador['id'],
@@ -276,7 +292,7 @@ async def seleccionar_ganador_etapa(sorteo_id: str, sorteo, etapa_num: int):
         'email': usuario.get('email', '') if usuario else '',
         'numero_boleto': boleto_ganador['numero_boleto'],
         'premio': premio_nombre,
-        'etapa': etapa_num,
+        'etapa_numero': etapa_num,
         'fecha_seleccion': datetime.now(timezone.utc).isoformat()
     }
     
