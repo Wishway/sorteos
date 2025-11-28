@@ -28,7 +28,7 @@ def init_live_service(database, sorteo_model, estado_enum, tipo_enum):
 async def iniciar_animacion_live(sorteo_id: str):
     """
     Iniciar animación LIVE para un sorteo
-    1 minuto por premio
+    2 minutos por premio - OBLIGATORIO
     """
     # Evitar iniciar si ya hay una animación activa
     if sorteo_id in active_animations:
@@ -39,11 +39,28 @@ async def iniciar_animacion_live(sorteo_id: str):
     task = asyncio.create_task(ejecutar_animacion_live(sorteo_id))
     active_animations[sorteo_id] = task
     
+    logger.info(f"✅ Animación LIVE programada para sorteo {sorteo_id}")
+    
     try:
         await task
     finally:
         if sorteo_id in active_animations:
             del active_animations[sorteo_id]
+            logger.info(f"✅ Animación LIVE finalizada y eliminada para sorteo {sorteo_id}")
+
+async def verificar_y_reiniciar_animaciones():
+    """
+    Verificar sorteos LIVE sin animación activa y reiniciarlos
+    """
+    sorteos_live = await db.sorteos.find({'estado': 'live'}).to_list(100)
+    
+    for sorteo_doc in sorteos_live:
+        sorteo_id = sorteo_doc['id']
+        
+        # Si el sorteo está LIVE pero NO tiene animación activa
+        if sorteo_id not in active_animations:
+            logger.warning(f"⚠️  Sorteo LIVE sin animación: {sorteo_id} - Reiniciando...")
+            asyncio.create_task(iniciar_animacion_live(sorteo_id))
 
 async def ejecutar_animacion_live(sorteo_id: str):
     """
