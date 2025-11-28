@@ -97,6 +97,10 @@ async def emit_live_time_update(sorteo_id: str, time_data: dict):
     """Emitir actualización de tiempo cada segundo"""
     await sio.emit('live_time_update', time_data, room=f'sorteo_{sorteo_id}')
 
+async def emit_waiting_countdown_update(sorteo_id: str, countdown_data: dict):
+    """Emitir actualización de countdown WAITING cada segundo"""
+    await sio.emit('waiting_countdown_update', countdown_data, room=f'sorteo_{sorteo_id}')
+
 async def emit_live_animation_complete(sorteo_id: str, data: dict):
     """Completar animación LIVE"""
     await sio.emit('live_animation_complete', data, room=f'sorteo_{sorteo_id}')
