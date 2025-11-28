@@ -95,8 +95,8 @@ async def verificar_transicion_estado_nuevo(sorteo_id: str) -> Optional[str]:
         
         # Si pasó a LIVE, iniciar animación
         if nuevo_estado == SorteoEstado.LIVE:
-            from live_animation_service import iniciar_animacion_async
-            asyncio.create_task(iniciar_animacion_async(sorteo_id))
+            from live_animation_service import iniciar_animacion_live
+            asyncio.create_task(iniciar_animacion_live(sorteo_id))
         
         return nuevo_estado
     
