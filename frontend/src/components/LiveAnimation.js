@@ -130,9 +130,38 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
   };
 
   return (
-    <div className="relative">
-      {/* Fondo animado con luces */}
-      <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 opacity-50 animate-pulse"></div>
+    <>
+      {/* Estilos personalizados para animaciones slot machine */}
+      <style>{`
+        @keyframes fadeInScale {
+          0% {
+            opacity: 0;
+            transform: scale(0.8);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+        
+        @keyframes bounceIn {
+          0% {
+            opacity: 0;
+            transform: scale(0.3);
+          }
+          50% {
+            transform: scale(1.1);
+          }
+          100% {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+      `}</style>
+      
+      <div className="relative">
+        {/* Fondo animado con luces */}
+        <div className="absolute inset-0 bg-gradient-to-br from-purple-900 via-pink-900 to-red-900 opacity-50 animate-pulse"></div>
       
       <Card className="relative border-4 border-yellow-400 shadow-2xl overflow-hidden">
         {/* Efectos de luces */}
