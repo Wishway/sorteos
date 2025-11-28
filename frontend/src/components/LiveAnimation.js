@@ -184,7 +184,9 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
             {currentPrize ? (
               <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 p-1 rounded-xl mt-3">
                 <div className="bg-black rounded-xl px-6 py-3">
-                  <p className="text-yellow-300 text-sm font-semibold mb-1">PREMIO EN JUEGO:</p>
+                  <p className="text-yellow-300 text-sm font-semibold mb-1">
+                    Sorteando premio {prizeIndex + 1} de {totalPrizes}
+                  </p>
                   <p className="text-white text-2xl font-bold">🎁 {currentPrize}</p>
                 </div>
               </div>
