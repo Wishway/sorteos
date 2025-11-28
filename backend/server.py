@@ -2417,6 +2417,12 @@ async def startup_event():
     waiting_countdown_service.init_countdown_service(db, SorteoEstado)
     waiting_countdown_service.iniciar_monitoreo_countdowns()
     logger.info("Waiting countdown service inicializado")
+    
+    # Inicializar verificador periódico de estados
+    import state_checker_service
+    state_checker_service.init_state_checker(db, state_machine)
+    state_checker_service.iniciar_verificador_estados()
+    logger.info("State checker service inicializado")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
