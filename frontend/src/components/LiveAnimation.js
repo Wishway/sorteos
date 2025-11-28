@@ -194,8 +194,8 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
                 </div>
               </div>
 
-              {/* NUEVO: Lista de boletos rotando */}
-              <div className="bg-gradient-to-br from-yellow-600 via-orange-600 to-red-600 p-4 rounded-xl">
+              {/* Lista de boletos rotando estilo slot machine */}
+              <div className="bg-gradient-to-br from-yellow-600 via-orange-600 to-red-600 p-4 rounded-xl shadow-2xl">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <Trophy className="w-6 h-6 text-white animate-spin" />
                   <p className="text-white text-lg font-semibold">Números en Sorteo</p>
@@ -204,9 +204,11 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
                 <div className="flex flex-wrap justify-center gap-3">
                   {displayedTickets.map((ticket, idx) => (
                     <div 
-                      key={idx}
-                      className="bg-white text-black px-4 py-2 rounded-full font-bold text-xl animate-bounce"
-                      style={{ animationDelay: `${idx * 0.15}s` }}
+                      key={`ticket-${ticket}-${idx}`}
+                      className="bg-white text-black px-5 py-3 rounded-full font-bold text-xl transition-all duration-200 transform hover:scale-110 shadow-lg"
+                      style={{ 
+                        animation: `bounceIn 0.4s ease-out ${idx * 0.08}s both`
+                      }}
                     >
                       #{ticket}
                     </div>
