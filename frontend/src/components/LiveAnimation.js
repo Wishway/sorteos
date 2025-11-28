@@ -96,7 +96,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
         websocketService.leaveSorteo(sorteo.id);
       };
     }
-  }, [sorteo.id, sorteo.estado]);
+  }, [sorteo.id, sorteo.estado, participantes]);
 
   // Animación MEJORADA - TODOS los nombres y boletos rotando
   useEffect(() => {
