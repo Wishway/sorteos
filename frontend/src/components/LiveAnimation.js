@@ -343,7 +343,8 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
           ) : null}
         </CardContent>
       </Card>
-    </div>
+      </div>
+    </>
   );
 };
 
