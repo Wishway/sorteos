@@ -26,6 +26,16 @@ def init_state_machine(database, sorteo_model, estado_enum, tipo_enum):
     SorteoEstado = estado_enum
     SorteoTipo = tipo_enum
 
+def normalize_datetime_to_utc(dt):
+    """Convierte un datetime a UTC-aware, manejando casos naive y aware"""
+    if dt is None:
+        return None
+    if dt.tzinfo is None:
+        # Si es naive, asumimos que es UTC
+        return dt.replace(tzinfo=timezone.utc)
+    # Si ya tiene timezone, convertir a UTC
+    return dt.astimezone(timezone.utc)
+
 async def verificar_transicion_estado_nuevo(sorteo_id: str) -> Optional[str]:
     """
     Máquina de estados:
