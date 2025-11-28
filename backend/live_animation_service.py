@@ -90,9 +90,9 @@ async def ejecutar_animacion_live(sorteo_id: str):
         'timestamp': datetime.now(timezone.utc).isoformat()
     })
     
-    # Procesar cada premio (1 minuto cada uno)
+    # Procesar cada premio (2 minutos cada uno - OBLIGATORIO)
     ganadores = sorteo.ganadores if sorteo.ganadores else []
-    duracion_por_premio = 60  # 60 segundos = 1 minuto
+    duracion_por_premio = 120  # 120 segundos = 2 minutos (REQUERIMIENTO OBLIGATORIO)
     
     for idx, ganador in enumerate(ganadores):
         premio_nombre = ganador.get('premio', f'Premio {idx + 1}')
