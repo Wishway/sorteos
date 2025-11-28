@@ -2410,6 +2410,12 @@ async def startup_event():
     # Inicializar live_animation_service
     live_animation_service.init_live_service(db, Sorteo, SorteoEstado, SorteoTipo)
     logger.info("Live animation service inicializado")
+    
+    # Inicializar waiting_countdown_service
+    import waiting_countdown_service
+    waiting_countdown_service.init_countdown_service(db, SorteoEstado)
+    waiting_countdown_service.iniciar_monitoreo_countdowns()
+    logger.info("Waiting countdown service inicializado")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
