@@ -49,9 +49,14 @@ async def verificar_transicion_estado_nuevo(sorteo_id: str) -> Optional[str]:
     sorteo = Sorteo(**sorteo_doc)
     ahora = datetime.now(timezone.utc)
     
-    # Asegurar timezone
-    if sorteo.fecha_cierre.tzinfo is None:
-        sorteo.fecha_cierre = sorteo.fecha_cierre.replace(tzinfo=timezone.utc)
+    # Normalizar TODAS las fechas del sorteo a UTC-aware
+    sorteo.fecha_cierre = normalize_datetime_to_utc(sorteo.fecha_cierre)
+    if hasattr(sorteo, 'waiting_hasta') and sorteo.waiting_hasta:
+        sorteo.waiting_hasta = normalize_datetime_to_utc(sorteo.waiting_hasta)
+    if hasattr(sorteo, 'fecha_waiting') and sorteo.fecha_waiting:
+        sorteo.fecha_waiting = normalize_datetime_to_utc(sorteo.fecha_waiting)
+    if hasattr(sorteo, 'fecha_live') and sorteo.fecha_live:
+        sorteo.fecha_live = normalize_datetime_to_utc(sorteo.fecha_live)
     
     estado_actual = sorteo.estado
     nuevo_estado = None
