@@ -105,6 +105,7 @@ async def ejecutar_animacion_live(sorteo_id: str):
             'premio_index': idx,
             'premio_nombre': premio_nombre,
             'duracion_segundos': duracion_por_premio,
+            'total_premios': len(ganadores),
             'timestamp': inicio_premio.isoformat(),
             'tiempo_restante': duracion_por_premio
         })
