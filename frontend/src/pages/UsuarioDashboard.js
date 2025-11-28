@@ -39,6 +39,7 @@ const UsuarioDashboard = () => {
       return;
     }
     fetchMisBoletos();
+    fetchMisPremios();
   }, [user]);
 
   const fetchMisBoletos = async () => {
