@@ -20,6 +20,13 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
   const yaTerminado = sorteo.ganadores && sorteo.ganadores.length > 0 && sorteo.estado === 'completed';
 
   useEffect(() => {
+    console.log('🎬 LiveAnimation useEffect ejecutado:', {
+      sorteoId: sorteo.id,
+      estado: sorteo.estado,
+      participantesCount: participantes?.length || 0,
+      yaTerminado
+    });
+    
     // Si ya terminó (completed con ganadores), mostrarlos directamente
     if (yaTerminado) {
       setIsAnimating(false);
@@ -32,9 +39,12 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     if (sorteo.estado === 'live') {
       // Si tenemos participantes del prop, usarlos inmediatamente
       if (participantes && participantes.length > 0) {
+        console.log('✅ ACTIVANDO ANIMACIÓN con participantes:', participantes);
         setWsParticipantes(participantes);
         setIsAnimating(true);
         setTimeLeft(120); // 2 minutos por defecto
+      } else {
+        console.log('⚠️ NO hay participantes aún, esperando...');
       }
       
       websocketService.joinSorteo(sorteo.id);
