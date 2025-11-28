@@ -60,5 +60,6 @@ async def monitorear_countdowns_waiting():
             await asyncio.sleep(5)  # Esperar m\u00e1s tiempo en caso de error
 
 def iniciar_monitoreo_countdowns():
-    \"\"\"Iniciar tarea en background para monitorear countdowns\"\"\"\n    asyncio.create_task(monitorear_countdowns_waiting())
+    """Iniciar tarea en background para monitorear countdowns"""
+    asyncio.create_task(monitorear_countdowns_waiting())
     logger.info(\"\u2705 Servicio de countdown WAITING iniciado\")
