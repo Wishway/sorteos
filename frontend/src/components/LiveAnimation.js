@@ -53,6 +53,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
         console.log('🎁 Sorteando premio', data);
         setCurrentPrize(data.premio_nombre);
         setPrizeIndex(data.premio_index);
+        setTotalPrizes(data.total_premios || 1);
         setTimeLeft(data.tiempo_restante || data.duracion_segundos);
         setIsAnimating(true);
       };
@@ -61,6 +62,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       const handleTimeUpdate = (data) => {
         setCurrentPrize(data.premio_nombre);
         setTimeLeft(data.tiempo_restante);
+        setTotalPrizes(data.total_premios || totalPrizes);
       };
       
       // Escuchar anuncio de ganador
