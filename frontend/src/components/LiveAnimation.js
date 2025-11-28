@@ -12,6 +12,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
   const [showWinners, setShowWinners] = useState(false);
   const [currentPrize, setCurrentPrize] = useState(null);
   const [prizeIndex, setPrizeIndex] = useState(0);
+  const [totalPrizes, setTotalPrizes] = useState(1);
   const [wsParticipantes, setWsParticipantes] = useState([]);
   const [displayedNames, setDisplayedNames] = useState([]);
   const [displayedTickets, setDisplayedTickets] = useState([]);
