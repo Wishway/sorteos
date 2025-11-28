@@ -56,7 +56,7 @@ async def monitorear_countdowns_waiting():
             await asyncio.sleep(1)
             
         except Exception as e:
-            logger.error(f\"Error en monitoreo de countdowns: {e}\")
+            logger.error(f"Error en monitoreo de countdowns: {e}")
             await asyncio.sleep(5)  # Esperar m\u00e1s tiempo en caso de error
 
 def iniciar_monitoreo_countdowns():
