@@ -109,13 +109,14 @@ async def ejecutar_animacion_live(sorteo_id: str):
             'tiempo_restante': duracion_por_premio
         })
         
-        # Esperar 1 minuto (60 segundos) enviando actualizaciones cada segundo
+        # Esperar 2 minutos (120 segundos) enviando actualizaciones cada segundo
         for segundo in range(duracion_por_premio, 0, -1):
             # Emitir actualización de tiempo cada segundo
             await emit_live_time_update(sorteo_id, {
                 'premio_index': idx,
                 'premio_nombre': premio_nombre,
                 'tiempo_restante': segundo,
+                'total_premios': len(ganadores),
                 'timestamp': datetime.now(timezone.utc).isoformat()
             })
             await asyncio.sleep(1)
