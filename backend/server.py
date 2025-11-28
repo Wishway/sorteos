@@ -2485,6 +2485,10 @@ async def startup_event():
     state_checker_service.init_state_checker(db, state_machine)
     state_checker_service.iniciar_verificador_estados()
     logger.info("State checker service inicializado")
+    
+    # Verificar y reiniciar animaciones LIVE faltantes
+    await live_animation_service.verificar_y_reiniciar_animaciones()
+    logger.info("Verificación de animaciones LIVE completada")
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
