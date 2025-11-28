@@ -113,7 +113,17 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
     // Usar wsParticipantes si existe, sino usar participantes del prop
     const activeParticipants = wsParticipantes.length > 0 ? wsParticipantes : participantes;
     
-    if (!isAnimating || activeParticipants.length === 0) return;
+    console.log('🎰 Animation useEffect:', {
+      isAnimating,
+      activeParticipantsCount: activeParticipants.length,
+      wsParticipantesCount: wsParticipantes.length,
+      participantesCount: participantes.length
+    });
+    
+    if (!isAnimating || activeParticipants.length === 0) {
+      console.log('⏸️ Animación no activa o sin participantes');
+      return;
+    }
 
     const rotationInterval = setInterval(() => {
       // MOSTRAR TODOS LOS PARTICIPANTES, no solo 5
