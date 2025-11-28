@@ -116,7 +116,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       // También actualizar el participante principal
       const randomIndex = Math.floor(Math.random() * activeParticipants.length);
       setCurrentParticipant(activeParticipants[randomIndex]);
-    }, 300); // Cambiar cada 0.3 segundos
+    }, 200); // Cambiar cada 0.2 segundos para efecto más rápido tipo slot machine
 
     return () => clearInterval(rotationInterval);
   }, [isAnimating, wsParticipantes, participantes]);
