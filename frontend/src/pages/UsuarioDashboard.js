@@ -440,7 +440,12 @@ const UsuarioDashboard = () => {
           </TabsContent>
 
           <TabsContent value="ganadores" className="space-y-4">
-            {boletosGanadores.length === 0 ? (
+            {loadingPremios ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <p className="mt-4 text-gray-600">Cargando premios ganados...</p>
+              </div>
+            ) : premiosGanados.length === 0 ? (
               <Card className="p-12 text-center">
                 <Trophy className="w-16 h-16 mx-auto mb-4 text-gray-400" />
                 <h3 className="text-xl font-semibold mb-2">Aún no has ganado premios</h3>
@@ -448,20 +453,63 @@ const UsuarioDashboard = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {boletosGanadores.map((boleto) => (
-                  <Card key={boleto.id} className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400">
+                {premiosGanados.map((premio, index) => (
+                  <Card key={premio.id || index} className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        <Trophy className="w-12 h-12 text-yellow-600 flex-shrink-0" />
+                        {/* Imagen del premio o sorteo */}
+                        {(premio.premio?.imagen || premio.sorteo?.imagenes?.[0]) ? (
+                          <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
+                            <img 
+                              src={premio.premio?.imagen || premio.sorteo.imagenes[0]} 
+                              alt={premio.premio?.nombre || 'Premio'}
+                              className="w-full h-full object-cover"
+                            />
+                          </div>
+                        ) : (
+                          <Trophy className="w-24 h-24 text-yellow-600 flex-shrink-0 p-4 bg-white rounded-lg" />
+                        )}
+                        
                         <div className="flex-1">
                           <Badge className="mb-2 bg-yellow-600">¡Ganador!</Badge>
-                          <p className="font-bold text-lg mb-1">Boleto #{boleto.numero_boleto}</p>
-                          {boleto.etapa_ganada && (
-                            <p className="text-sm text-gray-700">Premio de Etapa {boleto.etapa_ganada}</p>
+                          
+                          {/* Nombre del sorteo */}
+                          <h3 className="font-bold text-lg mb-1">{premio.sorteo?.titulo || 'Sorteo'}</h3>
+                          
+                          {/* Premio ganado */}
+                          <div className="mb-2">
+                            <p className="text-sm font-semibold text-yellow-700">Premio:</p>
+                            <p className="font-bold text-md">{premio.premio?.nombre || 'Premio Principal'}</p>
+                            {premio.premio?.etapa_numero && (
+                              <Badge variant="outline" className="mt-1">Etapa {premio.premio.etapa_numero}</Badge>
+                            )}
+                          </div>
+                          
+                          {/* Información del boleto */}
+                          <div className="flex items-center gap-3 text-sm text-gray-700 mt-3">
+                            <div className="flex items-center gap-1">
+                              <Ticket className="w-4 h-4" />
+                              <span>Boleto #{premio.numero_boleto}</span>
+                            </div>
+                            {premio.fecha_sorteo && (
+                              <div className="flex items-center gap-1">
+                                <CalendarIcon className="w-4 h-4" />
+                                <span>{formatDate(premio.fecha_sorteo)}</span>
+                              </div>
+                            )}
+                          </div>
+                          
+                          {/* Botón para ver sorteo */}
+                          {premio.sorteo?.landing_slug && (
+                            <Button 
+                              variant="outline" 
+                              size="sm" 
+                              className="mt-3"
+                              onClick={() => navigate(`/sorteo/${premio.sorteo.landing_slug}`)}
+                            >
+                              Ver Sorteo
+                            </Button>
                           )}
-                          <p className="text-sm text-gray-600 mt-2">
-                            {formatCurrency(boleto.precio_pagado)} - {formatDate(boleto.fecha_compra)}
-                          </p>
                         </div>
                       </div>
                     </CardContent>
