@@ -62,4 +62,4 @@ async def monitorear_countdowns_waiting():
 def iniciar_monitoreo_countdowns():
     """Iniciar tarea en background para monitorear countdowns"""
     asyncio.create_task(monitorear_countdowns_waiting())
-    logger.info(\"\u2705 Servicio de countdown WAITING iniciado\")
+    logger.info("✅ Servicio de countdown WAITING iniciado")
