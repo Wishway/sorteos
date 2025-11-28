@@ -172,19 +172,21 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
                 </div>
               </div>
 
-              {/* NUEVO: Lista de nombres rotando rápido */}
-              <div className="bg-gradient-to-br from-purple-900 via-pink-800 to-red-900 p-4 rounded-xl">
+              {/* Lista de nombres rotando estilo slot machine */}
+              <div className="bg-gradient-to-br from-purple-900 via-pink-800 to-red-900 p-4 rounded-xl shadow-2xl">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <Zap className="w-6 h-6 text-yellow-400 animate-pulse" />
                   <p className="text-yellow-300 text-lg font-semibold">Participantes en Juego</p>
                   <Zap className="w-6 h-6 text-yellow-400 animate-pulse" />
                 </div>
-                <div className="grid grid-cols-1 gap-2">
+                <div className="grid grid-cols-1 gap-2 max-h-64 overflow-hidden">
                   {displayedNames.map((name, idx) => (
                     <div 
-                      key={idx} 
-                      className="bg-black/50 px-4 py-2 rounded-lg text-white text-center font-bold text-lg animate-pulse"
-                      style={{ animationDelay: `${idx * 0.1}s` }}
+                      key={`${name}-${idx}`} 
+                      className="bg-black/50 px-4 py-3 rounded-lg text-white text-center font-bold text-lg transition-all duration-200 transform hover:scale-105"
+                      style={{ 
+                        animation: `fadeInScale 0.3s ease-in-out ${idx * 0.05}s both`
+                      }}
                     >
                       {name}
                     </div>
