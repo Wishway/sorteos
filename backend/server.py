@@ -304,6 +304,7 @@ class Sorteo(BaseModel):
     compra_minima: int = 1
     datos_bancarios: Optional[str] = None
     fecha_waiting: Optional[datetime] = None  # Cuándo entró en WAITING
+    waiting_hasta: Optional[datetime] = None  # Hasta cuándo dura WAITING (5 min para etapas)
     fecha_live: Optional[datetime] = None     # Cuándo inició LIVE
     fecha_completed: Optional[datetime] = None  # Cuándo se completó
     ganadores: List[dict] = []  # Lista de ganadores seleccionados
