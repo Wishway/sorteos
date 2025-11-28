@@ -293,7 +293,7 @@ const UsuarioDashboard = () => {
               <Trophy className="h-4 w-4 text-yellow-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{boletosGanadores.length}</div>
+              <div className="text-2xl font-bold">{loadingPremios ? '...' : premiosGanados.length}</div>
             </CardContent>
           </Card>
         </div>
