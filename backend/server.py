@@ -1429,6 +1429,34 @@ async def pausar_despausar_ventas(sorteo_id: str, pausar: bool, request: Request
     
     return {"message": f"Ventas {'pausadas' if pausar else 'reanudadas'} exitosamente", "pausadas": pausar}
 
+@api_router.put("/admin/sorteo/{sorteo_id}/ajustar-minimo")
+async def ajustar_minimo_boletos(sorteo_id: str, minimo: int, request: Request):
+    """Ajustar el mínimo de boletos de un sorteo publicado (para emergencias)"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden ajustar el mínimo")
+    
+    if minimo < 1:
+        raise HTTPException(status_code=400, detail="El mínimo debe ser al menos 1")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] not in ['published', 'activo']:
+        raise HTTPException(status_code=400, detail="Solo se puede ajustar el mínimo de sorteos publicados")
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'minimo_boletos': minimo}}
+    )
+    
+    logger.info(f"Admin {admin.email} ajustó mínimo de boletos del sorteo {sorteo_id} a {minimo}")
+    
+    await broadcast_sorteos_update()
+    
+    return {"message": f"Mínimo de boletos ajustado a {minimo} exitosamente", "minimo": minimo}
+
 @api_router.post("/admin/actualizar-estados-sorteos")
 async def actualizar_estados_automatico():
     """Verificar y actualizar estados de todos los sorteos activos (para llamar periódicamente)"""
