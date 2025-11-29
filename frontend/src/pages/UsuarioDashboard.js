@@ -229,17 +229,17 @@ const UsuarioDashboard = () => {
                   </form>
                 </DialogContent>
               </Dialog>
-              <Button variant="outline" onClick={() => navigate('/usuario/perfil')} data-testid="perfil-btn">
-                <User className="w-4 h-4 mr-2" />
-                Mi Perfil
+              <Button variant="outline" onClick={() => navigate('/usuario/perfil')} data-testid="perfil-btn" className="flex-1 md:flex-none">
+                <User className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Mi Perfil</span>
               </Button>
-              <Button variant="outline" onClick={() => navigate('/')} data-testid="home-btn">
-                <Home className="w-4 h-4 mr-2" />
-                Inicio
+              <Button variant="outline" onClick={() => navigate('/')} data-testid="home-btn" className="flex-1 md:flex-none">
+                <Home className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Inicio</span>
               </Button>
-              <Button variant="outline" onClick={handleLogout} data-testid="logout-btn">
-                <LogOut className="w-4 h-4 mr-2" />
-                Salir
+              <Button variant="outline" onClick={handleLogout} data-testid="logout-btn" className="flex-1 md:flex-none">
+                <LogOut className="w-4 h-4 md:mr-2" />
+                <span className="hidden md:inline">Salir</span>
               </Button>
             </div>
           </div>
