@@ -339,38 +339,41 @@ const VendedorDashboard = () => {
         )}
 
         {/* Botones de Acciones */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-8">
           <Button 
             onClick={() => setShowEditarPerfil(true)}
-            className="bg-indigo-600 hover:bg-indigo-700"
+            className="bg-indigo-600 hover:bg-indigo-700 text-sm md:text-base"
           >
-            <User className="w-4 h-4 mr-2" />
-            Mi Perfil
+            <User className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Mi Perfil</span>
           </Button>
           
           <Button 
             onClick={() => setShowDatosBancarios(true)}
-            className="bg-blue-600 hover:bg-blue-700"
+            className="bg-blue-600 hover:bg-blue-700 text-sm md:text-base"
           >
-            <Building className="w-4 h-4 mr-2" />
-            {perfil?.datos_bancarios_completos ? 'Datos Bancarios' : 'Completar Datos Bancarios'}
+            <Building className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">{perfil?.datos_bancarios_completos ? 'Datos Bancarios' : 'Completar Datos'}</span>
+            <span className="md:hidden">Banco</span>
           </Button>
           
           <Button 
             onClick={() => setShowCambiarPassword(true)}
-            className="bg-purple-600 hover:bg-purple-700"
+            className="bg-purple-600 hover:bg-purple-700 text-sm md:text-base"
           >
-            <Lock className="w-4 h-4 mr-2" />
-            Cambiar Contraseña
+            <Lock className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Cambiar Contraseña</span>
+            <span className="md:hidden">Password</span>
           </Button>
           
           <Button 
             onClick={() => setShowSolicitarRetiro(true)}
             disabled={!perfil?.datos_bancarios_completos || perfil?.wallet_balance <= 0}
-            className="bg-green-600 hover:bg-green-700 disabled:opacity-50"
+            className="bg-green-600 hover:bg-green-700 disabled:opacity-50 text-sm md:text-base"
           >
-            <CreditCard className="w-4 h-4 mr-2" />
-            Solicitar Retiro
+            <CreditCard className="w-4 h-4 md:mr-2" />
+            <span className="hidden md:inline">Solicitar Retiro</span>
+            <span className="md:hidden">Retiro</span>
           </Button>
         </div>
 
