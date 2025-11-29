@@ -808,7 +808,8 @@ const AdminDashboard = () => {
                                 placeholder="https://..." 
                                 type="url"
                                 value={premioForm.imagen_url} 
-                                onChange={(e) => setPremioForm(prev => ({ ...prev, imagen_url: e.target.value }))} 
+                                onChange={(e) => setPremioForm(prev => ({ ...prev, imagen_url: e.target.value }))}
+                                className="min-w-0"
                               />
                             </div>
                             <div>
@@ -817,7 +818,8 @@ const AdminDashboard = () => {
                                 placeholder="https://..." 
                                 type="url"
                                 value={premioForm.video_url} 
-                                onChange={(e) => setPremioForm(prev => ({ ...prev, video_url: e.target.value }))} 
+                                onChange={(e) => setPremioForm(prev => ({ ...prev, video_url: e.target.value }))}
+                                className="min-w-0"
                               />
                             </div>
                           </div>
