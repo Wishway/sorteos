@@ -1119,27 +1119,41 @@ const AdminDashboard = () => {
                             </>
                           )}
 
-                          {/* PUBLISHED / ACTIVO: Pausar/Despausar Ventas */}
+                          {/* PUBLISHED / ACTIVO: Pausar/Despausar Ventas y Ajustar Mínimo */}
                           {(sorteo.estado === 'published' || sorteo.estado === 'activo') && (
-                            <Button 
-                              variant={sorteo.ventas_pausadas ? "default" : "outline"}
-                              size="sm"
-                              onClick={() => pausarDespausarVentas(sorteo.id, !sorteo.ventas_pausadas)}
-                              data-testid={`pausar-ventas-${sorteo.id}`}
-                              className={sorteo.ventas_pausadas ? "bg-orange-600 hover:bg-orange-700" : ""}
-                            >
-                              {sorteo.ventas_pausadas ? (
-                                <>
-                                  <Play className="w-4 h-4 mr-2" />
-                                  Reanudar Ventas
-                                </>
-                              ) : (
-                                <>
-                                  <XCircle className="w-4 h-4 mr-2" />
-                                  Pausar Ventas
-                                </>
-                              )}
-                            </Button>
+                            <>
+                              <Button 
+                                variant={sorteo.ventas_pausadas ? "default" : "outline"}
+                                size="sm"
+                                onClick={() => pausarDespausarVentas(sorteo.id, !sorteo.ventas_pausadas)}
+                                data-testid={`pausar-ventas-${sorteo.id}`}
+                                className={sorteo.ventas_pausadas ? "bg-orange-600 hover:bg-orange-700" : ""}
+                              >
+                                {sorteo.ventas_pausadas ? (
+                                  <>
+                                    <Play className="w-4 h-4 mr-2" />
+                                    Reanudar Ventas
+                                  </>
+                                ) : (
+                                  <>
+                                    <XCircle className="w-4 h-4 mr-2" />
+                                    Pausar Ventas
+                                  </>
+                                )}
+                              </Button>
+                              <Button 
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditandoMinimo(sorteo.id);
+                                  setNuevoMinimo(sorteo.minimo_boletos || 1);
+                                }}
+                                data-testid={`ajustar-minimo-${sorteo.id}`}
+                              >
+                                <Settings className="w-4 h-4 mr-2" />
+                                Ajustar Mínimo (Actual: {sorteo.minimo_boletos || 1})
+                              </Button>
+                            </>
                           )}
 
                           {/* WAITING: Iniciar manualmente */}
