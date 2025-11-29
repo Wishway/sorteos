@@ -669,7 +669,7 @@ async def google_callback(request: Request, response: Response):
                 name=auth_data.get('name', auth_data['email'].split('@')[0]),
                 picture=auth_data.get('picture'),
                 email_verified=True,
-                role=UserRole.USER  # Default role for Google signup
+                role=UserRole.USUARIO  # Default role for Google signup
             )
             user_dict = user.model_dump()
             user_dict['created_at'] = user_dict['created_at'].isoformat()
