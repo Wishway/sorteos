@@ -140,7 +140,7 @@ const Login = () => {
           <img 
             src={LOGO_URL} 
             alt="WishWay Logo" 
-            className="h-16 mx-auto mb-6 object-contain"
+            className="h-24 md:h-28 mx-auto mb-6 object-contain"
           />
           <h1 className="text-3xl font-bold text-gray-900 mb-2">
             Bienvenido de vuelta
