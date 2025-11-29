@@ -380,6 +380,17 @@ const AdminDashboard = () => {
     }
   };
 
+  const ajustarMinimoBoletos = async (sorteoId, minimo) => {
+    try {
+      await axios.put(`${API}/admin/sorteo/${sorteoId}/ajustar-minimo?minimo=${minimo}`, {}, { withCredentials: true });
+      toast.success(`Mínimo ajustado a ${minimo} boletos`);
+      setEditandoMinimo(null);
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al ajustar mínimo');
+    }
+  };
+
   const iniciarSorteo = async (sorteoId) => {
     if (!window.confirm('¿Iniciar el sorteo en LIVE ahora? Esto iniciará la animación de 2 minutos.')) return;
     
