@@ -309,20 +309,20 @@ const VendedorDashboard = () => {
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-pink-600 to-red-600 py-8 px-4">
       <div className="max-w-7xl mx-auto">
         {/* Header */}
-        <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-8 gap-4">
           <div>
-            <h1 className="text-4xl font-bold text-white mb-2">Dashboard Vendedor</h1>
-            <p className="text-purple-200">Bienvenido, {perfil?.name || user?.name}</p>
+            <h1 className="text-2xl md:text-4xl font-bold text-white mb-2">Dashboard Vendedor</h1>
+            <p className="text-purple-200 text-sm md:text-base">Bienvenido, {perfil?.name || user?.name}</p>
           </div>
           
-          <div className="flex gap-3">
-            <Button onClick={() => navigate('/')} variant="outline" className="bg-white/10 text-white hover:bg-white/20">
-              <Home className="w-4 h-4 mr-2" />
-              Inicio
+          <div className="flex gap-2 md:gap-3 w-full md:w-auto">
+            <Button onClick={() => navigate('/')} variant="outline" className="bg-white/10 text-white hover:bg-white/20 flex-1 md:flex-none">
+              <Home className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">Inicio</span>
             </Button>
-            <Button onClick={handleLogout} className="bg-white/10 text-white hover:bg-white/20">
-              <LogOut className="w-4 h-4 mr-2" />
-              Cerrar Sesión
+            <Button onClick={handleLogout} className="bg-white/10 text-white hover:bg-white/20 flex-1 md:flex-none">
+              <LogOut className="w-4 h-4 md:mr-2" />
+              <span className="hidden md:inline">Cerrar Sesión</span>
             </Button>
           </div>
         </div>
