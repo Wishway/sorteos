@@ -69,18 +69,13 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
         setIsAnimating(true);
       };
       
-      // Escuchar actualizaciones de tiempo (cada segundo)
+      // Escuchar actualizaciones de tiempo (cada segundo) - ÚNICO SOURCE OF TRUTH
       const handleTimeUpdate = (data) => {
-        console.log('⏱️ WebSocket - Actualización de tiempo:', data.tiempo_restante, 'segundos');
+        console.log('⏱️ TIEMPO REAL del servidor:', data.tiempo_restante, 'segundos');
         setCurrentPrize(data.premio_nombre);
         setTimeLeft(data.tiempo_restante);
         setTotalPrizes(data.total_premios || totalPrizes);
       };
-      
-      // Timer local para decrementar el contador cada segundo (backup si WebSocket falla)
-      const localTimerInterval = setInterval(() => {
-        setTimeLeft(prev => prev > 0 ? prev - 1 : 0);
-      }, 1000);
       
       // Escuchar anuncio de ganador
       const handleWinnerAnnounced = (data) => {
