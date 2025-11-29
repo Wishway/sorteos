@@ -550,6 +550,21 @@ frontend:
         agent: "testing"
         comment: "❌ FAILED DEFINITIVO TEST (2025-01-27): EXACT TEST REQUESTED BY USER CONFIRMS THE ISSUE PERSISTS. Following the exact process: 1) Clear cache/cookies ✅, 2) Login with carlos.vendedor@wishway.com/vendedor123 ✅, 3) Wait 5 seconds ✅, 4) Clear console ✅, 5) Click 'Cerrar Sesión' ✅, 6) Wait 5 seconds ✅, 7) Check console ❌. RESULT: Red error overlay appears with 'Uncaught runtime errors:' and the EXACT message 'There was an error during concurrent rendering but React was able to recover by instead synchronously rendering the entire root.' Screenshot evidence captured. The user's reported issue is 100% CONFIRMED and UNRESOLVED."
 
+  - task: "Google Login OAuth Flow"
+    implemented: true
+    working: true
+    file: "/app/frontend/src/pages/LoginNew.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: "NA"
+        agent: "testing"
+        comment: "User requested testing of Google login flow at https://rafflemaster-2.preview.emergentagent.com/login. Need to verify: 1) 'Continuar con Google' button exists and is clickable, 2) Button redirects to auth.emergentagent.com, 3) Redirect parameter is included correctly, 4) No immediate errors on page"
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED COMPREHENSIVE GOOGLE LOGIN TEST: All aspects of Google OAuth integration working perfectly. Button exists with correct text 'Continuar con Google', button is enabled and clickable (not disabled), clicking successfully redirects to auth.emergentagent.com with proper redirect parameter format (https://auth.emergentagent.com/?redirect=https%3A%2F%2Frafflemaster-2.preview.emergentagent.com%2Flogin), no console errors detected during flow, authentication service integration functioning as designed. The initial Google OAuth redirect flow is working correctly."
+
 test_plan:
   current_focus:
     - "Seller Logout Post-Fix"
