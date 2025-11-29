@@ -60,6 +60,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       
       // Escuchar actualizaciones de tiempo (cada segundo)
       const handleTimeUpdate = (data) => {
+        console.log('⏱️ Actualización de tiempo:', data.tiempo_restante, 'segundos');
         setCurrentPrize(data.premio_nombre);
         setTimeLeft(data.tiempo_restante);
         setTotalPrizes(data.total_premios || totalPrizes);
