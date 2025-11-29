@@ -189,62 +189,19 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
             <Badge className="bg-red-600 text-white text-lg px-6 py-2 mb-4 animate-bounce">
               🔴 EN VIVO
             </Badge>
-            <h2 className="text-3xl font-bold text-white mb-2 flex items-center justify-center gap-3">
-              <Trophy className="w-8 h-8 text-yellow-400" />
-              {sorteo.titulo}
+            <h2 className="text-3xl font-bold text-white mb-2">
+              Transmisión en directo
             </h2>
-            {currentPrize ? (
-              <div className="bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600 p-1 rounded-xl mt-3">
-                <div className="bg-black rounded-xl px-6 py-3">
-                  <p className="text-yellow-300 text-sm font-semibold mb-1">
-                    Sorteando premio {prizeIndex + 1} de {totalPrizes}
-                  </p>
-                  <p className="text-white text-2xl font-bold">🎁 {currentPrize}</p>
-                </div>
-              </div>
-            ) : (
-              <p className="text-gray-300 text-lg mt-2">Sorteo en progreso...</p>
-            )}
+            <p className="text-gray-300 text-lg">El sorteo está sucediendo</p>
           </div>
 
           {isAnimating ? (
-            // Animación en progreso - MEJORADA
             <div className="space-y-6">
-              {/* Contador regresivo */}
-              <div className="text-center">
-                <p className="text-yellow-400 text-sm mb-2 font-semibold">Tiempo restante:</p>
-                <div className="text-7xl font-bold text-white bg-gradient-to-r from-yellow-400 via-red-500 to-purple-600 bg-clip-text text-transparent animate-pulse">
-                  {formatTime(timeLeft)}
-                </div>
-              </div>
-
-              {/* Lista de nombres rotando estilo slot machine */}
-              <div className="bg-gradient-to-br from-purple-900 via-pink-800 to-red-900 p-4 rounded-xl shadow-2xl">
-                <div className="flex items-center justify-center gap-2 mb-3">
-                  <Zap className="w-6 h-6 text-yellow-400 animate-pulse" />
-                  <p className="text-yellow-300 text-lg font-semibold">Participantes en Juego</p>
-                  <Zap className="w-6 h-6 text-yellow-400 animate-pulse" />
-                </div>
-                <div className="grid grid-cols-1 gap-2 max-h-64 overflow-hidden">
-                  {displayedNames.map((name, idx) => (
-                    <div 
-                      key={`${name}-${idx}`} 
-                      className="bg-black/50 px-4 py-3 rounded-lg text-white text-center font-bold text-lg transition-all duration-200 transform hover:scale-105"
-                      style={{ 
-                        animation: `fadeInScale 0.3s ease-in-out ${idx * 0.05}s both`
-                      }}
-                    >
-                      {name}
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Lista de boletos rotando estilo slot machine */}
+              {/* Números del sorteo */}
               <div className="bg-gradient-to-br from-yellow-600 via-orange-600 to-red-600 p-4 rounded-xl shadow-2xl">
                 <div className="flex items-center justify-center gap-2 mb-3">
                   <Trophy className="w-6 h-6 text-white animate-spin" />
-                  <p className="text-white text-lg font-semibold">Números en Sorteo</p>
+                  <p className="text-white text-lg font-semibold">Números del Sorteo</p>
                   <Trophy className="w-6 h-6 text-white animate-spin" />
                 </div>
                 <div className="flex flex-wrap justify-center gap-3">
@@ -262,7 +219,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
                 </div>
               </div>
 
-              {/* Participante principal destacado */}
+              {/* Seleccionando un ganador */}
               {currentParticipant && (
                 <div className="bg-gradient-to-br from-yellow-500 via-red-600 to-purple-700 p-1 rounded-2xl animate-pulse">
                   <div className="bg-black rounded-2xl p-6">
@@ -273,12 +230,8 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
                     </div>
                     
                     <div className="text-center">
-                      <div className="text-4xl font-bold text-white mb-2 animate-pulse">
+                      <div className="text-4xl font-bold text-white animate-pulse">
                         {currentParticipant.nombre || currentParticipant.email}
-                      </div>
-                      <div className="flex items-center justify-center gap-2 text-2xl text-yellow-400">
-                        <Trophy className="w-6 h-6" />
-                        <span className="font-bold">Boleto #{currentParticipant.numero_boleto}</span>
                       </div>
                     </div>
                   </div>
