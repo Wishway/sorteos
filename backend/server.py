@@ -636,6 +636,88 @@ async def login(data: LoginRequest, response: Response):
         role=user.role
     )
 
+@api_router.post("/auth/google/callback")
+async def google_callback(request: Request, response: Response):
+    """Handle Google OAuth callback from Emergent Auth"""
+    try:
+        body = await request.json()
+        session_id = body.get('session_id')
+        
+        if not session_id:
+            raise HTTPException(status_code=400, detail="Missing session_id")
+        
+        # Exchange session_id for user data from Emergent Auth
+        async with httpx.AsyncClient() as client:
+            try:
+                auth_response = await client.get(
+                    'https://demobackend.emergentagent.com/auth/v1/env/oauth/session-data',
+                    headers={'X-Session-ID': session_id}
+                )
+                auth_response.raise_for_status()
+                auth_data = auth_response.json()
+            except httpx.HTTPError as e:
+                logger.error(f"Error calling Emergent Auth API: {e}")
+                raise HTTPException(status_code=401, detail="Error al obtener datos de sesión de Google")
+        
+        # Check if user exists
+        user_doc = await db.users.find_one({'email': auth_data['email']}, {"_id": 0})
+        
+        if not user_doc:
+            # Create new user with Google data
+            user = User(
+                email=auth_data['email'],
+                name=auth_data.get('name', auth_data['email'].split('@')[0]),
+                picture=auth_data.get('picture'),
+                email_verified=True,
+                role=UserRole.USER  # Default role for Google signup
+            )
+            user_dict = user.model_dump()
+            user_dict['created_at'] = user_dict['created_at'].isoformat()
+            await db.users.insert_one(user_dict)
+            logger.info(f"New user created via Google: {user.email}")
+        else:
+            user = User(**user_doc)
+        
+        # Create session
+        session_token = auth_data.get('session_token', str(uuid.uuid4()))
+        session = UserSession(
+            user_id=user.id,
+            session_token=session_token,
+            expires_at=datetime.now(timezone.utc) + timedelta(days=JWT_EXPIRATION_DAYS)
+        )
+        
+        session_dict = session.model_dump()
+        session_dict['created_at'] = session_dict['created_at'].isoformat()
+        session_dict['expires_at'] = session_dict['expires_at'].isoformat()
+        await db.user_sessions.insert_one(session_dict)
+        
+        # Set cookie
+        response.set_cookie(
+            key='session_token',
+            value=session_token,
+            httponly=True,
+            secure=True,
+            samesite='none',
+            max_age=JWT_EXPIRATION_DAYS * 24 * 60 * 60,
+            path='/'
+        )
+        
+        logger.info(f"User logged in via Google: {user.email}")
+        
+        return SessionDataResponse(
+            id=user.id,
+            email=user.email,
+            name=user.name,
+            picture=user.picture,
+            session_token=session_token,
+            role=user.role
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error in Google callback: {e}")
+        raise HTTPException(status_code=500, detail="Error interno del servidor")
+
 @api_router.get("/auth/session-data")
 async def get_session_data(request: Request, response: Response):
     # Check X-Session-ID header (from Google OAuth)
