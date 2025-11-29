@@ -22,9 +22,16 @@ import PerfilUsuario from '@/pages/PerfilUsuario';
 import PerfilAdmin from '@/pages/PerfilAdmin';
 
 function App() {
-  // Detectar vendedor desde URL al cargar la aplicación
+  // Inicializar WebSocket y detectar vendedor desde URL al cargar la aplicación
   useEffect(() => {
     referralService.checkAndSaveFromURL();
+    
+    // Conectar WebSocket globalmente al iniciar la app
+    websocketService.connect();
+    
+    return () => {
+      websocketService.disconnect();
+    };
   }, []);
 
   return (
