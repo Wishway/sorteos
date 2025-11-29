@@ -117,5 +117,5 @@ async def emit_ventas_pausadas(sorteo_id: str, pausadas: bool):
 # Broadcast global
 async def broadcast_sorteos_update():
     """Emitir actualización global de sorteos (para home)"""
-    await sio.emit('sorteos_list_updated', {}, broadcast=True)
+    await sio.emit('sorteos_list_updated', {})
     logger.info("Emitida actualización global de sorteos")
