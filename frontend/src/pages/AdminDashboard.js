@@ -623,14 +623,21 @@ const AdminDashboard = () => {
         </div>
 
         <Tabs defaultValue="sorteos" className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="sorteos" data-testid="tab-sorteos">Sorteos</TabsTrigger>
-            <TabsTrigger value="usuarios" data-testid="tab-usuarios">Usuarios</TabsTrigger>
-            <TabsTrigger value="retiros" data-testid="tab-retiros">Retiros de Vendedores</TabsTrigger>
-            <TabsTrigger value="pendientes" data-testid="tab-pendientes">
-              Boletos Pendientes {boletosPendientes.length > 0 && `(${boletosPendientes.length})`}
+          <TabsList className="flex-wrap h-auto gap-2">
+            <TabsTrigger value="sorteos" data-testid="tab-sorteos" className="flex-shrink-0">Sorteos</TabsTrigger>
+            <TabsTrigger value="usuarios" data-testid="tab-usuarios" className="flex-shrink-0">Usuarios</TabsTrigger>
+            <TabsTrigger value="retiros" data-testid="tab-retiros" className="flex-shrink-0 whitespace-nowrap">
+              <span className="hidden sm:inline">Retiros de Vendedores</span>
+              <span className="sm:hidden">Retiros</span>
             </TabsTrigger>
-            <TabsTrigger value="aprobados" data-testid="tab-aprobados">Boletos Aprobados</TabsTrigger>
+            <TabsTrigger value="pendientes" data-testid="tab-pendientes" className="flex-shrink-0 whitespace-nowrap">
+              <span className="hidden sm:inline">Boletos Pendientes {boletosPendientes.length > 0 && `(${boletosPendientes.length})`}</span>
+              <span className="sm:hidden">Pendientes {boletosPendientes.length > 0 && `(${boletosPendientes.length})`}</span>
+            </TabsTrigger>
+            <TabsTrigger value="aprobados" data-testid="tab-aprobados" className="flex-shrink-0 whitespace-nowrap">
+              <span className="hidden sm:inline">Boletos Aprobados</span>
+              <span className="sm:hidden">Aprobados</span>
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="sorteos" className="space-y-4">
