@@ -34,7 +34,10 @@ async def monitorear_countdowns_waiting():
             
             for sorteo in sorteos_waiting:
                 # Asegurar timezone
-                waiting_hasta = sorteo['waiting_hasta']
+                waiting_hasta = sorteo.get('waiting_hasta')
+                if not waiting_hasta:
+                    continue
+                    
                 if waiting_hasta.tzinfo is None:
                     waiting_hasta = waiting_hasta.replace(tzinfo=timezone.utc)
                 
