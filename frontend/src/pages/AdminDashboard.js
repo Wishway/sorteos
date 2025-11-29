@@ -1698,6 +1698,44 @@ const AdminDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog para ajustar mínimo de boletos */}
+      <Dialog open={editandoMinimo !== null} onOpenChange={() => setEditandoMinimo(null)}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Ajustar Mínimo de Boletos</DialogTitle>
+            <DialogDescription>
+              Cambia temporalmente el mínimo de boletos para permitir compras menores. Útil cuando faltan pocos boletos para completar el sorteo.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label>Nuevo mínimo de boletos por compra</Label>
+              <Input
+                type="number"
+                min="1"
+                value={nuevoMinimo}
+                onChange={(e) => setNuevoMinimo(parseInt(e.target.value) || 1)}
+                className="mt-2"
+              />
+              <p className="text-sm text-gray-500 mt-2">
+                Ejemplo: Si quedan 2 boletos por vender y el mínimo es 5, cámbialo a 1 o 2 para poder completar el sorteo.
+              </p>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => ajustarMinimoBoletos(editandoMinimo, nuevoMinimo)} 
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                Guardar Cambio
+              </Button>
+              <Button onClick={() => setEditandoMinimo(null)} variant="outline" className="flex-1">
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
