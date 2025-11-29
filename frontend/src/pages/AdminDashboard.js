@@ -725,28 +725,30 @@ const AdminDashboard = () => {
 
                     <div className="col-span-2 border-t pt-4">
                       <h3 className="font-semibold mb-3">Imágenes Promocionales</h3>
-                      {formData.imagenes.map((img, index) => (
-                        <div key={index} className="flex items-center gap-2 mb-2 p-2 bg-gray-50 rounded">
-                          <span className="flex-1 text-sm truncate">{img}</span>
-                          <Button type="button" variant="destructive" size="sm" onClick={() => {
-                            setFormData(prev => ({ ...prev, imagenes: prev.imagenes.filter((_, i) => i !== index) }));
-                          }}>Eliminar</Button>
-                        </div>
-                      ))}
-                      <div className="flex gap-2 mt-3">
+                      <div className="max-h-40 overflow-y-auto space-y-2 mb-3">
+                        {formData.imagenes.map((img, index) => (
+                          <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                            <span className="flex-1 text-sm truncate max-w-[300px] overflow-hidden text-ellipsis" title={img}>{img}</span>
+                            <Button type="button" variant="destructive" size="sm" onClick={() => {
+                              setFormData(prev => ({ ...prev, imagenes: prev.imagenes.filter((_, i) => i !== index) }));
+                            }}>Eliminar</Button>
+                          </div>
+                        ))}
+                      </div>
+                      <div className="flex gap-2">
                         <Input 
                           placeholder="URL de imagen (ej: https://...)" 
                           type="url"
                           value={imagenUrl} 
                           onChange={(e) => setImagenUrl(e.target.value)}
-                          className="overflow-hidden text-ellipsis whitespace-nowrap"
+                          className="flex-1 min-w-0"
                         />
                         <Button type="button" onClick={() => {
                           if (imagenUrl.trim()) {
                             setFormData(prev => ({ ...prev, imagenes: [...prev.imagenes, imagenUrl.trim()] }));
                             setImagenUrl('');
                           }
-                        }}>Agregar</Button>
+                        }} className="flex-shrink-0">Agregar</Button>
                       </div>
                     </div>
 
