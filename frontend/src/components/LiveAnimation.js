@@ -108,6 +108,7 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
       websocketService.onLiveAnimationComplete(handleAnimationComplete);
       
       return () => {
+        clearInterval(localTimerInterval);
         websocketService.offLiveAnimationStart(handleAnimationStart);
         websocketService.offLivePrizeDrawing(handlePrizeDrawing);
         websocketService.offLiveTimeUpdate(handleTimeUpdate);
