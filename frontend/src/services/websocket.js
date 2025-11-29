@@ -7,22 +7,30 @@ class WebSocketService {
   }
 
   connect() {
-    if (this.socket) {
-      console.log('WebSocket ya está conectado');
+    if (this.socket && this.connected) {
+      console.log('✅ WebSocket ya está conectado');
+      return;
+    }
+    
+    if (this.socket && !this.connected) {
+      console.log('⏳ WebSocket conectándose...');
       return;
     }
 
     // Conectar al backend
     const backendUrl = process.env.REACT_APP_BACKEND_URL || 'http://localhost:8001';
+    console.log('🔌 Conectando WebSocket a:', backendUrl);
+    
     this.socket = io(backendUrl, {
-      transports: ['websocket', 'polling'],
+      transports: ['polling', 'websocket'], // polling primero, luego websocket
       reconnection: true,
       reconnectionDelay: 1000,
-      reconnectionAttempts: 5
+      reconnectionAttempts: 10,
+      timeout: 20000
     });
 
     this.socket.on('connect', () => {
-      console.log('✅ WebSocket conectado');
+      console.log('✅ WebSocket CONECTADO exitosamente');
       this.connected = true;
     });
 
@@ -32,11 +40,12 @@ class WebSocketService {
     });
 
     this.socket.on('connection_established', (data) => {
-      console.log('✅ Conexión establecida:', data);
+      console.log('✅ Conexión establecida con SID:', data.sid);
     });
 
     this.socket.on('connect_error', (error) => {
-      console.error('❌ Error de conexión WebSocket:', error);
+      console.error('❌ Error de conexión WebSocket:', error.message);
+      this.connected = false;
     });
   }
 
