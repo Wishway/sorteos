@@ -178,7 +178,7 @@ const HomeComplete = () => {
           <img 
             src={LOGO_URL} 
             alt="WishWay Logo" 
-            className="h-24 mx-auto mb-8 drop-shadow-2xl object-contain"
+            className="h-32 md:h-40 lg:h-48 mx-auto mb-8 drop-shadow-2xl object-contain"
           />
           
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-2xl">
