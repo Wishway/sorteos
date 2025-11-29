@@ -38,7 +38,18 @@ const LiveAnimation = ({ sorteo, participantes = [], onAnimationComplete }) => {
         setTimeLeft(120); // 2 minutos por defecto
       }
       
-      websocketService.joinSorteo(sorteo.id);
+      // Esperar a que WebSocket esté conectado antes de unirse
+      const waitAndJoin = () => {
+        if (websocketService.socket && websocketService.connected) {
+          console.log('✅ WebSocket conectado, uniéndose al sorteo:', sorteo.id);
+          websocketService.joinSorteo(sorteo.id);
+        } else {
+          console.log('⏳ WebSocket no conectado, reintentando...');
+          setTimeout(waitAndJoin, 200);
+        }
+      };
+      
+      waitAndJoin();
       
       // Escuchar inicio de animación
       const handleAnimationStart = (data) => {
