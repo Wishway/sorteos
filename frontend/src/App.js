@@ -4,6 +4,7 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { Toaster } from 'sonner';
 import '@/App.css';
 import referralService from '@/services/referralService';
+import websocketService from '@/services/websocket';
 
 // Pages
 import Home from '@/pages/Home';
