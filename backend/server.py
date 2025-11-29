@@ -1448,7 +1448,10 @@ async def ajustar_minimo_boletos(sorteo_id: str, minimo: int, request: Request):
     
     await db.sorteos.update_one(
         {'id': sorteo_id},
-        {'$set': {'minimo_boletos': minimo}}
+        {'$set': {
+            'minimo_boletos': minimo,
+            'cantidad_minima_boletos': minimo  # Actualizar ambos campos para compatibilidad
+        }}
     )
     
     logger.info(f"Admin {admin.email} ajustó mínimo de boletos del sorteo {sorteo_id} a {minimo}")
