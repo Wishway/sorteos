@@ -55,13 +55,20 @@ class WebSocketService {
       this.connect();
     }
     
-    const attemptJoin = () => {
+    const attemptJoin = (retries = 0) => {
       if (this.socket && this.connected) {
-        console.log(`🔗 Uniéndose al sorteo: ${sorteoId}`);
+        console.log(`✅ Uniéndose al sorteo: ${sorteoId}`);
         this.socket.emit('join_sorteo', { sorteo_id: sorteoId });
+        
+        // Confirmar que se unió al room
+        this.socket.once('joined_sorteo', (data) => {
+          console.log(`✅ CONFIRMADO: Unido al sorteo ${data.sorteo_id}`);
+        });
+      } else if (retries < 20) { // Máximo 10 segundos de espera
+        console.log(`⏳ Esperando conexión WebSocket... intento ${retries + 1}/20`);
+        setTimeout(() => attemptJoin(retries + 1), 500);
       } else {
-        console.log('⏳ Esperando conexión WebSocket para unirse al sorteo...');
-        setTimeout(() => attemptJoin(), 500);
+        console.error('❌ No se pudo conectar al WebSocket después de 10 segundos');
       }
     };
     
