@@ -50,10 +50,22 @@ class WebSocketService {
 
   // Unirse a un sorteo específico
   joinSorteo(sorteoId) {
-    if (this.socket && this.connected) {
-      console.log(`🔗 Uniéndose al sorteo: ${sorteoId}`);
-      this.socket.emit('join_sorteo', { sorteo_id: sorteoId });
+    if (!this.socket) {
+      console.warn('⚠️ Socket no inicializado, conectando...');
+      this.connect();
     }
+    
+    const attemptJoin = () => {
+      if (this.socket && this.connected) {
+        console.log(`🔗 Uniéndose al sorteo: ${sorteoId}`);
+        this.socket.emit('join_sorteo', { sorteo_id: sorteoId });
+      } else {
+        console.log('⏳ Esperando conexión WebSocket para unirse al sorteo...');
+        setTimeout(() => attemptJoin(), 500);
+      }
+    };
+    
+    attemptJoin();
   }
 
   // Salir de un sorteo
