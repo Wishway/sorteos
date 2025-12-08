@@ -57,11 +57,25 @@ const SorteoLanding = () => {
       // Inicializar cantidad con el mínimo de boletos
       const cantidadMinima = sorteoData.cantidad_minima_boletos || 1;
       setCantidad(cantidadMinima);
-      setNumerosBoletos(Array(cantidadMinima).fill(''));
       
-      // Fetch available numbers
+      // Fetch available numbers primero
       const numerosRes = await axios.get(`${API}/sorteos/${sorteoData.id}/numeros-disponibles`);
-      setNumerosDisponibles(numerosRes.data.disponibles);
+      const disponibles = numerosRes.data.disponibles;
+      setNumerosDisponibles(disponibles);
+      
+      // CAMBIO: Asignar números aleatorios al inicializar
+      if (disponibles && disponibles.length > 0) {
+        const disponiblesCopia = [...disponibles];
+        const numerosIniciales = [];
+        for (let i = 0; i < cantidadMinima && disponiblesCopia.length > 0; i++) {
+          const randomIndex = Math.floor(Math.random() * disponiblesCopia.length);
+          numerosIniciales.push(disponiblesCopia[randomIndex].toString());
+          disponiblesCopia.splice(randomIndex, 1);
+        }
+        setNumerosBoletos(numerosIniciales);
+      } else {
+        setNumerosBoletos(Array(cantidadMinima).fill(''));
+      }
     } catch (error) {
       console.error('Error al cargar sorteo:', error);
       toast.error('Error al cargar el sorteo');
