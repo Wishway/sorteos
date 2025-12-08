@@ -341,9 +341,7 @@ const HomeComplete = () => {
                               <>
                                 <p className="text-orange-400 text-sm mb-3 font-semibold">Fecha alcanzada</p>
                                 <p className="text-white text-lg">Esperando completar venta de boletos</p>
-                                <p className="text-sm text-gray-400 mt-2">
-                                  Faltan {sorteo.cantidad_total_boletos - sorteo.cantidad_vendida} boletos
-                                </p>
+                                {/* CAMBIO: Quitar texto de boletos faltantes, solo mostrar barra de progreso */}
                               </>
                             );
                           }
