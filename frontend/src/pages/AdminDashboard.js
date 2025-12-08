@@ -1261,18 +1261,7 @@ const AdminDashboard = () => {
                             </>
                           )}
 
-                          {/* WAITING: Iniciar manualmente */}
-                          {sorteo.estado === 'waiting' && (
-                            <Button 
-                              className="bg-yellow-600 hover:bg-yellow-700"
-                              size="sm"
-                              onClick={() => iniciarSorteo(sorteo.id)}
-                              data-testid={`iniciar-sorteo-${sorteo.id}`}
-                            >
-                              <Play className="w-4 h-4 mr-2" />
-                              Iniciar Sorteo
-                            </Button>
-                          )}
+                          {/* CAMBIO: Eliminado botón manual "Iniciar Sorteo" - Sistema 100% automático */}
 
                           {/* LIVE: Finalizar */}
                           {sorteo.estado === 'live' && (
