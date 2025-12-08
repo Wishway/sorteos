@@ -289,14 +289,8 @@ const HomeComplete = () => {
                     <CardContent className="p-6 text-center">
                       <h3 className="font-bold text-2xl mb-4 text-white">{sorteo.titulo}</h3>
                       
-                      {/* Mostrar información de progreso */}
+                      {/* CAMBIO: Solo barra de progreso, sin texto de boletos */}
                       <div className="mb-4">
-                        <div className="flex justify-between items-center mb-2">
-                          <span className="text-sm text-gray-400">Boletos vendidos</span>
-                          <span className="text-sm font-bold text-orange-400">
-                            {sorteo.cantidad_vendida}/{sorteo.cantidad_total_boletos}
-                          </span>
-                        </div>
                         <div className="w-full bg-gray-700 rounded-full h-3 overflow-hidden">
                           <div 
                             className="bg-gradient-to-r from-orange-500 to-red-600 h-full rounded-full transition-all duration-500"
