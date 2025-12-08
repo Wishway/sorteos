@@ -160,14 +160,16 @@ const AdminDashboard = () => {
   };
 
   const agregarEtapa = () => {
-    if (!etapaForm.porcentaje || !etapaForm.premio) {
-      toast.error('Completa al menos porcentaje y premio de la etapa');
+    // CAMBIO: Validar que tenga al menos 1 premio
+    if (!etapaForm.porcentaje || (!etapaForm.premios || etapaForm.premios.length === 0)) {
+      toast.error('Completa porcentaje y agrega al menos un premio a la etapa');
       return;
     }
     const nuevaEtapa = {
       numero: formData.etapas.length + 1,
       porcentaje: parseFloat(etapaForm.porcentaje),
-      premio: etapaForm.premio,
+      premio: etapaForm.premios[0]?.nombre || '',  // Mantener compatibilidad con campo único
+      premios: etapaForm.premios,  // NUEVO: Array de premios
       nombre: etapaForm.nombre || `Etapa ${formData.etapas.length + 1}`,
       imagen_urls: etapaForm.imagen_urls || [],
       video_urls: etapaForm.video_urls || [],
@@ -180,7 +182,8 @@ const AdminDashboard = () => {
       premio: '', 
       nombre: '',
       imagen_urls: [],
-      video_urls: []
+      video_urls: [],
+      premios: []  // Resetear array de premios
     });
     setEtapaImagenUrl('');
     setEtapaVideoUrl('');
