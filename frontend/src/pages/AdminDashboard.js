@@ -67,10 +67,11 @@ const AdminDashboard = () => {
   const [etapaForm, setEtapaForm] = useState({ 
     numero: 1, 
     porcentaje: '', 
-    premio: '', 
+    premio: '',  // Mantener por compatibilidad
     nombre: '',
     imagen_urls: [],
-    video_urls: []
+    video_urls: [],
+    premios: []  // NUEVO: Array de premios para múltiples premios por etapa
   });
   const [etapaImagenUrl, setEtapaImagenUrl] = useState('');
   const [etapaVideoUrl, setEtapaVideoUrl] = useState('');
