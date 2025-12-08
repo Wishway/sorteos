@@ -918,13 +918,101 @@ const AdminDashboard = () => {
                             </div>
                           </div>
 
+                          {/* PREMIOS DE LA ETAPA (múltiples) */}
                           <div className="mb-3">
-                            <Label className="text-xs">Premio de esta Etapa *</Label>
-                            <Input 
-                              placeholder="Ej: iPhone 15 Pro" 
-                              value={etapaForm.premio} 
-                              onChange={(e) => setEtapaForm(prev => ({ ...prev, premio: e.target.value }))} 
-                            />
+                            <Label className="text-xs font-semibold">Premios de esta Etapa *</Label>
+                            {etapaForm.premios && etapaForm.premios.length > 0 && (
+                              <div className="space-y-2 mb-3">
+                                {etapaForm.premios.map((premio, pIdx) => (
+                                  <div key={pIdx} className="flex items-center gap-2 p-2 bg-white rounded border">
+                                    <div className="flex-1">
+                                      <p className="font-semibold text-sm">{premio.nombre}</p>
+                                      {premio.descripcion && <p className="text-xs text-gray-600">{premio.descripcion}</p>}
+                                      {premio.imagen_url && <p className="text-xs text-blue-600">✓ Imagen</p>}
+                                      {premio.video_url && <p className="text-xs text-purple-600">✓ Video</p>}
+                                    </div>
+                                    <Button 
+                                      type="button" 
+                                      variant="ghost" 
+                                      size="sm" 
+                                      onClick={() => {
+                                        setEtapaForm(prev => ({ 
+                                          ...prev, 
+                                          premios: prev.premios.filter((_, i) => i !== pIdx) 
+                                        }));
+                                      }}
+                                    >
+                                      Eliminar
+                                    </Button>
+                                  </div>
+                                ))}
+                              </div>
+                            )}
+                            
+                            {/* Formulario para agregar premio a la etapa */}
+                            <div className="bg-green-50 p-3 rounded border border-green-200">
+                              <p className="text-xs font-semibold mb-2 text-green-900">Agregar Premio a esta Etapa</p>
+                              <div className="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                  <Label className="text-xs">Nombre *</Label>
+                                  <Input 
+                                    placeholder="Ej: iPhone 15 Pro" 
+                                    value={premioForm.nombre} 
+                                    onChange={(e) => setPremioForm(prev => ({ ...prev, nombre: e.target.value }))} 
+                                    className="text-sm"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">Descripción</Label>
+                                  <Input 
+                                    placeholder="Opcional" 
+                                    value={premioForm.descripcion} 
+                                    onChange={(e) => setPremioForm(prev => ({ ...prev, descripcion: e.target.value }))} 
+                                    className="text-sm"
+                                  />
+                                </div>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 mb-2">
+                                <div>
+                                  <Label className="text-xs">URL Imagen</Label>
+                                  <Input 
+                                    placeholder="https://..." 
+                                    type="url"
+                                    value={premioForm.imagen_url} 
+                                    onChange={(e) => setPremioForm(prev => ({ ...prev, imagen_url: e.target.value }))}
+                                    className="text-sm min-w-0"
+                                  />
+                                </div>
+                                <div>
+                                  <Label className="text-xs">URL Video</Label>
+                                  <Input 
+                                    placeholder="https://..." 
+                                    type="url"
+                                    value={premioForm.video_url} 
+                                    onChange={(e) => setPremioForm(prev => ({ ...prev, video_url: e.target.value }))}
+                                    className="text-sm min-w-0"
+                                  />
+                                </div>
+                              </div>
+                              <Button 
+                                type="button" 
+                                size="sm" 
+                                onClick={() => {
+                                  if (!premioForm.nombre.trim()) {
+                                    toast.error('El nombre del premio es obligatorio');
+                                    return;
+                                  }
+                                  setEtapaForm(prev => ({ 
+                                    ...prev, 
+                                    premios: [...(prev.premios || []), { ...premioForm }]
+                                  }));
+                                  setPremioForm({ nombre: '', descripcion: '', imagen_url: '', video_url: '' });
+                                }}
+                                className="w-full"
+                              >
+                                + Agregar Premio
+                              </Button>
+                            </div>
                           </div>
 
                           {/* URLs de imágenes para esta etapa */}
