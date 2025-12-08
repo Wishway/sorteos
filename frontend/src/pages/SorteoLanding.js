@@ -92,6 +92,32 @@ const SorteoLanding = () => {
     }
   };
 
+  // NUEVA FUNCIÓN: Asignar números aleatorios disponibles
+  const asignarNumerosAleatorios = (cantidad) => {
+    if (!numerosDisponibles || numerosDisponibles.length === 0) {
+      return Array(cantidad).fill('');
+    }
+    
+    // Copiar array de disponibles
+    const disponiblesCopia = [...numerosDisponibles];
+    const numerosAsignados = [];
+    
+    for (let i = 0; i < cantidad && disponiblesCopia.length > 0; i++) {
+      // Seleccionar índice aleatorio
+      const randomIndex = Math.floor(Math.random() * disponiblesCopia.length);
+      numerosAsignados.push(disponiblesCopia[randomIndex].toString());
+      // Remover el número seleccionado para no repetirlo
+      disponiblesCopia.splice(randomIndex, 1);
+    }
+    
+    // Si no hay suficientes disponibles, rellenar con vacíos
+    while (numerosAsignados.length < cantidad) {
+      numerosAsignados.push('');
+    }
+    
+    return numerosAsignados;
+  };
+
   const handleCantidadChange = (nuevaCantidad) => {
     const num = parseInt(nuevaCantidad) || 1;
     const minimo = sorteo?.cantidad_minima_boletos || 1;
@@ -103,7 +129,8 @@ const SorteoLanding = () => {
     }
     
     setCantidad(num);
-    const nuevosNumeros = Array(num).fill('').map((_, i) => numerosBoletos[i] || '');
+    // CAMBIO: Asignar números aleatorios en lugar de vacíos
+    const nuevosNumeros = asignarNumerosAleatorios(num);
     setNumerosBoletos(nuevosNumeros);
   };
 
