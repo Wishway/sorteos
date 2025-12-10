@@ -47,6 +47,9 @@ const AdminDashboard = () => {
   const [showAprobarRetiro, setShowAprobarRetiro] = useState(false);
   const [editandoMinimo, setEditandoMinimo] = useState(null);
   const [nuevoMinimo, setNuevoMinimo] = useState(1);
+  const [sorteoExpandido, setSorteoExpandido] = useState(null);
+  const [imagenesTemp, setImagenesTemp] = useState({});
+  const [premiosImagenesTemp, setPremiosImagenesTemp] = useState({});
 
   const [formData, setFormData] = useState({
     titulo: '', descripcion: '', precio_boleto: '', cantidad_minima_boletos: '',
