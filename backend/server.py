@@ -1460,6 +1460,34 @@ async def ajustar_minimo_boletos(sorteo_id: str, minimo: int, request: Request):
     
     return {"message": f"Mínimo de boletos ajustado a {minimo} exitosamente", "minimo": minimo}
 
+class ActualizarImagenesRequest(BaseModel):
+    imagenes: List[str]
+
+@api_router.put("/admin/sorteo/{sorteo_id}/actualizar-imagenes")
+async def actualizar_imagenes_videos(sorteo_id: str, data: ActualizarImagenesRequest, request: Request):
+    """Actualizar solo imágenes/videos de un sorteo PUBLISHED"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden actualizar imágenes")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] not in ['published', 'activo']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'imagenes': data.imagenes}}
+    )
+    
+    logger.info(f"Admin {admin.email} actualizó imágenes del sorteo {sorteo_id}")
+    
+    await broadcast_sorteos_update()
+    
+    return {"message": "Imágenes/Videos actualizados exitosamente"}
+
 @api_router.post("/admin/actualizar-estados-sorteos")
 async def actualizar_estados_automatico():
     """Verificar y actualizar estados de todos los sorteos activos (para llamar periódicamente)"""
