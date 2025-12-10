@@ -1298,6 +1298,19 @@ const AdminDashboard = () => {
                             </Button>
                           )}
 
+                          {/* PUBLISHED: Ver/Editar Medios */}
+                          {(sorteo.estado === 'published' || sorteo.estado === 'activo') && (
+                            <Button 
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setSorteoExpandido(sorteoExpandido === sorteo.id ? null : sorteo.id)}
+                              className="mt-2"
+                            >
+                              <Image className="w-4 h-4 mr-2" />
+                              {sorteoExpandido === sorteo.id ? 'Ocultar' : 'Ver/Editar'} Imágenes y Videos
+                            </Button>
+                          )}
+
                           {/* COMPLETED: Puede eliminarse */}
                           {(sorteo.estado === 'completed' || sorteo.estado === 'completado') && (
                             <>
