@@ -1180,7 +1180,23 @@ const AdminDashboard = () => {
                             <span>Vendidos: {sorteo.cantidad_vendida}/{sorteo.cantidad_total_boletos}</span>
                             <span>Progreso: {sorteo.progreso_porcentaje.toFixed(1)}%</span>
                           </div>
-                          {/* ELIMINADO: Botones manuales de etapas - Sistema 100% automático */}
+                          {/* Mostrar INFORMACIÓN de etapas (sin botones manuales) */}
+                          {sorteo.tipo === 'etapas' && sorteo.etapas && sorteo.etapas.length > 0 && (
+                            <div className="flex gap-2 flex-wrap mt-3">
+                              {sorteo.etapas.map((etapa) => (
+                                <div 
+                                  key={etapa.numero} 
+                                  className={`px-3 py-1 rounded-full text-xs font-semibold ${
+                                    etapa.completado 
+                                      ? 'bg-green-100 text-green-700 border border-green-300' 
+                                      : 'bg-blue-100 text-blue-700 border border-blue-300'
+                                  }`}
+                                >
+                                  Etapa {etapa.numero} - {etapa.porcentaje}% {etapa.completado ? '✓ Completada' : ''}
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                         <div className="flex flex-col gap-2">
                           {/* DRAFT: Publicar y Editar */}
