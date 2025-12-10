@@ -1264,6 +1264,18 @@ const AdminDashboard = () => {
                                 <Settings className="w-4 h-4 mr-2" />
                                 Ajustar Mínimo (Actual: {sorteo.minimo_boletos || 1})
                               </Button>
+                              <Button 
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setEditandoImagenes(sorteo.id);
+                                  setImagenesEditadas(sorteo.imagenes || []);
+                                }}
+                                data-testid={`editar-imagenes-${sorteo.id}`}
+                              >
+                                <Image className="w-4 h-4 mr-2" />
+                                Editar Imágenes/Videos
+                              </Button>
                             </>
                           )}
 
