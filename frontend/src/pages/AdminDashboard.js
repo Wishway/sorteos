@@ -398,19 +398,7 @@ const AdminDashboard = () => {
     }
   };
 
-  const actualizarImagenesVideos = async (sorteoId) => {
-    try {
-      await axios.put(`${API}/admin/sorteo/${sorteoId}/actualizar-imagenes`, {
-        imagenes: imagenesEditadas
-      }, { withCredentials: true });
-      toast.success('Imágenes/Videos actualizados');
-      setEditandoImagenes(null);
-      setImagenesEditadas([]);
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al actualizar imágenes');
-    }
-  };
+  // Función removida - reemplazada por la sección expandible de edición de imágenes
 
   const iniciarSorteo = async (sorteoId) => {
     if (!window.confirm('¿Iniciar el sorteo en LIVE ahora? Esto iniciará la animación de 2 minutos.')) return;
