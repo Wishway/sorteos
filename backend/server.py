@@ -1460,12 +1460,21 @@ async def ajustar_minimo_boletos(sorteo_id: str, minimo: int, request: Request):
     
     return {"message": f"Mínimo de boletos ajustado a {minimo} exitosamente", "minimo": minimo}
 
-class ActualizarImagenesRequest(BaseModel):
-    imagenes: List[str]
+class ActualizarImagenPromoRequest(BaseModel):
+    index: int
+    url: str
 
-@api_router.put("/admin/sorteo/{sorteo_id}/actualizar-imagenes")
-async def actualizar_imagenes_videos(sorteo_id: str, data: ActualizarImagenesRequest, request: Request):
-    """Actualizar solo imágenes/videos de un sorteo PUBLISHED"""
+class ActualizarPremioImagenRequest(BaseModel):
+    premio_index: int
+    imagen_url: str
+
+class ActualizarPremioVideoRequest(BaseModel):
+    premio_index: int
+    video_url: str
+
+@api_router.put("/admin/sorteo/{sorteo_id}/actualizar-imagen-promo")
+async def actualizar_imagen_promo(sorteo_id: str, data: ActualizarImagenPromoRequest, request: Request):
+    """Actualizar UNA imagen promocional específica de un sorteo PUBLISHED"""
     admin = await get_current_user(request)
     if admin.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Solo admins pueden actualizar imágenes")
@@ -1477,16 +1486,85 @@ async def actualizar_imagenes_videos(sorteo_id: str, data: ActualizarImagenesReq
     if sorteo_doc['estado'] not in ['published', 'activo']:
         raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
     
+    imagenes = sorteo_doc.get('imagenes', [])
+    if data.index >= len(imagenes):
+        raise HTTPException(status_code=400, detail="Índice de imagen inválido")
+    
+    imagenes[data.index] = data.url
+    
     await db.sorteos.update_one(
         {'id': sorteo_id},
-        {'$set': {'imagenes': data.imagenes}}
+        {'$set': {'imagenes': imagenes}}
     )
     
-    logger.info(f"Admin {admin.email} actualizó imágenes del sorteo {sorteo_id}")
-    
+    logger.info(f"Admin {admin.email} actualizó imagen promocional {data.index} del sorteo {sorteo_id}")
     await broadcast_sorteos_update()
     
-    return {"message": "Imágenes/Videos actualizados exitosamente"}
+    return {"message": "Imagen actualizada exitosamente"}
+
+@api_router.put("/admin/sorteo/{sorteo_id}/actualizar-premio-imagen")
+async def actualizar_premio_imagen(sorteo_id: str, data: ActualizarPremioImagenRequest, request: Request):
+    """Actualizar imagen de UN premio específico de un sorteo PUBLISHED"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden actualizar imágenes")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] not in ['published', 'activo']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
+    
+    premios = sorteo_doc.get('premios', [])
+    if data.premio_index >= len(premios):
+        raise HTTPException(status_code=400, detail="Índice de premio inválido")
+    
+    premios[data.premio_index]['imagen_url'] = data.imagen_url
+    if 'imagen' in premios[data.premio_index]:
+        premios[data.premio_index]['imagen'] = data.imagen_url
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'premios': premios}}
+    )
+    
+    logger.info(f"Admin {admin.email} actualizó imagen de premio {data.premio_index} del sorteo {sorteo_id}")
+    await broadcast_sorteos_update()
+    
+    return {"message": "Imagen de premio actualizada exitosamente"}
+
+@api_router.put("/admin/sorteo/{sorteo_id}/actualizar-premio-video")
+async def actualizar_premio_video(sorteo_id: str, data: ActualizarPremioVideoRequest, request: Request):
+    """Actualizar video de UN premio específico de un sorteo PUBLISHED"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden actualizar videos")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] not in ['published', 'activo']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar videos de sorteos publicados")
+    
+    premios = sorteo_doc.get('premios', [])
+    if data.premio_index >= len(premios):
+        raise HTTPException(status_code=400, detail="Índice de premio inválido")
+    
+    premios[data.premio_index]['video_url'] = data.video_url
+    if 'video' in premios[data.premio_index]:
+        premios[data.premio_index]['video'] = data.video_url
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'premios': premios}}
+    )
+    
+    logger.info(f"Admin {admin.email} actualizó video de premio {data.premio_index} del sorteo {sorteo_id}")
+    await broadcast_sorteos_update()
+    
+    return {"message": "Video de premio actualizado exitosamente"}
 
 @api_router.post("/admin/actualizar-estados-sorteos")
 async def actualizar_estados_automatico():
