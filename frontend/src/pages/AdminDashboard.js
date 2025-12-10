@@ -1336,8 +1336,10 @@ const AdminDashboard = () => {
                               {/* IMÁGENES PROMOCIONALES */}
                               <div className="mb-4">
                                 <Label className="font-semibold text-sm mb-2 block">Imágenes Promocionales</Label>
-                                {sorteo.imagenes && sorteo.imagenes.length > 0 ? (
-                                  <div className="space-y-2">
+                                
+                                {/* Imágenes existentes */}
+                                {sorteo.imagenes && sorteo.imagenes.length > 0 && (
+                                  <div className="space-y-2 mb-3">
                                     {sorteo.imagenes.map((img, imgIdx) => (
                                       <div key={imgIdx} className="flex gap-2">
                                         <Input 
@@ -1350,8 +1352,6 @@ const AdminDashboard = () => {
                                           size="sm"
                                           onClick={async () => {
                                             const nuevaUrl = imagenesTemp[`${sorteo.id}-${imgIdx}`] || img;
-                                            const nuevasImagenes = [...sorteo.imagenes];
-                                            nuevasImagenes[imgIdx] = nuevaUrl;
                                             try {
                                               await axios.put(`${API}/admin/sorteo/${sorteo.id}/actualizar-imagen-promo`, {
                                                 index: imgIdx,
@@ -1366,12 +1366,61 @@ const AdminDashboard = () => {
                                         >
                                           Guardar cambios
                                         </Button>
+                                        <Button
+                                          size="sm"
+                                          variant="destructive"
+                                          onClick={async () => {
+                                            try {
+                                              const nuevasImagenes = sorteo.imagenes.filter((_, i) => i !== imgIdx);
+                                              await axios.put(`${API}/admin/sorteo/${sorteo.id}/actualizar-imagenes`, {
+                                                imagenes: nuevasImagenes
+                                              }, { withCredentials: true });
+                                              toast.success('Imagen eliminada');
+                                              fetchData();
+                                            } catch (error) {
+                                              toast.error('Error al eliminar');
+                                            }
+                                          }}
+                                        >
+                                          Eliminar
+                                        </Button>
                                       </div>
                                     ))}
                                   </div>
-                                ) : (
-                                  <p className="text-sm text-gray-500">No hay imágenes promocionales</p>
                                 )}
+                                
+                                {/* Agregar nueva imagen */}
+                                <div className="flex gap-2">
+                                  <Input 
+                                    value={imagenesTemp[`${sorteo.id}-nueva`] || ''}
+                                    onChange={(e) => setImagenesTemp(prev => ({...prev, [`${sorteo.id}-nueva`]: e.target.value}))}
+                                    placeholder="URL de nueva imagen (https://...)"
+                                    className="flex-1"
+                                  />
+                                  <Button
+                                    size="sm"
+                                    onClick={async () => {
+                                      const nuevaUrl = imagenesTemp[`${sorteo.id}-nueva`];
+                                      if (!nuevaUrl || !nuevaUrl.trim()) {
+                                        toast.error('Ingresa una URL válida');
+                                        return;
+                                      }
+                                      try {
+                                        const imagenesActuales = sorteo.imagenes || [];
+                                        await axios.put(`${API}/admin/sorteo/${sorteo.id}/actualizar-imagenes`, {
+                                          imagenes: [...imagenesActuales, nuevaUrl.trim()]
+                                        }, { withCredentials: true });
+                                        toast.success('Imagen agregada');
+                                        setImagenesTemp(prev => ({...prev, [`${sorteo.id}-nueva`]: ''}));
+                                        fetchData();
+                                      } catch (error) {
+                                        toast.error('Error al agregar');
+                                      }
+                                    }}
+                                  >
+                                    Agregar imagen
+                                  </Button>
+                                </div>
                               </div>
 
                               {/* IMÁGENES Y VIDEOS DE PREMIOS */}
