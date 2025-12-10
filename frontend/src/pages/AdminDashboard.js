@@ -1180,17 +1180,7 @@ const AdminDashboard = () => {
                             <span>Vendidos: {sorteo.cantidad_vendida}/{sorteo.cantidad_total_boletos}</span>
                             <span>Progreso: {sorteo.progreso_porcentaje.toFixed(1)}%</span>
                           </div>
-                          {sorteo.tipo === 'etapas' && sorteo.etapas.length > 0 && (
-                            <div className="mt-3 flex gap-2">
-                              {sorteo.etapas.map((etapa) => (
-                                <Button key={etapa.numero} size="sm" variant={etapa.completado ? 'secondary' : 'default'}
-                                  onClick={() => !etapa.completado && ejecutarSorteo(sorteo.id, etapa.numero)}
-                                  disabled={etapa.completado} data-testid={`ejecutar-etapa-${sorteo.id}-${etapa.numero}`}>
-                                  <Play className="w-3 h-3 mr-1" />Etapa {etapa.numero} {etapa.completado ? '✓' : ''}
-                                </Button>
-                              ))}
-                            </div>
-                          )}
+                          {/* ELIMINADO: Botones manuales de etapas - Sistema 100% automático */}
                         </div>
                         <div className="flex flex-col gap-2">
                           {/* DRAFT: Publicar y Editar */}
