@@ -1852,6 +1852,88 @@ const AdminDashboard = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Dialog para editar imágenes/videos en sorteos PUBLISHED */}
+      <Dialog open={editandoImagenes !== null} onOpenChange={() => setEditandoImagenes(null)}>
+        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Editar Imágenes y Videos</DialogTitle>
+            <DialogDescription>
+              Solo puedes editar las URLs de imágenes y videos. Los demás datos del sorteo no se pueden modificar en estado PUBLISHED.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4">
+            {/* Lista de imágenes actuales */}
+            <div>
+              <Label className="font-semibold mb-2 block">Imágenes/Videos Actuales</Label>
+              <div className="max-h-40 overflow-y-auto space-y-2 mb-3">
+                {imagenesEditadas.map((img, index) => (
+                  <div key={index} className="flex items-center gap-2 p-2 bg-gray-50 rounded">
+                    <span className="flex-1 text-sm truncate max-w-[400px] overflow-hidden text-ellipsis" title={img}>{img}</span>
+                    <Button 
+                      type="button" 
+                      variant="destructive" 
+                      size="sm" 
+                      onClick={() => {
+                        setImagenesEditadas(prev => prev.filter((_, i) => i !== index));
+                      }}
+                    >
+                      Eliminar
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Agregar nueva imagen */}
+            <div>
+              <Label>Agregar Nueva Imagen/Video</Label>
+              <div className="flex gap-2 mt-2">
+                <Input 
+                  placeholder="URL de imagen o video (ej: https://...)" 
+                  type="url"
+                  value={nuevaImagenUrl} 
+                  onChange={(e) => setNuevaImagenUrl(e.target.value)}
+                  className="flex-1 min-w-0"
+                />
+                <Button 
+                  type="button" 
+                  onClick={() => {
+                    if (nuevaImagenUrl.trim()) {
+                      setImagenesEditadas(prev => [...prev, nuevaImagenUrl.trim()]);
+                      setNuevaImagenUrl('');
+                    }
+                  }} 
+                  className="flex-shrink-0"
+                >
+                  Agregar
+                </Button>
+              </div>
+            </div>
+
+            {/* Botones de acción */}
+            <div className="flex gap-2">
+              <Button 
+                onClick={() => actualizarImagenesVideos(editandoImagenes)} 
+                className="flex-1 bg-blue-600 hover:bg-blue-700"
+              >
+                Guardar Cambios
+              </Button>
+              <Button 
+                onClick={() => {
+                  setEditandoImagenes(null);
+                  setImagenesEditadas([]);
+                  setNuevaImagenUrl('');
+                }} 
+                variant="outline" 
+                className="flex-1"
+              >
+                Cancelar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
