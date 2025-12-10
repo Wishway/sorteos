@@ -454,7 +454,7 @@ const HomeComplete = () => {
                       <div className="flex justify-between items-center mb-2">
                         <span className="text-sm font-semibold text-gray-300">Progreso</span>
                         <span className="text-sm font-bold text-purple-400">
-                          {sorteo.cantidad_vendida}/{sorteo.cantidad_total_boletos}
+                          {sorteo.progreso_porcentaje.toFixed(0)}%
                         </span>
                       </div>
                       <div className="relative h-3 bg-gray-700 rounded-full overflow-hidden">
