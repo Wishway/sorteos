@@ -401,7 +401,7 @@ const UsuarioDashboard = () => {
               <div className="space-y-4">
                 <Card className="p-4 bg-yellow-50 border-yellow-200">
                   <p className="text-yellow-800 text-sm">
-                    ⏳ Estos boletos están pendientes de aprobación. Una vez que el administrador verifique tu pago, aparecerán en "Boletos Activos".
+                    ⏳ Estos boletos están pendientes de aprobación. Una vez que el administrador verifique tu pago, aparecerán en &quot;Boletos Activos&quot;.
                   </p>
                 </Card>
                 <div className="grid gap-4">
