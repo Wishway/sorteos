@@ -2545,7 +2545,14 @@ async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Reque
     if not boleto_doc:
         raise HTTPException(status_code=404, detail="Boleto no encontrado")
     
-    # VALIDACIÓN: Verificar que el boleto sigue disponible antes de aprobar
+    # VALIDACIÓN 1: Verificar si el boleto actual ya está aprobado
+    if boleto_doc.get('pago_confirmado'):
+        raise HTTPException(
+            status_code=400, 
+            detail="Este boleto ya ha sido aprobado anteriormente."
+        )
+    
+    # VALIDACIÓN 2: Verificar que el número de boleto sigue disponible
     numero_boleto = boleto_doc.get('numero_boleto')
     sorteo_id = boleto_doc.get('sorteo_id')
     
