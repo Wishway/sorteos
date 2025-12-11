@@ -513,62 +513,74 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                           <Badge style={{ backgroundColor: sorteo.color_primario }}>
                             Etapa {etapa.numero}
                           </Badge>
-                          {etapa.premio}
+                          {etapa.nombre || etapa.premio}
                         </h3>
                         
-                        {/* Imágenes de premios de esta etapa */}
-                        {etapa.imagen_urls && etapa.imagen_urls.length > 0 && (
-                          <div className="mb-4">
-                            <h4 className="text-sm font-semibold text-gray-700 mb-2">Imágenes del premio:</h4>
-                            <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                              {etapa.imagen_urls.map((url, idx) => (
-                                <img 
-                                  key={idx}
-                                  src={url} 
-                                  alt={`Premio Etapa ${etapa.numero} - ${idx + 1}`}
-                                  className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
-                                />
-                              ))}
-                            </div>
-                          </div>
-                        )}
-                        
-                        {/* Videos de premios de esta etapa (EMBED) */}
-                        {etapa.video_urls && etapa.video_urls.length > 0 && (
-                          <div>
-                            <h4 className="text-sm font-semibold text-gray-700 mb-2">Videos del premio:</h4>
-                            <div className="space-y-4">
-                              {etapa.video_urls.map((url, idx) => {
-                                const getYouTubeEmbedUrl = (videoUrl) => {
-                                  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
-                                  const match = videoUrl.match(regExp);
-                                  return (match && match[2].length === 11) 
-                                    ? `https://www.youtube.com/embed/${match[2]}`
-                                    : videoUrl;
-                                };
+                        {/* TODOS los premios de esta etapa */}
+                        {etapa.premios && etapa.premios.length > 0 ? (
+                          <div className="space-y-4">
+                            {etapa.premios.map((premio, pIdx) => (
+                              <div key={pIdx} className="bg-gray-50 rounded-lg p-4">
+                                <div className="flex items-center gap-2 mb-2">
+                                  <Trophy className="w-5 h-5 text-yellow-500" />
+                                  <h4 className="font-semibold text-lg">{premio.nombre}</h4>
+                                </div>
+                                {premio.descripcion && (
+                                  <p className="text-gray-600 mb-3">{premio.descripcion}</p>
+                                )}
                                 
-                                const embedUrl = getYouTubeEmbedUrl(url);
-                                
-                                return (
-                                  <div key={idx} className="aspect-video">
-                                    <iframe
-                                      src={embedUrl}
-                                      title={`Video Premio Etapa ${etapa.numero} - ${idx + 1}`}
-                                      className="w-full h-full rounded-lg shadow-md"
-                                      frameBorder="0"
-                                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                      allowFullScreen
-                                    ></iframe>
+                                {/* Imagen del premio */}
+                                {(premio.imagen_url || premio.imagen) && (
+                                  <div className="mb-3">
+                                    <img 
+                                      src={premio.imagen_url || premio.imagen} 
+                                      alt={premio.nombre}
+                                      className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition-shadow"
+                                    />
                                   </div>
-                                );
-                              })}
-                            </div>
+                                )}
+                                
+                                {/* Video del premio (EMBED YouTube) */}
+                                {(premio.video_url || premio.video) && (
+                                  <div className="aspect-video">
+                                    {(() => {
+                                      const videoUrl = premio.video_url || premio.video;
+                                      const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=)([^#&?]*).*/;
+                                      const match = videoUrl.match(regExp);
+                                      const isYouTube = match && match[2].length === 11;
+                                      
+                                      if (isYouTube) {
+                                        return (
+                                          <iframe
+                                            src={`https://www.youtube.com/embed/${match[2]}`}
+                                            title={`Video ${premio.nombre}`}
+                                            className="w-full h-full rounded-lg shadow-md"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                          ></iframe>
+                                        );
+                                      } else {
+                                        return (
+                                          <a 
+                                            href={videoUrl} 
+                                            target="_blank" 
+                                            rel="noopener noreferrer"
+                                            className="text-blue-600 hover:underline flex items-center gap-2"
+                                          >
+                                            🎬 Ver video del premio
+                                          </a>
+                                        );
+                                      }
+                                    })()}
+                                  </div>
+                                )}
+                              </div>
+                            ))}
                           </div>
-                        )}
-                        
-                        {(!etapa.imagen_urls || etapa.imagen_urls.length === 0) && 
-                         (!etapa.video_urls || etapa.video_urls.length === 0) && (
-                          <p className="text-gray-500 text-sm italic">No hay imágenes o videos para esta etapa</p>
+                        ) : (
+                          /* Si no hay premios detallados, mostrar el nombre del premio de la etapa */
+                          <p className="text-gray-600">{etapa.premio}</p>
                         )}
                       </div>
                     ))}
