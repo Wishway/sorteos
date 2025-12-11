@@ -1332,9 +1332,11 @@ const AdminDashboard = () => {
                               {/* IMÁGENES Y VIDEOS DE PREMIOS */}
                               <div>
                                 <Label className="font-semibold text-sm mb-2 block">Premios</Label>
-                                {sorteo.premios && sorteo.premios.length > 0 && sorteo.premios.map((premio, pIdx) => (
+                                
+                                {/* Premios de sorteo único */}
+                                {sorteo.tipo === 'unico' && sorteo.premios && sorteo.premios.length > 0 && sorteo.premios.map((premio, pIdx) => (
                                   <div key={pIdx} className="mb-4 p-3 bg-white border rounded">
-                                    <p className="font-semibold text-sm mb-2">Premio: {premio.nombre}</p>
+                                    <p className="font-semibold text-sm mb-2">Premio: {premio.nombre} <span className="text-gray-500 text-xs">(no editable)</span></p>
                                     
                                     <div className="space-y-2">
                                       <div className="flex gap-2">
@@ -1353,7 +1355,9 @@ const AdminDashboard = () => {
                                           size="sm"
                                           className="self-end"
                                           onClick={async () => {
-                                            const nuevaUrl = premiosImagenesTemp[`${sorteo.id}-premio-${pIdx}-img`] || premio.imagen_url || premio.imagen || '';
+                                            const nuevaUrl = premiosImagenesTemp[`${sorteo.id}-premio-${pIdx}-img`] !== undefined 
+                                              ? premiosImagenesTemp[`${sorteo.id}-premio-${pIdx}-img`] 
+                                              : (premio.imagen_url || premio.imagen || '');
                                             try {
                                               await axios.put(`${API}/admin/sorteo/${sorteo.id}/actualizar-premio-imagen`, {
                                                 premio_index: pIdx,
@@ -1386,7 +1390,9 @@ const AdminDashboard = () => {
                                           size="sm"
                                           className="self-end"
                                           onClick={async () => {
-                                            const nuevaUrl = premiosImagenesTemp[`${sorteo.id}-premio-${pIdx}-vid`] || premio.video_url || premio.video || '';
+                                            const nuevaUrl = premiosImagenesTemp[`${sorteo.id}-premio-${pIdx}-vid`] !== undefined 
+                                              ? premiosImagenesTemp[`${sorteo.id}-premio-${pIdx}-vid`] 
+                                              : (premio.video_url || premio.video || '');
                                             try {
                                               await axios.put(`${API}/admin/sorteo/${sorteo.id}/actualizar-premio-video`, {
                                                 premio_index: pIdx,
@@ -1405,6 +1411,102 @@ const AdminDashboard = () => {
                                     </div>
                                   </div>
                                 ))}
+                                
+                                {/* Premios de sorteo por etapas */}
+                                {sorteo.tipo === 'etapas' && sorteo.etapas && sorteo.etapas.length > 0 && sorteo.etapas.map((etapa, etapaIdx) => (
+                                  <div key={etapaIdx} className="mb-4">
+                                    <p className="font-semibold text-sm mb-2 text-blue-700">Etapa {etapa.numero}: {etapa.nombre || etapa.premio}</p>
+                                    
+                                    {etapa.premios && etapa.premios.length > 0 ? (
+                                      etapa.premios.map((premio, pIdx) => (
+                                        <div key={pIdx} className="mb-3 p-3 bg-white border rounded ml-4">
+                                          <p className="font-semibold text-sm mb-2">Premio: {premio.nombre} <span className="text-gray-500 text-xs">(no editable)</span></p>
+                                          
+                                          <div className="space-y-2">
+                                            <div className="flex gap-2">
+                                              <div className="flex-1">
+                                                <Label className="text-xs">URL Imagen:</Label>
+                                                <Input 
+                                                  value={premiosImagenesTemp[`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-img`] !== undefined 
+                                                    ? premiosImagenesTemp[`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-img`] 
+                                                    : (premio.imagen_url || premio.imagen || '')}
+                                                  onChange={(e) => setPremiosImagenesTemp(prev => ({...prev, [`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-img`]: e.target.value}))}
+                                                  placeholder="https://..."
+                                                  className="mt-1"
+                                                />
+                                              </div>
+                                              <Button
+                                                size="sm"
+                                                className="self-end"
+                                                onClick={async () => {
+                                                  const nuevaUrl = premiosImagenesTemp[`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-img`] !== undefined 
+                                                    ? premiosImagenesTemp[`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-img`] 
+                                                    : (premio.imagen_url || premio.imagen || '');
+                                                  try {
+                                                    await axios.put(`${API}/admin/sorteo/${sorteo.id}/actualizar-etapa-premio-imagen`, {
+                                                      etapa_index: etapaIdx,
+                                                      premio_index: pIdx,
+                                                      imagen_url: nuevaUrl
+                                                    }, { withCredentials: true });
+                                                    toast.success('Imagen actualizada');
+                                                    fetchData();
+                                                  } catch (error) {
+                                                    toast.error('Error al actualizar');
+                                                  }
+                                                }}
+                                              >
+                                                Guardar cambios
+                                              </Button>
+                                            </div>
+
+                                            <div className="flex gap-2">
+                                              <div className="flex-1">
+                                                <Label className="text-xs">URL Video:</Label>
+                                                <Input 
+                                                  value={premiosImagenesTemp[`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-vid`] !== undefined 
+                                                    ? premiosImagenesTemp[`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-vid`] 
+                                                    : (premio.video_url || premio.video || '')}
+                                                  onChange={(e) => setPremiosImagenesTemp(prev => ({...prev, [`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-vid`]: e.target.value}))}
+                                                  placeholder="https://..."
+                                                  className="mt-1"
+                                                />
+                                              </div>
+                                              <Button
+                                                size="sm"
+                                                className="self-end"
+                                                onClick={async () => {
+                                                  const nuevaUrl = premiosImagenesTemp[`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-vid`] !== undefined 
+                                                    ? premiosImagenesTemp[`${sorteo.id}-etapa-${etapaIdx}-premio-${pIdx}-vid`] 
+                                                    : (premio.video_url || premio.video || '');
+                                                  try {
+                                                    await axios.put(`${API}/admin/sorteo/${sorteo.id}/actualizar-etapa-premio-video`, {
+                                                      etapa_index: etapaIdx,
+                                                      premio_index: pIdx,
+                                                      video_url: nuevaUrl
+                                                    }, { withCredentials: true });
+                                                    toast.success('Video actualizado');
+                                                    fetchData();
+                                                  } catch (error) {
+                                                    toast.error('Error al actualizar');
+                                                  }
+                                                }}
+                                              >
+                                                Guardar cambios
+                                              </Button>
+                                            </div>
+                                          </div>
+                                        </div>
+                                      ))
+                                    ) : (
+                                      <p className="text-xs text-gray-500 ml-4">Sin premios detallados en esta etapa</p>
+                                    )}
+                                  </div>
+                                ))}
+                                
+                                {/* Mensaje si no hay premios */}
+                                {(!sorteo.premios || sorteo.premios.length === 0) && (!sorteo.etapas || sorteo.etapas.length === 0) && (
+                                  <p className="text-sm text-gray-500">No hay premios configurados</p>
+                                )}
                               </div>
                             </div>
                           )}
