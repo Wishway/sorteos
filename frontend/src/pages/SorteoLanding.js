@@ -642,6 +642,32 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
               </CardContent>
             </Card>
 
+            {/* GALERÍA DE IMÁGENES PROMOCIONALES DEL SORTEO */}
+            {sorteo.imagenes && sorteo.imagenes.length > 0 && (
+              <Card className="sorteo-card">
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    📸 Imágenes del Sorteo
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    {sorteo.imagenes.map((imgUrl, idx) => (
+                      <div key={idx} className="relative group">
+                        <img 
+                          src={imgUrl} 
+                          alt={`${sorteo.titulo} - Imagen ${idx + 1}`}
+                          className="w-full h-48 object-cover rounded-lg shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
+                          onClick={() => window.open(imgUrl, '_blank')}
+                        />
+                        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-all duration-300 rounded-lg"></div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
             <Tabs defaultValue="descripcion" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
                 <TabsTrigger value="descripcion">Descripción</TabsTrigger>
