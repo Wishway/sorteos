@@ -374,12 +374,69 @@ const UsuarioDashboard = () => {
           </CardContent>
         </Card>
 
-        <Tabs defaultValue="activos" className="space-y-4">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
           <TabsList>
+            <TabsTrigger value="pendientes" data-testid="tab-pendientes">
+              Boletos Pendientes {boletosPendientes.length > 0 && `(${boletosPendientes.length})`}
+            </TabsTrigger>
             <TabsTrigger value="activos" data-testid="tab-activos">Boletos Activos</TabsTrigger>
             <TabsTrigger value="ganadores" data-testid="tab-ganadores">Premios Ganados</TabsTrigger>
             <TabsTrigger value="historial" data-testid="tab-historial">Historial</TabsTrigger>
           </TabsList>
+
+          {/* TAB: BOLETOS PENDIENTES DE APROBACIÓN */}
+          <TabsContent value="pendientes" className="space-y-4">
+            {loading ? (
+              <div className="text-center py-12">
+                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+              </div>
+            ) : boletosPendientes.length === 0 ? (
+              <Card className="p-12 text-center">
+                <Ticket className="w-16 h-16 mx-auto mb-4 text-gray-400" />
+                <h3 className="text-xl font-semibold mb-2">No tienes boletos pendientes</h3>
+                <p className="text-gray-600 mb-4">Todos tus boletos han sido aprobados</p>
+                <Button onClick={() => navigate('/')}>Ver Sorteos</Button>
+              </Card>
+            ) : (
+              <div className="space-y-4">
+                <Card className="p-4 bg-yellow-50 border-yellow-200">
+                  <p className="text-yellow-800 text-sm">
+                    ⏳ Estos boletos están pendientes de aprobación. Una vez que el administrador verifique tu pago, aparecerán en "Boletos Activos".
+                  </p>
+                </Card>
+                <div className="grid gap-4">
+                  {boletosPendientes.map((boleto) => (
+                    <Card key={boleto.id} className="sorteo-card border-yellow-300">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-3">
+                              <Badge>Boleto #{boleto.numero_boleto}</Badge>
+                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
+                                ⏳ Pendiente de Aprobación
+                              </Badge>
+                            </div>
+                            
+                            {boleto.sorteo && (
+                              <div className="mb-2">
+                                <p className="font-semibold text-lg">{boleto.sorteo.titulo}</p>
+                                <p className="text-xs text-gray-500">Código: {boleto.sorteo.landing_slug}</p>
+                              </div>
+                            )}
+                            
+                            <div className="text-sm text-gray-600 space-y-1">
+                              <p>Fecha de compra: {formatDateTime(boleto.fecha_compra)}</p>
+                              <p>Monto: {formatCurrency(boleto.precio_pagado)}</p>
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </div>
+            )}
+          </TabsContent>
 
           <TabsContent value="activos" className="space-y-4">
             {loading ? (
