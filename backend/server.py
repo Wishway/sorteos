@@ -2182,10 +2182,15 @@ async def get_ganadores_recientes():
                     }
         
         # Si ya tiene la info guardada directamente, usarla
-        if not ganador.get('usuario_nombre'):
+        if not ganador.get('usuario_nombre') and not ganador.get('nombre_usuario'):
             # Get user info
             user_doc = await db.users.find_one({'id': ganador['usuario_id']}, {"_id": 0})
             if user_doc:
+                ganador['nombre_usuario'] = user_doc.get('name', 'Anónimo')
+                ganador['email_usuario'] = user_doc.get('email', '')
+                ganador['cedula_usuario'] = user_doc.get('cedula', '')
+                ganador['celular_usuario'] = user_doc.get('celular', '')
+                # También mantener compatibilidad con campos antiguos
                 ganador['usuario_nombre'] = user_doc.get('name', 'Anónimo')
                 ganador['usuario_email'] = user_doc.get('email', '')
         
