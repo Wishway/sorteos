@@ -590,3 +590,44 @@ agent_communication:
     message: "DEFINITIVO TEST COMPLETED (2025-01-27): Executed the EXACT test procedure requested by user with carlos.vendedor@wishway.com/vendedor123. CRITICAL FINDING: The concurrent rendering error is 100% CONFIRMED and PERSISTS. Visual evidence shows red error overlay with 'Uncaught runtime errors:' and the exact message 'There was an error during concurrent rendering but React was able to recover by instead synchronously rendering the entire root.' This appears consistently after clicking 'Cerrar Sesión'. The logout functionality works (redirects to home) but the React concurrent rendering error is UNRESOLVED. Screenshot evidence captured. This is a CRITICAL ISSUE that needs immediate attention from main agent using websearch tool to find proper React 19 concurrent rendering solutions."
   - agent: "testing"
     message: "GOOGLE LOGIN FLOW TESTING COMPLETED (2025-01-29): Comprehensive testing of Google OAuth integration at https://rafflewave-1.preview.emergentagent.com/login completed successfully. ✅ TEST RESULTS: Google login button exists and displays correct text 'Continuar con Google', ✅ Button is enabled and clickable (not disabled), ✅ Clicking button successfully redirects to auth.emergentagent.com with proper redirect parameter, ✅ URL redirect format correct: https://auth.emergentagent.com/?redirect=https%3A%2F%2Frafflemaster-2.preview.emergentagent.com%2Flogin, ✅ No console errors detected during the flow, ✅ Authentication service integration working as expected. The initial Google OAuth redirect flow is functioning perfectly - button works correctly and redirects to Emergent Agent's authentication service as designed."
+
+## Testing Session - 2025-12-11
+
+### Admin Dashboard - Edición de Imágenes Promocionales en Sorteos Publicados
+
+**Contexto**: Se agregó funcionalidad para agregar/editar/eliminar imágenes promocionales en sorteos que ya están en estado PUBLISHED.
+
+**Cambios Implementados**:
+1. Backend: Agregado nuevo endpoint `PUT /api/admin/sorteo/{sorteo_id}/actualizar-imagenes` para manejar la lista completa de imágenes
+2. Frontend: Ya existía el código para mostrar el input de agregar nueva imagen, pero faltaba el endpoint del backend
+
+**Pruebas Backend Completadas (curl)**:
+- ✅ Login como admin funciona
+- ✅ Endpoint actualizar-imagenes funciona para agregar imágenes
+- ✅ Endpoint actualizar-imagenes funciona para eliminar imágenes
+
+frontend:
+  - task: "Admin Add/Edit Promotional Images on Published Raffles"
+    implemented: true
+    working: "NA"
+    file: "/app/frontend/src/pages/AdminDashboard.js"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: "NA"
+        agent: "main"
+        comment: "Backend endpoint created and tested via curl. Frontend UI exists. Need to test complete flow: 1) Login as admin, 2) Navigate to sorteos tab, 3) Find a PUBLISHED sorteo, 4) Click 'Ver/Editar Imágenes y Videos' button, 5) Verify the input for adding new images appears, 6) Add a test image URL and click 'Agregar imagen', 7) Verify image is added successfully, 8) Optionally test delete functionality."
+
+test_plan:
+  current_focus:
+    - "Admin Add/Edit Promotional Images on Published Raffles"
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "main"
+    message: "Implemented backend endpoint for updating promotional images on published raffles. The frontend code already existed but was calling a non-existent endpoint. Now the endpoint exists. Need testing agent to verify the complete flow works from the UI."
+    test_credentials:
+      admin: "admin@wishway.com / admin123"
+    test_scenario: "1) Login as admin, 2) Go to Sorteos tab, 3) Find a PUBLISHED sorteo (green badge), 4) Click 'Ver/Editar Imágenes y Videos', 5) Use the input to add a new promotional image URL, 6) Verify success message and image appears in the list"
