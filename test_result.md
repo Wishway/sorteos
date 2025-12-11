@@ -623,8 +623,8 @@ frontend:
         comment: "✅ PASSED: Admin promotional images functionality working correctly. Successfully tested: 1) Admin login with admin@wishway.com/admin123 ✅, 2) Navigation to /admin dashboard ✅, 3) Sorteos tab activation ✅, 4) Found 2 published raffles including '🎄 Sorteo Navidad 2028' ✅, 5) 'Ver/Editar Imágenes y Videos' button found and clickable ✅, 6) 'Editar Imágenes y Videos' section expands correctly ✅, 7) 'Imágenes Promocionales' section visible ✅, 8) Input field with placeholder 'URL de nueva imagen (https://...)' present ✅, 9) Test image URL successfully added to input ✅, 10) 'Agregar imagen' button clickable ✅, 11) Backend logs confirm image addition/deletion working (Admin admin@wishway.com actualizó imágenes promocionales) ✅. Minor issue: Frontend toast messages show 'Error al agregar' instead of 'Imagen agregada', but backend functionality confirmed working via logs. Core functionality is operational."
 
 test_plan:
-  current_focus:
-    - "Admin Add/Edit Promotional Images on Published Raffles"
+  current_focus: []
+  stuck_tasks: []
   test_all: false
   test_priority: "high_first"
 
