@@ -282,7 +282,13 @@ const SorteoLanding = () => {
       setCantidad(1);
       setNumerosBoletos(['']);
       setComprobanteUrl('');
-      fetchSorteoData();
+      
+      // REDIRIGIR AL PANEL DEL USUARIO - BOLETOS PENDIENTES
+      toast.info('Redirigiendo a tu panel para ver tus boletos pendientes...');
+      setTimeout(() => {
+        navigate('/usuario?tab=boletos');
+      }, 1500);
+      
     } catch (error) {
       if (error.response?.status === 400 && error.response?.data?.detail?.includes('completar tus datos')) {
         toast.error('Debes completar tus datos antes de comprar');
