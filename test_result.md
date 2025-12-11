@@ -667,3 +667,70 @@ agent_communication:
 test_credentials:
   admin: "admin@wishway.com / admin123"
   usuario: "usuario@test.com / test123"
+
+## Testing Session - 2025-12-11 (Backend Testing of New Improvements)
+
+### Backend Testing Results:
+
+backend:
+  - task: "Admin Boletos Pendientes Endpoint"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: Admin boletos-pendientes endpoint working correctly. Successfully tested with admin@wishway.com/admin123. API returns proper structure with user data (name, email, cedula, celular) when boletos exist. Empty response handled correctly when no pending boletos found."
+
+  - task: "Boleto Approval Validation (Backend)"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ FAILED CRITICAL: Boleto approval validation NOT working as expected. The validation logic in /api/admin/boleto/{boleto_id}/aprobar only checks for OTHER boletos with same number that are already approved, but does NOT prevent approving the SAME boleto multiple times. When attempting to approve an already-approved boleto, it returns 200 success instead of 400 error. The validation should check if the current boleto is already approved (pago_confirmado=true) before allowing re-approval."
+
+  - task: "Purchase Endpoint Verification"
+    implemented: true
+    working: true
+    file: "/app/backend/server.py"
+    stuck_count: 0
+    priority: "high"
+    needs_retesting: false
+    status_history:
+      - working: true
+        agent: "testing"
+        comment: "✅ PASSED: Purchase endpoint /api/boletos/comprar working correctly. Successfully tested purchase with usuario@test.com/test123. API accepts purchase requests and creates boletos properly. Response structure includes message, boletos array, total, metodo_pago, and pendiente_aprobacion fields. Boletos are created in pending state awaiting admin approval."
+
+  - task: "Ganadores Data Structure Validation"
+    implemented: true
+    working: false
+    file: "/app/backend/server.py"
+    stuck_count: 1
+    priority: "high"
+    needs_retesting: true
+    status_history:
+      - working: false
+        agent: "testing"
+        comment: "❌ FAILED CRITICAL: Ganadores data structure does NOT match requirements. The /api/ganadores/recientes endpoint returns fields like 'usuario_nombre', 'usuario_email' but the requirements specify 'nombre_usuario', 'email_usuario', 'cedula_usuario', 'celular_usuario'. Current structure: ['boleto_id', 'usuario_id', 'numero_boleto', 'premio', 'fecha_sorteo', 'usuario_nombre', 'usuario_email'] vs Required: ['nombre_usuario', 'email_usuario', 'cedula_usuario', 'celular_usuario', 'numero_boleto', 'premio', 'etapa', 'fecha_sorteo']. Missing cedula_usuario and celular_usuario fields entirely."
+
+test_plan:
+  current_focus:
+    - "Boleto Approval Validation (Backend)"
+    - "Ganadores Data Structure Validation"
+  stuck_tasks:
+    - "Boleto Approval Validation (Backend)"
+    - "Ganadores Data Structure Validation"
+  test_all: false
+  test_priority: "high_first"
+
+agent_communication:
+  - agent: "testing"
+    message: "BACKEND TESTING COMPLETED (2025-12-11): Tested new improvements for raffle platform. ✅ PASSED: Admin boletos-pendientes endpoint works correctly with proper user data structure. ✅ PASSED: Purchase endpoint functions properly and creates boletos in pending state. ❌ FAILED CRITICAL: Boleto approval validation allows duplicate approvals - needs fix to check if current boleto is already approved. ❌ FAILED CRITICAL: Ganadores data structure uses wrong field names (usuario_nombre vs nombre_usuario) and missing cedula_usuario/celular_usuario fields. Both critical issues need immediate attention from main agent."
