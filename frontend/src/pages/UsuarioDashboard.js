@@ -115,6 +115,7 @@ const UsuarioDashboard = () => {
   const boletosFiltradosData = boletosFiltrados();
   const boletosActivos = boletosFiltradosData.filter(b => b.estado === 'activo' || b.estado === 'ganador');
   const boletosGanadores = boletosFiltradosData.filter(b => b.estado === 'ganador' || b.etapa_ganada !== null);
+  const boletosPendientes = boletosFiltradosData.filter(b => !b.pago_confirmado);
   
   const handleChangePassword = async (e) => {
     e.preventDefault();
