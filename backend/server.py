@@ -1502,6 +1502,33 @@ async def actualizar_imagen_promo(sorteo_id: str, data: ActualizarImagenPromoReq
     
     return {"message": "Imagen actualizada exitosamente"}
 
+class ActualizarImagenesPromoRequest(BaseModel):
+    imagenes: List[str]
+
+@api_router.put("/admin/sorteo/{sorteo_id}/actualizar-imagenes")
+async def actualizar_imagenes_promo(sorteo_id: str, data: ActualizarImagenesPromoRequest, request: Request):
+    """Actualizar TODAS las imágenes promocionales de un sorteo PUBLISHED (agregar/eliminar)"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden actualizar imágenes")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] not in ['published', 'activo']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'imagenes': data.imagenes}}
+    )
+    
+    logger.info(f"Admin {admin.email} actualizó imágenes promocionales del sorteo {sorteo_id}: {len(data.imagenes)} imágenes")
+    await broadcast_sorteos_update()
+    
+    return {"message": "Imágenes actualizadas exitosamente"}
+
 @api_router.put("/admin/sorteo/{sorteo_id}/actualizar-premio-imagen")
 async def actualizar_premio_imagen(sorteo_id: str, data: ActualizarPremioImagenRequest, request: Request):
     """Actualizar imagen de UN premio específico de un sorteo PUBLISHED"""
