@@ -19,6 +19,7 @@ const API = `${BACKEND_URL}/api`;
 const UsuarioDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [boletos, setBoletos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [showChangePassword, setShowChangePassword] = useState(false);
@@ -32,6 +33,10 @@ const UsuarioDashboard = () => {
   const [sorteos, setSorteos] = useState([]);
   const [premiosGanados, setPremiosGanados] = useState([]);
   const [loadingPremios, setLoadingPremios] = useState(false);
+  
+  // Determinar tab inicial basado en parámetro de URL
+  const tabInicial = searchParams.get('tab') === 'boletos' ? 'pendientes' : 'activos';
+  const [activeTab, setActiveTab] = useState(tabInicial);
 
   useEffect(() => {
     if (!user) {
