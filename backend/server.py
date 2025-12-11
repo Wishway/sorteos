@@ -2379,8 +2379,12 @@ async def get_usuarios(request: Request):
     
     usuarios = await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
     for usuario in usuarios:
-        if isinstance(usuario['created_at'], str):
-            usuario['created_at'] = datetime.fromisoformat(usuario['created_at'])
+        # Manejar created_at que puede no existir o ser string
+        if 'created_at' in usuario:
+            if isinstance(usuario['created_at'], str):
+                usuario['created_at'] = datetime.fromisoformat(usuario['created_at'])
+        else:
+            usuario['created_at'] = datetime.now(timezone.utc)
     
     return usuarios
 
