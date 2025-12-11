@@ -636,3 +636,34 @@ agent_communication:
     test_scenario: "1) Login as admin, 2) Go to Sorteos tab, 3) Find a PUBLISHED sorteo (green badge), 4) Click 'Ver/Editar Imágenes y Videos', 5) Use the input to add a new promotional image URL, 6) Verify success message and image appears in the list"
   - agent: "testing"
     message: "TESTING COMPLETED SUCCESSFULLY (2025-12-11): Admin promotional images functionality is working correctly. ✅ All UI elements present and functional: login, dashboard navigation, sorteos tab, published raffles detection, expand/collapse images section, promotional images input field, and add/delete buttons. ✅ Backend integration confirmed working via server logs showing successful image additions/deletions. ✅ Core functionality operational - admins can add/edit promotional images on published raffles as requested. Minor issue: Frontend toast messages show 'Error al agregar' instead of success message, but this doesn't affect core functionality since backend operations are successful. The feature is ready for use."
+
+## Testing Session - 2025-12-11 (Mejoras Boletos & Sorteos Completados)
+
+### Cambios Implementados:
+
+**1. Celular del comprador en boletos pendientes**
+- El campo celular ya estaba presente en el frontend (línea 1655-1656 AdminDashboard.js)
+- El backend ya incluye todos los datos del usuario (endpoint `/admin/boletos-pendientes`)
+
+**2. Validación antes de aprobar boletos (Backend)**
+- Agregada validación en `/api/admin/boleto/{boleto_id}/aprobar`
+- Verifica que el número de boleto no haya sido aprobado para otro usuario
+- Devuelve error "El boleto #{numero} ya no está disponible. Fue adquirido por otro usuario."
+
+**3. Redirección después de comprar**
+- Agregado en SorteoLanding.js: `navigate('/usuario?tab=boletos')` después de compra exitosa
+- Toast informativo: "Redirigiendo a tu panel para ver tus boletos pendientes..."
+
+**4. Nuevo tab "Boletos Pendientes" en panel usuario**
+- Agregado tab en UsuarioDashboard.js
+- Soporte para parámetro URL `?tab=boletos`
+- Muestra boletos con `pago_confirmado: false`
+
+**5. Información completa del ganador en sorteos COMPLETED**
+- Agregado en AdminDashboard.js sección de ganadores
+- Muestra: nombre, email, cédula, celular, número boleto, premio, etapa, fecha
+- Backend modificado para incluir todos los datos del usuario en ganadores
+
+test_credentials:
+  admin: "admin@wishway.com / admin123"
+  usuario: "usuario@test.com / test123"
