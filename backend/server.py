@@ -1164,14 +1164,16 @@ async def seleccionar_ganadores_sorteo(sorteo_id: str):
         ganadores.append({
             'boleto_id': boleto_ganador['id'],
             'usuario_id': boleto_ganador['usuario_id'],
-            'nombre': usuario.get('name', '') if usuario else '',
-            'email': usuario.get('email', '') if usuario else '',
+            'nombre_usuario': usuario.get('name', '') if usuario else '',
+            'email_usuario': usuario.get('email', '') if usuario else '',
+            'cedula_usuario': usuario.get('cedula', '') if usuario else '',
+            'celular_usuario': usuario.get('celular', '') if usuario else '',
             'numero_boleto': boleto_ganador['numero_boleto'],
             'premio': premio_nombre,
             'premio_imagen': premio_imagen,
             'premio_video': premio_video,
-            'etapa_numero': etapa_numero,
-            'fecha_seleccion': datetime.now(timezone.utc).isoformat()
+            'etapa': etapa_numero,
+            'fecha_sorteo': datetime.now(timezone.utc).isoformat()
         })
     
     return ganadores
