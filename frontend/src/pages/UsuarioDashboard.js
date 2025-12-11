@@ -264,7 +264,7 @@ const UsuarioDashboard = () => {
                     🎉 ¡Felicidades! {premiosGanados.length === 1 ? 'Has ganado un premio' : 'Tienes premios ganados'}
                   </h2>
                   <p className="text-lg text-gray-700">
-                    Has ganado {premiosGanados.length} premio{premiosGanados.length !== 1 ? 's' : ''}. Revisa la sección "Premios Ganados" para más detalles.
+                    Has ganado {premiosGanados.length} premio{premiosGanados.length !== 1 ? 's' : ''}. Revisa la sección &quot;Premios Ganados&quot; para más detalles.
                   </p>
                 </div>
               </div>
