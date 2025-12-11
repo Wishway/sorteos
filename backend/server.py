@@ -2543,6 +2543,24 @@ async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Reque
     if not boleto_doc:
         raise HTTPException(status_code=404, detail="Boleto no encontrado")
     
+    # VALIDACIÓN: Verificar que el boleto sigue disponible antes de aprobar
+    numero_boleto = boleto_doc.get('numero_boleto')
+    sorteo_id = boleto_doc.get('sorteo_id')
+    
+    # Verificar si existe otro boleto CON PAGO CONFIRMADO para el mismo número
+    boleto_existente = await db.boletos.find_one({
+        'sorteo_id': sorteo_id,
+        'numero_boleto': numero_boleto,
+        'pago_confirmado': True,
+        'id': {'$ne': boleto_id}  # Excluir el boleto actual
+    })
+    
+    if boleto_existente:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"El boleto #{numero_boleto} ya no está disponible. Fue adquirido por otro usuario."
+        )
+    
     result = await db.boletos.update_one(
         {'id': boleto_id},
         {'$set': {
