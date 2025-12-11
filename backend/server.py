@@ -1593,6 +1593,88 @@ async def actualizar_premio_video(sorteo_id: str, data: ActualizarPremioVideoReq
     
     return {"message": "Video de premio actualizado exitosamente"}
 
+class ActualizarEtapaPremioImagenRequest(BaseModel):
+    etapa_index: int
+    premio_index: int
+    imagen_url: str
+
+class ActualizarEtapaPremioVideoRequest(BaseModel):
+    etapa_index: int
+    premio_index: int
+    video_url: str
+
+@api_router.put("/admin/sorteo/{sorteo_id}/actualizar-etapa-premio-imagen")
+async def actualizar_etapa_premio_imagen(sorteo_id: str, data: ActualizarEtapaPremioImagenRequest, request: Request):
+    """Actualizar imagen de UN premio específico dentro de una etapa de un sorteo PUBLISHED"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden actualizar imágenes")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] not in ['published', 'activo']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
+    
+    etapas = sorteo_doc.get('etapas', [])
+    if data.etapa_index >= len(etapas):
+        raise HTTPException(status_code=400, detail="Índice de etapa inválido")
+    
+    premios = etapas[data.etapa_index].get('premios', [])
+    if data.premio_index >= len(premios):
+        raise HTTPException(status_code=400, detail="Índice de premio inválido")
+    
+    etapas[data.etapa_index]['premios'][data.premio_index]['imagen_url'] = data.imagen_url
+    if 'imagen' in etapas[data.etapa_index]['premios'][data.premio_index]:
+        etapas[data.etapa_index]['premios'][data.premio_index]['imagen'] = data.imagen_url
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'etapas': etapas}}
+    )
+    
+    logger.info(f"Admin {admin.email} actualizó imagen de premio {data.premio_index} en etapa {data.etapa_index} del sorteo {sorteo_id}")
+    await broadcast_sorteos_update()
+    
+    return {"message": "Imagen de premio de etapa actualizada exitosamente"}
+
+@api_router.put("/admin/sorteo/{sorteo_id}/actualizar-etapa-premio-video")
+async def actualizar_etapa_premio_video(sorteo_id: str, data: ActualizarEtapaPremioVideoRequest, request: Request):
+    """Actualizar video de UN premio específico dentro de una etapa de un sorteo PUBLISHED"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden actualizar videos")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    if sorteo_doc['estado'] not in ['published', 'activo']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar videos de sorteos publicados")
+    
+    etapas = sorteo_doc.get('etapas', [])
+    if data.etapa_index >= len(etapas):
+        raise HTTPException(status_code=400, detail="Índice de etapa inválido")
+    
+    premios = etapas[data.etapa_index].get('premios', [])
+    if data.premio_index >= len(premios):
+        raise HTTPException(status_code=400, detail="Índice de premio inválido")
+    
+    etapas[data.etapa_index]['premios'][data.premio_index]['video_url'] = data.video_url
+    if 'video' in etapas[data.etapa_index]['premios'][data.premio_index]:
+        etapas[data.etapa_index]['premios'][data.premio_index]['video'] = data.video_url
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'etapas': etapas}}
+    )
+    
+    logger.info(f"Admin {admin.email} actualizó video de premio {data.premio_index} en etapa {data.etapa_index} del sorteo {sorteo_id}")
+    await broadcast_sorteos_update()
+    
+    return {"message": "Video de premio de etapa actualizado exitosamente"}
+
 @api_router.post("/admin/actualizar-estados-sorteos")
 async def actualizar_estados_automatico():
     """Verificar y actualizar estados de todos los sorteos activos (para llamar periódicamente)"""
