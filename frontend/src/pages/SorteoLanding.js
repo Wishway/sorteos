@@ -480,7 +480,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                                 <CheckCircle className="w-5 h-5 text-green-600" />
                               )}
                             </div>
-                            <p className="font-semibold text-lg">{etapa.premio}</p>
+                            <p className="font-semibold text-lg">{etapa.nombre || etapa.premio}</p>
                             <p className="text-sm text-gray-600 mt-1">
                               Se activa al {etapa.porcentaje}% de boletos vendidos
                             </p>
@@ -489,6 +489,27 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                                 <Clock className="w-4 h-4" />
                                 Sorteado el {formatDateTime(etapa.fecha_sorteo)}
                               </p>
+                            )}
+                            
+                            {/* GANADORES DE ESTA ETAPA */}
+                            {etapa.completado && sorteo.ganadores && sorteo.ganadores.length > 0 && (
+                              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
+                                <p className="text-sm font-semibold text-yellow-800 mb-2">🏆 Ganadores de esta etapa:</p>
+                                <div className="space-y-2">
+                                  {sorteo.ganadores
+                                    .filter(g => g.etapa === etapa.numero || g.etapa_numero === etapa.numero)
+                                    .map((ganador, gIdx) => (
+                                      <div key={gIdx} className="text-sm bg-white p-2 rounded border">
+                                        <p className="font-semibold">{ganador.nombre_usuario || ganador.nombre || ganador.email_usuario || 'Ganador'}</p>
+                                        <p className="text-gray-600">Boleto #{ganador.numero_boleto} - {ganador.premio}</p>
+                                      </div>
+                                    ))
+                                  }
+                                  {sorteo.ganadores.filter(g => g.etapa === etapa.numero || g.etapa_numero === etapa.numero).length === 0 && (
+                                    <p className="text-sm text-gray-500 italic">Pendiente de publicar ganadores</p>
+                                  )}
+                                </div>
+                              </div>
                             )}
                           </div>
                           <div className="text-right">
