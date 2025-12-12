@@ -375,13 +375,19 @@ const UsuarioDashboard = () => {
         </Card>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList>
-            <TabsTrigger value="pendientes" data-testid="tab-pendientes">
-              Boletos Pendientes {boletosPendientes.length > 0 && `(${boletosPendientes.length})`}
+          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
+            <TabsTrigger value="pendientes" data-testid="tab-pendientes" className="text-xs sm:text-sm py-2">
+              <span className="hidden sm:inline">Boletos </span>Pendientes {boletosPendientes.length > 0 && `(${boletosPendientes.length})`}
             </TabsTrigger>
-            <TabsTrigger value="activos" data-testid="tab-activos">Boletos Activos</TabsTrigger>
-            <TabsTrigger value="ganadores" data-testid="tab-ganadores">Premios Ganados</TabsTrigger>
-            <TabsTrigger value="historial" data-testid="tab-historial">Historial</TabsTrigger>
+            <TabsTrigger value="activos" data-testid="tab-activos" className="text-xs sm:text-sm py-2">
+              <span className="hidden sm:inline">Boletos </span>Activos
+            </TabsTrigger>
+            <TabsTrigger value="ganadores" data-testid="tab-ganadores" className="text-xs sm:text-sm py-2">
+              <span className="hidden sm:inline">Premios </span>Ganados
+            </TabsTrigger>
+            <TabsTrigger value="historial" data-testid="tab-historial" className="text-xs sm:text-sm py-2">
+              Historial
+            </TabsTrigger>
           </TabsList>
 
           {/* TAB: BOLETOS PENDIENTES DE APROBACIÓN */}
