@@ -464,62 +464,65 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                 </CardHeader>
                 <CardContent>
                   <div className="space-y-4">
-                    {sorteo.etapas.map((etapa) => (
-                      <div 
-                        key={etapa.numero} 
-                        className={`p-4 rounded-lg border-2 ${etapa.completado ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-gray-300'}`}
-                        data-testid={`etapa-${etapa.numero}`}
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <Badge variant={etapa.completado ? 'default' : 'secondary'}>
-                                Etapa {etapa.numero}
-                              </Badge>
-                              {etapa.completado && (
-                                <CheckCircle className="w-5 h-5 text-green-600" />
-                              )}
-                            </div>
-                            <p className="font-semibold text-lg">{etapa.nombre || etapa.premio}</p>
-                            <p className="text-sm text-gray-600 mt-1">
-                              Se activa al {etapa.porcentaje}% de boletos vendidos
-                            </p>
-                            {etapa.completado && etapa.fecha_sorteo && (
-                              <p className="text-sm text-green-700 mt-2 flex items-center gap-1">
-                                <Clock className="w-4 h-4" />
-                                Sorteado el {formatDateTime(etapa.fecha_sorteo)}
+                    {sorteo.etapas.map((etapa) => {
+                      // Buscar ganadores de esta etapa
+                      const ganadoresEtapa = sorteo.ganadores 
+                        ? sorteo.ganadores.filter(g => g.etapa === etapa.numero || g.etapa_numero === etapa.numero)
+                        : [];
+                      const tieneGanadores = ganadoresEtapa.length > 0;
+                      const etapaCompletada = etapa.completado || tieneGanadores;
+                      
+                      return (
+                        <div 
+                          key={etapa.numero} 
+                          className={`p-4 rounded-lg border-2 ${etapaCompletada ? 'bg-green-50 border-green-500' : 'bg-gray-50 border-gray-300'}`}
+                          data-testid={`etapa-${etapa.numero}`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <Badge variant={etapaCompletada ? 'default' : 'secondary'}>
+                                  Etapa {etapa.numero}
+                                </Badge>
+                                {etapaCompletada && (
+                                  <CheckCircle className="w-5 h-5 text-green-600" />
+                                )}
+                              </div>
+                              <p className="font-semibold text-lg">{etapa.nombre || etapa.premio}</p>
+                              <p className="text-sm text-gray-600 mt-1">
+                                Se activa al {etapa.porcentaje}% de boletos vendidos
                               </p>
-                            )}
-                            
-                            {/* GANADORES DE ESTA ETAPA */}
-                            {etapa.completado && sorteo.ganadores && sorteo.ganadores.length > 0 && (
-                              <div className="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
-                                <p className="text-sm font-semibold text-yellow-800 mb-2">🏆 Ganadores de esta etapa:</p>
-                                <div className="space-y-2">
-                                  {sorteo.ganadores
-                                    .filter(g => g.etapa === etapa.numero || g.etapa_numero === etapa.numero)
-                                    .map((ganador, gIdx) => (
+                              {(etapa.completado && etapa.fecha_sorteo) && (
+                                <p className="text-sm text-green-700 mt-2 flex items-center gap-1">
+                                  <Clock className="w-4 h-4" />
+                                  Sorteado el {formatDateTime(etapa.fecha_sorteo)}
+                                </p>
+                              )}
+                              
+                              {/* GANADORES DE ESTA ETAPA */}
+                              {tieneGanadores && (
+                                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
+                                  <p className="text-sm font-semibold text-yellow-800 mb-2">🏆 Ganadores de esta etapa:</p>
+                                  <div className="space-y-2">
+                                    {ganadoresEtapa.map((ganador, gIdx) => (
                                       <div key={gIdx} className="text-sm bg-white p-2 rounded border">
                                         <p className="font-semibold">{ganador.nombre_usuario || ganador.nombre || ganador.email_usuario || 'Ganador'}</p>
                                         <p className="text-gray-600">Boleto #{ganador.numero_boleto} - {ganador.premio}</p>
                                       </div>
-                                    ))
-                                  }
-                                  {sorteo.ganadores.filter(g => g.etapa === etapa.numero || g.etapa_numero === etapa.numero).length === 0 && (
-                                    <p className="text-sm text-gray-500 italic">Pendiente de publicar ganadores</p>
-                                  )}
+                                    ))}
+                                  </div>
                                 </div>
-                              </div>
-                            )}
-                          </div>
-                          <div className="text-right">
-                            <p className="text-2xl font-bold" style={{ color: sorteo.color_primario }}>
-                              {etapa.porcentaje}%
-                            </p>
+                              )}
+                            </div>
+                            <div className="text-right">
+                              <p className="text-2xl font-bold" style={{ color: sorteo.color_primario }}>
+                                {etapa.porcentaje}%
+                              </p>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 </CardContent>
               </Card>
