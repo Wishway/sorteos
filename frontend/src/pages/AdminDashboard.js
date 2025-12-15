@@ -1211,10 +1211,10 @@ const AdminDashboard = () => {
                               <p className="text-xs text-gray-500 italic mb-2">Sorteo finalizado</p>
                               
                               {/* INFORMACIÓN COMPLETA DE GANADORES */}
-                              {sorteo.ganadores && sorteo.ganadores.length > 0 && (
+                              {sorteo.ganadores && sorteo.ganadores.length > 0 ? (
                                 <div className="mb-4 p-3 bg-green-50 border border-green-200 rounded-lg">
                                   <h4 className="font-semibold text-green-800 mb-3 flex items-center gap-2">
-                                    🏆 Ganadores del Sorteo
+                                    🏆 Ganadores del Sorteo ({sorteo.ganadores.length})
                                   </h4>
                                   <div className="space-y-4">
                                     {sorteo.ganadores.map((ganador, gIdx) => (
@@ -1223,8 +1223,8 @@ const AdminDashboard = () => {
                                           {/* Datos del Ganador */}
                                           <div>
                                             <p className="text-xs text-green-700 font-semibold mb-1">👤 Datos del Ganador:</p>
-                                            <p className="text-sm"><strong>Nombre:</strong> {ganador.nombre_usuario || 'N/A'}</p>
-                                            <p className="text-sm"><strong>Email:</strong> {ganador.email_usuario || 'N/A'}</p>
+                                            <p className="text-sm"><strong>Nombre:</strong> {ganador.nombre_usuario || ganador.nombre || 'N/A'}</p>
+                                            <p className="text-sm"><strong>Email:</strong> {ganador.email_usuario || ganador.email || 'N/A'}</p>
                                             <p className="text-sm"><strong>Cédula:</strong> {ganador.cedula_usuario || 'N/A'}</p>
                                             <p className="text-sm"><strong>Celular:</strong> {ganador.celular_usuario || 'N/A'}</p>
                                           </div>
@@ -1234,8 +1234,8 @@ const AdminDashboard = () => {
                                             <p className="text-xs text-green-700 font-semibold mb-1">🎟️ Datos del Boleto:</p>
                                             <p className="text-sm"><strong>N° Boleto:</strong> #{ganador.numero_boleto}</p>
                                             <p className="text-sm"><strong>Premio:</strong> {ganador.premio || 'Premio principal'}</p>
-                                            {ganador.etapa && (
-                                              <p className="text-sm"><strong>Etapa:</strong> {ganador.etapa}</p>
+                                            {(ganador.etapa || ganador.etapa_numero) && (
+                                              <p className="text-sm"><strong>Etapa:</strong> {ganador.etapa || ganador.etapa_numero}</p>
                                             )}
                                             {ganador.fecha_sorteo && (
                                               <p className="text-sm"><strong>Fecha:</strong> {formatDateTime(ganador.fecha_sorteo)}</p>
@@ -1245,6 +1245,10 @@ const AdminDashboard = () => {
                                       </div>
                                     ))}
                                   </div>
+                                </div>
+                              ) : (
+                                <div className="mb-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                  <p className="text-sm text-yellow-700">⚠️ No hay ganadores registrados para este sorteo</p>
                                 </div>
                               )}
                               
