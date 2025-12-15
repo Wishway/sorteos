@@ -1623,8 +1623,8 @@ async def actualizar_premio_video(sorteo_id: str, data: ActualizarPremioVideoReq
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if sorteo_doc['estado'] not in ['published', 'activo']:
-        raise HTTPException(status_code=400, detail="Solo se pueden actualizar videos de sorteos publicados")
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar videos de sorteos publicados o en espera")
     
     premios = sorteo_doc.get('premios', [])
     if data.premio_index >= len(premios):
@@ -1701,8 +1701,8 @@ async def actualizar_etapa_premio_video(sorteo_id: str, data: ActualizarEtapaPre
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if sorteo_doc['estado'] not in ['published', 'activo']:
-        raise HTTPException(status_code=400, detail="Solo se pueden actualizar videos de sorteos publicados")
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar videos de sorteos publicados o en espera")
     
     etapas = sorteo_doc.get('etapas', [])
     if data.etapa_index >= len(etapas):
