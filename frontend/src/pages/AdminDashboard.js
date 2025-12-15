@@ -1192,8 +1192,8 @@ const AdminDashboard = () => {
                             </Button>
                           )}
 
-                          {/* PUBLISHED: Ver/Editar Medios */}
-                          {(sorteo.estado === 'published' || sorteo.estado === 'activo') && (
+                          {/* PUBLISHED / WAITING: Ver/Editar Medios */}
+                          {(sorteo.estado === 'published' || sorteo.estado === 'activo' || sorteo.estado === 'waiting') && (
                             <Button 
                               variant="outline"
                               size="sm"
