@@ -1233,6 +1233,20 @@ async def get_sorteos(estado: Optional[str] = None, incluir_draft: bool = False)
         for etapa in sorteo.get('etapas', []):
             if etapa.get('fecha_sorteo') and isinstance(etapa['fecha_sorteo'], str):
                 etapa['fecha_sorteo'] = datetime.fromisoformat(etapa['fecha_sorteo'])
+        
+        # ENRIQUECER datos de ganadores con información actualizada del usuario
+        for ganador in sorteo.get('ganadores', []):
+            if ganador.get('usuario_id') and (not ganador.get('celular_usuario') or not ganador.get('cedula_usuario')):
+                usuario_doc = await db.users.find_one({'id': ganador['usuario_id']}, {"_id": 0})
+                if usuario_doc:
+                    if not ganador.get('nombre_usuario'):
+                        ganador['nombre_usuario'] = usuario_doc.get('name', '')
+                    if not ganador.get('email_usuario'):
+                        ganador['email_usuario'] = usuario_doc.get('email', '')
+                    if not ganador.get('cedula_usuario'):
+                        ganador['cedula_usuario'] = usuario_doc.get('cedula', '')
+                    if not ganador.get('celular_usuario'):
+                        ganador['celular_usuario'] = usuario_doc.get('celular', '')
     
     return sorteos
 
