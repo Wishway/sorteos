@@ -1494,8 +1494,8 @@ async def ajustar_minimo_boletos(sorteo_id: str, minimo: int, request: Request):
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if sorteo_doc['estado'] not in ['published', 'activo']:
-        raise HTTPException(status_code=400, detail="Solo se puede ajustar el mínimo de sorteos publicados")
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
+        raise HTTPException(status_code=400, detail="Solo se puede ajustar el mínimo de sorteos publicados o en espera")
     
     await db.sorteos.update_one(
         {'id': sorteo_id},
