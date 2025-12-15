@@ -1121,60 +1121,95 @@ async def seleccionar_ganadores_sorteo(sorteo_id: str):
     if not boletos:
         return []
     
-    # Determinar cuántos ganadores necesitamos
-    num_premios = len(sorteo.premios) if sorteo.tipo == 'unico' else len(sorteo.etapas)
-    num_premios = max(num_premios, 1)  # Al menos 1 ganador
-    
-    # Seleccionar ganadores aleatorios
     import random
     ganadores = []
     boletos_disponibles = list(boletos)
     
-    for i in range(min(num_premios, len(boletos_disponibles))):
-        boleto_ganador = random.choice(boletos_disponibles)
-        boletos_disponibles.remove(boleto_ganador)
-        
-        # Obtener info del usuario
-        usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
-        
-        # Determinar premio y etapa
-        premio_info = None
-        etapa_numero = None
-        premio_nombre = ""
-        premio_imagen = None
-        premio_video = None
-        
-        if sorteo.tipo == 'unico':
-            if i < len(sorteo.premios):
-                premio = sorteo.premios[i]
-                premio_nombre = premio.nombre
-                premio_imagen = premio.imagen
-                premio_video = premio.video
-        else:
-            if i < len(sorteo.etapas):
-                etapa = sorteo.etapas[i]
-                premio_nombre = etapa.premio
-                etapa_numero = etapa.numero
-                # Si la etapa tiene imagen/video asociado
-                if hasattr(etapa, 'imagen'):
-                    premio_imagen = etapa.imagen
-                if hasattr(etapa, 'video'):
-                    premio_video = etapa.video
-        
-        ganadores.append({
-            'boleto_id': boleto_ganador['id'],
-            'usuario_id': boleto_ganador['usuario_id'],
-            'nombre_usuario': usuario.get('name', '') if usuario else '',
-            'email_usuario': usuario.get('email', '') if usuario else '',
-            'cedula_usuario': usuario.get('cedula', '') if usuario else '',
-            'celular_usuario': usuario.get('celular', '') if usuario else '',
-            'numero_boleto': boleto_ganador['numero_boleto'],
-            'premio': premio_nombre,
-            'premio_imagen': premio_imagen,
-            'premio_video': premio_video,
-            'etapa': etapa_numero,
-            'fecha_sorteo': datetime.now(timezone.utc).isoformat()
-        })
+    if sorteo.tipo == 'unico':
+        # Para sorteos ÚNICOS: un ganador por cada premio
+        for i, premio in enumerate(sorteo.premios):
+            if not boletos_disponibles:
+                break
+            
+            boleto_ganador = random.choice(boletos_disponibles)
+            boletos_disponibles.remove(boleto_ganador)
+            
+            # Obtener info del usuario
+            usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
+            
+            ganadores.append({
+                'boleto_id': boleto_ganador['id'],
+                'usuario_id': boleto_ganador['usuario_id'],
+                'nombre_usuario': usuario.get('name', '') if usuario else '',
+                'email_usuario': usuario.get('email', '') if usuario else '',
+                'cedula_usuario': usuario.get('cedula', '') if usuario else '',
+                'celular_usuario': usuario.get('celular', '') if usuario else '',
+                'numero_boleto': boleto_ganador['numero_boleto'],
+                'premio': premio.nombre,
+                'premio_imagen': premio.imagen,
+                'premio_video': premio.video,
+                'etapa': None,
+                'etapa_numero': None,
+                'fecha_sorteo': datetime.now(timezone.utc).isoformat()
+            })
+    else:
+        # Para sorteos POR ETAPAS: un ganador por cada premio de cada etapa
+        for etapa in sorteo.etapas:
+            etapa_premios = etapa.premios if hasattr(etapa, 'premios') and etapa.premios else []
+            
+            if etapa_premios:
+                # Si la etapa tiene premios definidos, sortear cada uno
+                for premio in etapa_premios:
+                    if not boletos_disponibles:
+                        break
+                    
+                    boleto_ganador = random.choice(boletos_disponibles)
+                    boletos_disponibles.remove(boleto_ganador)
+                    
+                    # Obtener info del usuario
+                    usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
+                    
+                    ganadores.append({
+                        'boleto_id': boleto_ganador['id'],
+                        'usuario_id': boleto_ganador['usuario_id'],
+                        'nombre_usuario': usuario.get('name', '') if usuario else '',
+                        'email_usuario': usuario.get('email', '') if usuario else '',
+                        'cedula_usuario': usuario.get('cedula', '') if usuario else '',
+                        'celular_usuario': usuario.get('celular', '') if usuario else '',
+                        'numero_boleto': boleto_ganador['numero_boleto'],
+                        'premio': premio.nombre if hasattr(premio, 'nombre') else str(premio.get('nombre', '')),
+                        'premio_imagen': premio.imagen_url if hasattr(premio, 'imagen_url') else premio.get('imagen_url', None),
+                        'premio_video': premio.video_url if hasattr(premio, 'video_url') else premio.get('video_url', None),
+                        'etapa': etapa.numero,
+                        'etapa_numero': etapa.numero,
+                        'fecha_sorteo': datetime.now(timezone.utc).isoformat()
+                    })
+            else:
+                # Si la etapa no tiene premios detallados, usar el nombre de la etapa como premio
+                if not boletos_disponibles:
+                    break
+                
+                boleto_ganador = random.choice(boletos_disponibles)
+                boletos_disponibles.remove(boleto_ganador)
+                
+                # Obtener info del usuario
+                usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
+                
+                ganadores.append({
+                    'boleto_id': boleto_ganador['id'],
+                    'usuario_id': boleto_ganador['usuario_id'],
+                    'nombre_usuario': usuario.get('name', '') if usuario else '',
+                    'email_usuario': usuario.get('email', '') if usuario else '',
+                    'cedula_usuario': usuario.get('cedula', '') if usuario else '',
+                    'celular_usuario': usuario.get('celular', '') if usuario else '',
+                    'numero_boleto': boleto_ganador['numero_boleto'],
+                    'premio': etapa.premio if hasattr(etapa, 'premio') else etapa.nombre,
+                    'premio_imagen': None,
+                    'premio_video': None,
+                    'etapa': etapa.numero,
+                    'etapa_numero': etapa.numero,
+                    'fecha_sorteo': datetime.now(timezone.utc).isoformat()
+                })
     
     return ganadores
 
