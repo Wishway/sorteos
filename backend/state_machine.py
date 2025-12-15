@@ -282,7 +282,8 @@ async def seleccionar_ganadores(sorteo_id: str, sorteo):
 
 async def seleccionar_ganador_etapa(sorteo_id: str, sorteo, etapa_num: int):
     """
-    Seleccionar UN ganador para una ETAPA específica
+    Seleccionar ganadores para TODOS los premios de una ETAPA específica.
+    Retorna una LISTA de ganadores (uno por cada premio de la etapa).
     """
     boletos = await db.boletos.find({
         'sorteo_id': sorteo_id,
@@ -290,25 +291,81 @@ async def seleccionar_ganador_etapa(sorteo_id: str, sorteo, etapa_num: int):
     }).to_list(10000)
     
     if not boletos:
-        return None
-    
-    # Elegir un boleto al azar
-    boleto_ganador = random.choice(boletos)
-    usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
+        return []
     
     # Obtener info de la etapa
     etapa = sorteo.etapas[etapa_num - 1] if etapa_num <= len(sorteo.etapas) else None
-    premio_nombre = etapa.premio if etapa else f"Premio Etapa {etapa_num}"
+    if not etapa:
+        return []
     
-    ganador = {
-        'boleto_id': boleto_ganador['id'],
-        'usuario_id': boleto_ganador['usuario_id'],
-        'nombre': usuario.get('name', '') if usuario else '',
-        'email': usuario.get('email', '') if usuario else '',
-        'numero_boleto': boleto_ganador['numero_boleto'],
-        'premio': premio_nombre,
-        'etapa_numero': etapa_num,
-        'fecha_seleccion': datetime.now(timezone.utc).isoformat()
-    }
+    ganadores = []
+    boletos_disponibles = list(boletos)
     
-    return ganador
+    # Verificar si la etapa tiene premios definidos
+    etapa_premios = []
+    if hasattr(etapa, 'premios') and etapa.premios:
+        etapa_premios = etapa.premios
+    
+    if etapa_premios:
+        # SORTEAR CADA PREMIO de la etapa
+        for premio in etapa_premios:
+            if not boletos_disponibles:
+                break
+            
+            # Elegir un boleto al azar
+            boleto_ganador = random.choice(boletos_disponibles)
+            boletos_disponibles.remove(boleto_ganador)  # Evitar que gane otro premio de la misma etapa
+            
+            usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
+            
+            # Obtener nombre del premio
+            premio_nombre = premio.nombre if hasattr(premio, 'nombre') else premio.get('nombre', f'Premio Etapa {etapa_num}')
+            premio_imagen = premio.imagen_url if hasattr(premio, 'imagen_url') else premio.get('imagen_url', None)
+            premio_video = premio.video_url if hasattr(premio, 'video_url') else premio.get('video_url', None)
+            
+            ganador = {
+                'boleto_id': boleto_ganador['id'],
+                'usuario_id': boleto_ganador['usuario_id'],
+                'nombre_usuario': usuario.get('name', '') if usuario else '',
+                'email_usuario': usuario.get('email', '') if usuario else '',
+                'cedula_usuario': usuario.get('cedula', '') if usuario else '',
+                'celular_usuario': usuario.get('celular', '') if usuario else '',
+                'numero_boleto': boleto_ganador['numero_boleto'],
+                'premio': premio_nombre,
+                'premio_imagen': premio_imagen,
+                'premio_video': premio_video,
+                'etapa': etapa_num,
+                'etapa_numero': etapa_num,
+                'fecha_sorteo': datetime.now(timezone.utc).isoformat()
+            }
+            
+            ganadores.append(ganador)
+            logger.info(f"Sorteo {sorteo_id} Etapa {etapa_num}: Ganador para premio '{premio_nombre}' - Boleto #{boleto_ganador['numero_boleto']}")
+    else:
+        # Si no hay premios detallados, usar el nombre de la etapa como premio único
+        if boletos_disponibles:
+            boleto_ganador = random.choice(boletos_disponibles)
+            usuario = await db.users.find_one({'id': boleto_ganador['usuario_id']}, {"_id": 0})
+            
+            premio_nombre = etapa.premio if hasattr(etapa, 'premio') else etapa.nombre if hasattr(etapa, 'nombre') else f"Premio Etapa {etapa_num}"
+            
+            ganador = {
+                'boleto_id': boleto_ganador['id'],
+                'usuario_id': boleto_ganador['usuario_id'],
+                'nombre_usuario': usuario.get('name', '') if usuario else '',
+                'email_usuario': usuario.get('email', '') if usuario else '',
+                'cedula_usuario': usuario.get('cedula', '') if usuario else '',
+                'celular_usuario': usuario.get('celular', '') if usuario else '',
+                'numero_boleto': boleto_ganador['numero_boleto'],
+                'premio': premio_nombre,
+                'premio_imagen': None,
+                'premio_video': None,
+                'etapa': etapa_num,
+                'etapa_numero': etapa_num,
+                'fecha_sorteo': datetime.now(timezone.utc).isoformat()
+            }
+            
+            ganadores.append(ganador)
+            logger.info(f"Sorteo {sorteo_id} Etapa {etapa_num}: Ganador para '{premio_nombre}' - Boleto #{boleto_ganador['numero_boleto']}")
+    
+    return ganadores
