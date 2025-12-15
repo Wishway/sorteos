@@ -146,14 +146,35 @@ const HomeComplete = () => {
     const newCountdowns = {};
     sorteosWaiting.forEach(sorteo => {
       const ahora = new Date();
-      const fechaInicio = new Date(sorteo.fecha_cierre);
-      const diff = fechaInicio - ahora;
       
-      if (diff > 0) {
-        const horas = Math.floor(diff / (1000 * 60 * 60));
-        const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const segundos = Math.floor((diff % (1000 * 60)) / 1000);
-        newCountdowns[sorteo.id] = { horas, minutos, segundos };
+      // Si tiene waiting_hasta, usar ese (contador de 5 min)
+      if (sorteo.waiting_hasta) {
+        const waitingHasta = new Date(sorteo.waiting_hasta);
+        const diff = waitingHasta - ahora;
+        
+        if (diff > 0) {
+          const minutos = Math.floor(diff / (1000 * 60));
+          const segundos = Math.floor((diff % (1000 * 60)) / 1000);
+          newCountdowns[sorteo.id] = { 
+            horas: 0, 
+            minutos, 
+            segundos,
+            usaWaitingHasta: true 
+          };
+        } else {
+          newCountdowns[sorteo.id] = { horas: 0, minutos: 0, segundos: 0, usaWaitingHasta: true };
+        }
+      } else {
+        // Fallback: usar fecha_cierre
+        const fechaInicio = new Date(sorteo.fecha_cierre);
+        const diff = fechaInicio - ahora;
+        
+        if (diff > 0) {
+          const horas = Math.floor(diff / (1000 * 60 * 60));
+          const minutos = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+          const segundos = Math.floor((diff % (1000 * 60)) / 1000);
+          newCountdowns[sorteo.id] = { horas, minutos, segundos, usaWaitingHasta: false };
+        }
       }
     });
     setCountdowns(newCountdowns);
