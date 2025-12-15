@@ -1534,8 +1534,8 @@ async def actualizar_imagen_promo(sorteo_id: str, data: ActualizarImagenPromoReq
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if sorteo_doc['estado'] not in ['published', 'activo']:
-        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados o en espera")
     
     imagenes = sorteo_doc.get('imagenes', [])
     if data.index >= len(imagenes):
@@ -1567,8 +1567,8 @@ async def actualizar_imagenes_promo(sorteo_id: str, data: ActualizarImagenesProm
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if sorteo_doc['estado'] not in ['published', 'activo']:
-        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados o en espera")
     
     await db.sorteos.update_one(
         {'id': sorteo_id},
@@ -1591,8 +1591,8 @@ async def actualizar_premio_imagen(sorteo_id: str, data: ActualizarPremioImagenR
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if sorteo_doc['estado'] not in ['published', 'activo']:
-        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados o en espera")
     
     premios = sorteo_doc.get('premios', [])
     if data.premio_index >= len(premios):
@@ -1665,8 +1665,8 @@ async def actualizar_etapa_premio_imagen(sorteo_id: str, data: ActualizarEtapaPr
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    if sorteo_doc['estado'] not in ['published', 'activo']:
-        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados")
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
+        raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados o en espera")
     
     etapas = sorteo_doc.get('etapas', [])
     if data.etapa_index >= len(etapas):
