@@ -304,10 +304,37 @@ const HomeComplete = () => {
                           const ahora = new Date();
                           const fechaInicio = new Date(sorteo.fecha_cierre);
                           const fechaWaiting = sorteo.fecha_waiting ? new Date(sorteo.fecha_waiting) : null;
+                          const waitingHasta = sorteo.waiting_hasta ? new Date(sorteo.waiting_hasta) : null;
                           const todosVendidos = sorteo.progreso_porcentaje >= 100;
                           const fechaAlcanzada = fechaInicio <= ahora;
                           
-                          // Si ambas condiciones se cumplieron, mostrar contador de 30 min desde fecha_waiting
+                          // Si tiene waiting_hasta (contador de 5 min), mostrarlo directamente
+                          if (waitingHasta && waitingHasta > ahora) {
+                            // Calcular tiempo restante en segundos
+                            const tiempoRestante = Math.max(0, Math.floor((waitingHasta - ahora) / 1000));
+                            const minutos = Math.floor(tiempoRestante / 60);
+                            const segundos = tiempoRestante % 60;
+                            
+                            return (
+                              <>
+                                <p className="text-orange-400 text-sm mb-3 font-semibold">¡Sorteo comienza en:</p>
+                                <div className="flex gap-2 items-center justify-center">
+                                  <div className="text-center">
+                                    <div className="text-3xl font-bold text-white">{String(minutos).padStart(2, '0')}</div>
+                                    <div className="text-xs text-gray-300">min</div>
+                                  </div>
+                                  <span className="text-3xl font-bold text-white">:</span>
+                                  <div className="text-center">
+                                    <div className="text-3xl font-bold text-white">{String(segundos).padStart(2, '0')}</div>
+                                    <div className="text-xs text-gray-300">seg</div>
+                                  </div>
+                                </div>
+                                <p className="text-xs text-gray-400 mt-3">Margen previo al sorteo</p>
+                              </>
+                            );
+                          }
+                          
+                          // Si tiene fecha_waiting pero no waiting_hasta (fallback 30 min)
                           if (todosVendidos && fechaAlcanzada && fechaWaiting) {
                             const fecha30Min = new Date(fechaWaiting.getTime() + 30 * 60 * 1000);
                             return (
