@@ -218,18 +218,20 @@ async def check_waiting_to_live(sorteo, ahora, sorteo_id):
         # Verificar si ya pasaron los 5 minutos de WAITING
         if sorteo.waiting_hasta and ahora >= sorteo.waiting_hasta:
             # Pasar a LIVE
-            # Seleccionar ganador de la etapa actual
-            if not sorteo.ganadores:
-                sorteo.ganadores = []
+            # Seleccionar ganadores de TODOS los premios de la etapa actual
+            ganadores_actuales = sorteo.ganadores if sorteo.ganadores else []
             
             # Verificar si ya se sorteó esta etapa
             etapa_actual_num = sorteo.etapa_actual
-            ya_sorteado = any(g.get('etapa_numero') == etapa_actual_num for g in sorteo.ganadores)
+            ya_sorteado = any(g.get('etapa_numero') == etapa_actual_num or g.get('etapa') == etapa_actual_num for g in ganadores_actuales)
             
             if not ya_sorteado:
-                ganador_etapa = await seleccionar_ganador_etapa(sorteo_id, sorteo, etapa_actual_num)
-                if ganador_etapa:
-                    update_data['ganadores'] = sorteo.ganadores + [ganador_etapa]
+                # Seleccionar ganadores para TODOS los premios de esta etapa
+                ganadores_etapa = await seleccionar_ganador_etapa(sorteo_id, sorteo, etapa_actual_num)
+                if ganadores_etapa:
+                    # ganadores_etapa ahora es una LISTA de ganadores
+                    update_data['ganadores'] = ganadores_actuales + ganadores_etapa
+                    logger.info(f"Sorteo {sorteo_id}: Seleccionados {len(ganadores_etapa)} ganadores para Etapa {etapa_actual_num}")
             
             update_data['fecha_live'] = ahora
             return (SorteoEstado.LIVE, update_data)
