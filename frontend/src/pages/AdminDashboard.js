@@ -1141,8 +1141,8 @@ const AdminDashboard = () => {
                             </>
                           )}
 
-                          {/* PUBLISHED / ACTIVO: Pausar/Despausar Ventas y Ajustar Mínimo */}
-                          {(sorteo.estado === 'published' || sorteo.estado === 'activo') && (
+                          {/* PUBLISHED / ACTIVO / WAITING: Pausar/Despausar Ventas y Ajustar Mínimo */}
+                          {(sorteo.estado === 'published' || sorteo.estado === 'activo' || sorteo.estado === 'waiting') && (
                             <>
                               <Button 
                                 variant={sorteo.ventas_pausadas ? "default" : "outline"}
