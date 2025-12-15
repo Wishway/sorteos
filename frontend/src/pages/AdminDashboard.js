@@ -1277,8 +1277,8 @@ const AdminDashboard = () => {
                             </div>
                           )}
 
-                          {/* SECCIÓN EXPANDIBLE: EDITAR IMÁGENES Y VIDEOS (SOLO PUBLISHED) */}
-                          {sorteoExpandido === sorteo.id && (sorteo.estado === 'published' || sorteo.estado === 'activo') && (
+                          {/* SECCIÓN EXPANDIBLE: EDITAR IMÁGENES Y VIDEOS (PUBLISHED / WAITING) */}
+                          {sorteoExpandido === sorteo.id && (sorteo.estado === 'published' || sorteo.estado === 'activo' || sorteo.estado === 'waiting') && (
                             <div className="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg">
                               <h4 className="font-semibold mb-3 text-blue-900">Editar Imágenes y Videos</h4>
                               
