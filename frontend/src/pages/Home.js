@@ -328,25 +328,21 @@ const HomeComplete = () => {
                           const waitingHasta = sorteo.waiting_hasta ? new Date(sorteo.waiting_hasta) : null;
                           const todosVendidos = sorteo.progreso_porcentaje >= 100;
                           const fechaAlcanzada = fechaInicio <= ahora;
+                          const countdown = countdowns[sorteo.id];
                           
                           // Si tiene waiting_hasta (contador de 5 min), mostrarlo directamente
-                          if (waitingHasta && waitingHasta > ahora) {
-                            // Calcular tiempo restante en segundos
-                            const tiempoRestante = Math.max(0, Math.floor((waitingHasta - ahora) / 1000));
-                            const minutos = Math.floor(tiempoRestante / 60);
-                            const segundos = tiempoRestante % 60;
-                            
+                          if (waitingHasta && countdown && countdown.usaWaitingHasta) {
                             return (
                               <>
                                 <p className="text-orange-400 text-sm mb-3 font-semibold">¡Sorteo comienza en:</p>
                                 <div className="flex gap-2 items-center justify-center">
                                   <div className="text-center">
-                                    <div className="text-3xl font-bold text-white">{String(minutos).padStart(2, '0')}</div>
+                                    <div className="text-3xl font-bold text-white">{String(countdown.minutos).padStart(2, '0')}</div>
                                     <div className="text-xs text-gray-300">min</div>
                                   </div>
                                   <span className="text-3xl font-bold text-white">:</span>
                                   <div className="text-center">
-                                    <div className="text-3xl font-bold text-white">{String(segundos).padStart(2, '0')}</div>
+                                    <div className="text-3xl font-bold text-white">{String(countdown.segundos).padStart(2, '0')}</div>
                                     <div className="text-xs text-gray-300">seg</div>
                                   </div>
                                 </div>
