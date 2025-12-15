@@ -499,14 +499,44 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                                 </p>
                               )}
                               
-                              {/* GANADORES DE ESTA ETAPA */}
-                              {tieneGanadores && (
+                              {/* GANADORES Y PREMIOS DE ESTA ETAPA */}
+                              {etapa.premios && etapa.premios.length > 0 && (
                                 <div className="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
-                                  <p className="text-sm font-semibold text-yellow-800 mb-2">🏆 Ganadores de esta etapa:</p>
+                                  <p className="text-sm font-semibold text-yellow-800 mb-2">🏆 Premios y Ganadores:</p>
+                                  <div className="space-y-2">
+                                    {etapa.premios.map((premio, pIdx) => {
+                                      // Buscar si este premio tiene ganador
+                                      const ganadorPremio = ganadoresEtapa.find(g => 
+                                        g.premio === premio.nombre || 
+                                        g.premio === premio.nombre_premio ||
+                                        (pIdx === 0 && ganadoresEtapa.length > 0 && !ganadoresEtapa[0].premio)
+                                      );
+                                      
+                                      return (
+                                        <div key={pIdx} className={`text-sm p-2 rounded border ${ganadorPremio ? 'bg-green-100 border-green-300' : 'bg-white'}`}>
+                                          <p className="font-semibold">{premio.nombre}</p>
+                                          {ganadorPremio ? (
+                                            <p className="text-green-700">
+                                              ✅ Ganador: {ganadorPremio.nombre_usuario || ganadorPremio.nombre || 'Ganador'} - Boleto #{ganadorPremio.numero_boleto}
+                                            </p>
+                                          ) : (
+                                            <p className="text-gray-500 italic">⏳ Pendiente de sortear</p>
+                                          )}
+                                        </div>
+                                      );
+                                    })}
+                                  </div>
+                                </div>
+                              )}
+                              
+                              {/* Si no hay premios detallados pero hay ganadores, mostrar solo ganadores */}
+                              {(!etapa.premios || etapa.premios.length === 0) && tieneGanadores && (
+                                <div className="mt-4 p-3 bg-yellow-50 border border-yellow-300 rounded-lg">
+                                  <p className="text-sm font-semibold text-yellow-800 mb-2">🏆 Ganadores:</p>
                                   <div className="space-y-2">
                                     {ganadoresEtapa.map((ganador, gIdx) => (
                                       <div key={gIdx} className="text-sm bg-white p-2 rounded border">
-                                        <p className="font-semibold">{ganador.nombre_usuario || ganador.nombre || ganador.email_usuario || 'Ganador'}</p>
+                                        <p className="font-semibold">{ganador.nombre_usuario || ganador.nombre || 'Ganador'}</p>
                                         <p className="text-gray-600">Boleto #{ganador.numero_boleto} - {ganador.premio}</p>
                                       </div>
                                     ))}
