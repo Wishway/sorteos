@@ -445,6 +445,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                       <Countdown 
                         targetDate={sorteo.fecha_cierre} 
                         className="justify-center"
+                        darkMode={true}
                       />
                     ) : (
                       <div className="text-center">
