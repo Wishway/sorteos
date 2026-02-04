@@ -1661,12 +1661,15 @@ async def actualizar_imagenes_promo(sorteo_id: str, data: ActualizarImagenesProm
     if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
         raise HTTPException(status_code=400, detail="Solo se pueden actualizar imágenes de sorteos publicados o en espera")
     
+    # Convertir URLs de Google Drive si es necesario
+    imagenes_procesadas = process_image_urls(data.imagenes)
+    
     await db.sorteos.update_one(
         {'id': sorteo_id},
-        {'$set': {'imagenes': data.imagenes}}
+        {'$set': {'imagenes': imagenes_procesadas}}
     )
     
-    logger.info(f"Admin {admin.email} actualizó imágenes promocionales del sorteo {sorteo_id}: {len(data.imagenes)} imágenes")
+    logger.info(f"Admin {admin.email} actualizó imágenes promocionales del sorteo {sorteo_id}: {len(imagenes_procesadas)} imágenes")
     await broadcast_sorteos_update()
     
     return {"message": "Imágenes actualizadas exitosamente"}
