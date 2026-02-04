@@ -672,7 +672,7 @@ const AdminDashboard = () => {
               <Users className="h-4 w-4 text-green-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{usuarios.length}</div>
+              <div className="text-2xl font-bold">{usuariosTotal || usuarios.length}</div>
             </CardContent>
           </Card>
           <Card className="sorteo-card">
