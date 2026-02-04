@@ -203,7 +203,7 @@ const HomeComplete = () => {
           />
           
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-bold text-white mb-6 drop-shadow-2xl">
-            WishWay Sorteos
+            Experiencia Wishway
           </h1>
           <p className="text-xl sm:text-2xl text-white mb-8 max-w-3xl mx-auto drop-shadow-lg font-medium">
             Participa en sorteos emocionantes y gana premios increíbles. Tu próximo sueño está a un boleto de distancia.
