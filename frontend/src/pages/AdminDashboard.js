@@ -50,6 +50,12 @@ const AdminDashboard = () => {
   const [sorteoExpandido, setSorteoExpandido] = useState(null);
   const [imagenesTemp, setImagenesTemp] = useState({});
   const [premiosImagenesTemp, setPremiosImagenesTemp] = useState({});
+  
+  // Estados para paginación de usuarios
+  const [usuariosPage, setUsuariosPage] = useState(1);
+  const [usuariosTotalPages, setUsuariosTotalPages] = useState(1);
+  const [usuariosTotal, setUsuariosTotal] = useState(0);
+  const [searchUsuarios, setSearchUsuarios] = useState('');
 
   const [formData, setFormData] = useState({
     titulo: '', descripcion: '', precio_boleto: '', cantidad_minima_boletos: '',
