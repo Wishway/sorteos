@@ -23,7 +23,8 @@
     "The 'Usuarios' card in AdminDashboard.js line 675 shows usuarios.length (current page count) instead of usuariosTotal (total count). Consider updating to show total users."
   ],
   "updated_files": [
-    "/app/backend/tests/test_pagination_delete.py"
+    "/app/backend/tests/test_pagination_delete.py",
+    "/app/frontend/src/pages/AdminDashboard.js"
   ],
   "success_rate": {
     "backend": "100%",
