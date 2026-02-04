@@ -830,7 +830,7 @@ async def forgot_password(data: dict):
     })
     
     # Construir el enlace de recuperación
-    frontend_url = os.environ.get('FRONTEND_URL', 'https://rafflewave-1.preview.emergentagent.com')
+    frontend_url = os.environ.get('FRONTEND_URL', 'https://sorteo-enhance.preview.emergentagent.com')
     reset_link = f"{frontend_url}/reset-password?token={reset_token}"
     
     # Enviar email con el enlace
