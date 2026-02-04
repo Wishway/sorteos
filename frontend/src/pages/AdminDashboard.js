@@ -1151,8 +1151,8 @@ const AdminDashboard = () => {
                             </>
                           )}
 
-                          {/* PUBLISHED / ACTIVO / WAITING / COMPLETED: Pausar/Despausar Ventas, Ocultar y Ajustar Mínimo */}
-                          {(sorteo.estado === 'published' || sorteo.estado === 'activo' || sorteo.estado === 'waiting' || sorteo.estado === 'completed') && (
+                          {/* PUBLISHED / ACTIVO / WAITING: Pausar/Despausar Ventas y Ajustar Mínimo */}
+                          {(sorteo.estado === 'published' || sorteo.estado === 'activo' || sorteo.estado === 'waiting') && (
                             <>
                               <Button 
                                 variant={sorteo.ventas_pausadas ? "default" : "outline"}
@@ -1173,26 +1173,6 @@ const AdminDashboard = () => {
                                   </>
                                 )}
                               </Button>
-                              
-                              <Button 
-                                variant={sorteo.oculto ? "default" : "outline"}
-                                size="sm"
-                                onClick={() => ocultarSorteo(sorteo.id)}
-                                data-testid={`ocultar-sorteo-${sorteo.id}`}
-                                className={sorteo.oculto ? "bg-gray-600 hover:bg-gray-700" : ""}
-                              >
-                                {sorteo.oculto ? (
-                                  <>
-                                    <Eye className="w-4 h-4 mr-2" />
-                                    Mostrar en Home
-                                  </>
-                                ) : (
-                                  <>
-                                    <EyeOff className="w-4 h-4 mr-2" />
-                                    Ocultar del Home
-                                  </>
-                                )}
-                              </Button>
                               <Button 
                                 variant="outline"
                                 size="sm"
@@ -1206,6 +1186,29 @@ const AdminDashboard = () => {
                                 Ajustar Mínimo (Actual: {sorteo.minimo_boletos || 1})
                               </Button>
                             </>
+                          )}
+                          
+                          {/* PUBLISHED / ACTIVO / WAITING / COMPLETED: Ocultar del Home */}
+                          {(sorteo.estado === 'published' || sorteo.estado === 'activo' || sorteo.estado === 'waiting' || sorteo.estado === 'completed') && (
+                            <Button 
+                              variant={sorteo.oculto ? "default" : "outline"}
+                              size="sm"
+                              onClick={() => ocultarSorteo(sorteo.id)}
+                              data-testid={`ocultar-sorteo-${sorteo.id}`}
+                              className={sorteo.oculto ? "bg-gray-600 hover:bg-gray-700" : ""}
+                            >
+                              {sorteo.oculto ? (
+                                <>
+                                  <Eye className="w-4 h-4 mr-2" />
+                                  Mostrar en Home
+                                </>
+                              ) : (
+                                <>
+                                  <EyeOff className="w-4 h-4 mr-2" />
+                                  Ocultar del Home
+                                </>
+                              )}
+                            </Button>
                           )}
 
                           {/* CAMBIO: Eliminado botón manual "Iniciar Sorteo" - Sistema 100% automático */}
