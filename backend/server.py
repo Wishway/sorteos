@@ -57,6 +57,61 @@ api_router = APIRouter(prefix="/api")
 # Wrap app with Socket.IO
 socket_app = socketio.ASGIApp(sio, app)
 
+# ============ GOOGLE DRIVE IMAGE CONVERSION ============
+import re
+
+def convert_google_drive_url(url: str) -> str:
+    """
+    Convierte URLs de Google Drive a enlaces directos de imagen.
+    Soporta múltiples formatos de URLs de Google Drive:
+    - https://drive.google.com/file/d/FILE_ID/view?usp=sharing
+    - https://drive.google.com/file/d/FILE_ID/view
+    - https://drive.google.com/open?id=FILE_ID
+    - https://drive.google.com/uc?id=FILE_ID&export=download
+    - https://drive.google.com/uc?export=view&id=FILE_ID
+    
+    Returns the direct image URL or the original URL if not a Google Drive link.
+    """
+    if not url:
+        return url
+    
+    # Pattern 1: drive.google.com/file/d/FILE_ID/...
+    pattern1 = r'drive\.google\.com/file/d/([a-zA-Z0-9_-]+)'
+    match1 = re.search(pattern1, url)
+    if match1:
+        file_id = match1.group(1)
+        return f'https://drive.google.com/uc?export=view&id={file_id}'
+    
+    # Pattern 2: drive.google.com/open?id=FILE_ID
+    pattern2 = r'drive\.google\.com/open\?id=([a-zA-Z0-9_-]+)'
+    match2 = re.search(pattern2, url)
+    if match2:
+        file_id = match2.group(1)
+        return f'https://drive.google.com/uc?export=view&id={file_id}'
+    
+    # Pattern 3: drive.google.com/uc?id=FILE_ID (already direct, but ensure export=view)
+    pattern3 = r'drive\.google\.com/uc\?.*id=([a-zA-Z0-9_-]+)'
+    match3 = re.search(pattern3, url)
+    if match3:
+        file_id = match3.group(1)
+        return f'https://drive.google.com/uc?export=view&id={file_id}'
+    
+    # Pattern 4: Google Drive thumbnail format
+    pattern4 = r'drive\.google\.com/thumbnail\?id=([a-zA-Z0-9_-]+)'
+    match4 = re.search(pattern4, url)
+    if match4:
+        file_id = match4.group(1)
+        return f'https://drive.google.com/uc?export=view&id={file_id}'
+    
+    # Not a Google Drive URL, return as-is
+    return url
+
+def process_image_urls(urls: list) -> list:
+    """Process a list of image URLs, converting Google Drive URLs."""
+    if not urls:
+        return urls
+    return [convert_google_drive_url(url) for url in urls]
+
 # ============ EMAIL FUNCTIONS ============
 async def send_password_reset_email(to_email: str, user_name: str, reset_link: str):
     """Enviar email de recuperación de contraseña"""
