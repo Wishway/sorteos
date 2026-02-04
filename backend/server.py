@@ -1279,8 +1279,23 @@ async def create_sorteo(data: SorteoCreate, request: Request):
     # Generate landing slug
     landing_slug = str(uuid.uuid4())[:8]
     
+    # Procesar URLs de Google Drive en imágenes
+    data_dict = data.model_dump()
+    if data_dict.get('imagenes'):
+        data_dict['imagenes'] = process_image_urls(data_dict['imagenes'])
+    
+    # Procesar URLs de Google Drive en premios y etapas
+    for premio in data_dict.get('premios', []):
+        if premio.get('imagen_url'):
+            premio['imagen_url'] = convert_google_drive_url(premio['imagen_url'])
+    
+    for etapa in data_dict.get('etapas', []):
+        for premio in etapa.get('premios', []):
+            if premio.get('imagen_url'):
+                premio['imagen_url'] = convert_google_drive_url(premio['imagen_url'])
+    
     sorteo = Sorteo(
-        **data.model_dump(),
+        **data_dict,
         landing_slug=landing_slug
     )
     
