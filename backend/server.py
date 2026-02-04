@@ -1631,7 +1631,8 @@ async def actualizar_imagen_promo(sorteo_id: str, data: ActualizarImagenPromoReq
     if data.index >= len(imagenes):
         raise HTTPException(status_code=400, detail="Índice de imagen inválido")
     
-    imagenes[data.index] = data.url
+    # Convertir URL de Google Drive si es necesario
+    imagenes[data.index] = convert_google_drive_url(data.url)
     
     await db.sorteos.update_one(
         {'id': sorteo_id},
