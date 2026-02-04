@@ -387,6 +387,16 @@ const AdminDashboard = () => {
     }
   };
 
+  const ocultarSorteo = async (sorteoId) => {
+    try {
+      const response = await axios.put(`${API}/admin/sorteo/${sorteoId}/ocultar`, {}, { withCredentials: true });
+      toast.success(response.data.message);
+      fetchData();
+    } catch (error) {
+      toast.error(error.response?.data?.detail || 'Error al ocultar/mostrar sorteo');
+    }
+  };
+
   const ajustarMinimoBoletos = async (sorteoId, minimo) => {
     try {
       await axios.put(`${API}/admin/sorteo/${sorteoId}/ajustar-minimo?minimo=${minimo}`, {}, { withCredentials: true });
