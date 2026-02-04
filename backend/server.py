@@ -309,6 +309,7 @@ class Sorteo(BaseModel):
     fecha_completed: Optional[datetime] = None  # Cuándo se completó
     ganadores: List[dict] = []  # Lista de ganadores seleccionados
     ventas_pausadas: bool = False  # Para pausar/despausar ventas en estado PUBLISHED
+    oculto: bool = False  # Para ocultar del Home sin cambiar estado
     etapa_actual: int = 0  # Etapa actual para sorteos por etapas (0 = no iniciado)
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
 
