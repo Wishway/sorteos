@@ -2535,13 +2535,27 @@ async def ejecutar_sorteo(data: EjecutarSorteoRequest, request: Request):
         "boleto_ganador": boleto_ganador
     }
 
-@api_router.get("/admin/usuarios", response_model=List[User])
-async def get_usuarios(request: Request):
+class UsuariosPaginados(BaseModel):
+    usuarios: List[User]
+    total: int
+    page: int
+    limit: int
+    total_pages: int
+
+@api_router.get("/admin/usuarios")
+async def get_usuarios(request: Request, page: int = 1, limit: int = 10):
     user = await get_current_user(request)
     if user.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Solo admins pueden ver usuarios")
     
-    usuarios = await db.users.find({}, {"_id": 0, "password_hash": 0}).to_list(1000)
+    # Contar total de usuarios
+    total = await db.users.count_documents({})
+    total_pages = (total + limit - 1) // limit  # Redondear hacia arriba
+    
+    # Obtener usuarios paginados
+    skip = (page - 1) * limit
+    usuarios = await db.users.find({}, {"_id": 0, "password_hash": 0}).skip(skip).limit(limit).to_list(limit)
+    
     for usuario in usuarios:
         # Manejar created_at que puede no existir o ser string
         if 'created_at' in usuario:
@@ -2550,7 +2564,13 @@ async def get_usuarios(request: Request):
         else:
             usuario['created_at'] = datetime.now(timezone.utc)
     
-    return usuarios
+    return {
+        "usuarios": usuarios,
+        "total": total,
+        "page": page,
+        "limit": limit,
+        "total_pages": total_pages
+    }
 
 @api_router.put("/admin/usuario/{user_id}/role")
 async def update_user_role(user_id: str, role: UserRole, request: Request):
