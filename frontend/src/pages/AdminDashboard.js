@@ -1630,19 +1630,22 @@ const AdminDashboard = () => {
 
           <TabsContent value="usuarios" className="space-y-4">
             <div className="flex justify-between items-center mb-4">
-              <h2 className="text-2xl font-bold">Gestión de Usuarios</h2>
+              <h2 className="text-2xl font-bold">Gestión de Usuarios ({usuariosTotal})</h2>
               <Input
                 placeholder="Buscar por nombre o email..."
                 className="max-w-xs"
+                value={searchUsuarios}
                 onChange={(e) => {
                   const search = e.target.value.toLowerCase();
+                  setSearchUsuarios(e.target.value);
                   if (search) {
-                    setUsuarios(usuarios.filter(u => 
+                    // Filtrado local mientras escribe
+                    setUsuarios(prev => prev.filter(u => 
                       u.name.toLowerCase().includes(search) || 
                       u.email.toLowerCase().includes(search)
                     ));
                   } else {
-                    fetchData();
+                    fetchUsuarios(1);
                   }
                 }}
               />
@@ -1652,74 +1655,103 @@ const AdminDashboard = () => {
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
               </div>
             ) : (
-              <div className="grid gap-4">
-                {usuarios.map((usuario) => (
-                  <Card key={usuario.id} className="sorteo-card">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between gap-4">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <h3 className="text-lg font-bold">{usuario.name}</h3>
-                            {usuario.bloqueado && (
-                              <Badge variant="destructive">Bloqueado</Badge>
+              <>
+                <div className="grid gap-4">
+                  {usuarios.map((usuario) => (
+                    <Card key={usuario.id} className="sorteo-card">
+                      <CardContent className="p-6">
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <div className="flex items-center gap-2 mb-2">
+                              <h3 className="text-lg font-bold">{usuario.name}</h3>
+                              {usuario.bloqueado && (
+                                <Badge variant="destructive">Bloqueado</Badge>
+                              )}
+                            </div>
+                            <p className="text-sm text-gray-600 mb-2">{usuario.email}</p>
+                            {usuario.cedula && (
+                              <p className="text-xs text-gray-500">Cédula: {usuario.cedula}</p>
                             )}
+                            {usuario.celular && (
+                              <p className="text-xs text-gray-500">Celular: {usuario.celular}</p>
+                            )}
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                usuario.role === 'admin' ? 'bg-red-100 text-red-700' :
+                                usuario.role === 'vendedor' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
+                              }`}>{usuario.role}</span>
+                            </div>
                           </div>
-                          <p className="text-sm text-gray-600 mb-2">{usuario.email}</p>
-                          {usuario.cedula && (
-                            <p className="text-xs text-gray-500">Cédula: {usuario.cedula}</p>
-                          )}
-                          {usuario.celular && (
-                            <p className="text-xs text-gray-500">Celular: {usuario.celular}</p>
-                          )}
-                          <div className="flex items-center gap-2 mt-2">
-                            <span className={`px-2 py-1 rounded text-xs font-semibold ${
-                              usuario.role === 'admin' ? 'bg-red-100 text-red-700' :
-                              usuario.role === 'vendedor' ? 'bg-blue-100 text-blue-700' : 'bg-gray-100 text-gray-700'
-                            }`}>{usuario.role}</span>
+                          <div className="flex flex-col gap-2">
+                            <Select value={usuario.role} onValueChange={(value) => cambiarRoleUsuario(usuario.id, value)}>
+                              <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
+                              <SelectContent>
+                                <SelectItem value="usuario">Usuario</SelectItem>
+                                <SelectItem value="vendedor">Vendedor</SelectItem>
+                                <SelectItem value="admin">Admin</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            {!usuario.bloqueado ? (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => bloquearUsuario(usuario.id)}
+                                data-testid={`bloquear-usuario-${usuario.id}`}
+                              >
+                                Bloquear
+                              </Button>
+                            ) : (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => desbloquearUsuario(usuario.id)}
+                                data-testid={`desbloquear-usuario-${usuario.id}`}
+                              >
+                                Desbloquear
+                              </Button>
+                            )}
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => eliminarUsuario(usuario.id)}
+                              data-testid={`eliminar-usuario-${usuario.id}`}
+                            >
+                              Eliminar
+                            </Button>
                           </div>
                         </div>
-                        <div className="flex flex-col gap-2">
-                          <Select value={usuario.role} onValueChange={(value) => cambiarRoleUsuario(usuario.id, value)}>
-                            <SelectTrigger className="w-40"><SelectValue /></SelectTrigger>
-                            <SelectContent>
-                              <SelectItem value="usuario">Usuario</SelectItem>
-                              <SelectItem value="vendedor">Vendedor</SelectItem>
-                              <SelectItem value="admin">Admin</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          {!usuario.bloqueado ? (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => bloquearUsuario(usuario.id)}
-                              data-testid={`bloquear-usuario-${usuario.id}`}
-                            >
-                              Bloquear
-                            </Button>
-                          ) : (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => desbloquearUsuario(usuario.id)}
-                              data-testid={`desbloquear-usuario-${usuario.id}`}
-                            >
-                              Desbloquear
-                            </Button>
-                          )}
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => eliminarUsuario(usuario.id)}
-                            data-testid={`eliminar-usuario-${usuario.id}`}
-                          >
-                            Eliminar
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+                
+                {/* Controles de Paginación */}
+                {usuariosTotalPages > 1 && !searchUsuarios && (
+                  <div className="flex justify-center items-center gap-4 mt-6">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fetchUsuarios(usuariosPage - 1)}
+                      disabled={usuariosPage <= 1}
+                      data-testid="usuarios-prev-page"
+                    >
+                      ← Anterior
+                    </Button>
+                    <span className="text-sm text-gray-600">
+                      Página {usuariosPage} de {usuariosTotalPages}
+                    </span>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => fetchUsuarios(usuariosPage + 1)}
+                      disabled={usuariosPage >= usuariosTotalPages}
+                      data-testid="usuarios-next-page"
+                    >
+                      Siguiente →
+                    </Button>
+                  </div>
+                )}
+              </>
             )}
           </TabsContent>
 
