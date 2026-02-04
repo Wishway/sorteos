@@ -1512,6 +1512,35 @@ async def ajustar_minimo_boletos(sorteo_id: str, minimo: int, request: Request):
     
     return {"message": f"Mínimo de boletos ajustado a {minimo} exitosamente", "minimo": minimo}
 
+@api_router.put("/admin/sorteo/{sorteo_id}/ocultar")
+async def ocultar_sorteo(sorteo_id: str, request: Request):
+    """Ocultar/Mostrar un sorteo del Home (no cambia el estado)"""
+    admin = await get_current_user(request)
+    if admin.role != UserRole.ADMIN:
+        raise HTTPException(status_code=403, detail="Solo admins pueden ocultar sorteos")
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    # Solo permitir ocultar sorteos publicados o en espera
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
+        raise HTTPException(status_code=400, detail="Solo se pueden ocultar sorteos publicados o en espera")
+    
+    # Toggle el estado oculto
+    nuevo_estado_oculto = not sorteo_doc.get('oculto', False)
+    
+    await db.sorteos.update_one(
+        {'id': sorteo_id},
+        {'$set': {'oculto': nuevo_estado_oculto}}
+    )
+    
+    accion = "ocultado" if nuevo_estado_oculto else "visible"
+    logger.info(f"Admin {admin.email} {accion} sorteo {sorteo_id}")
+    await broadcast_sorteos_update()
+    
+    return {"message": f"Sorteo {accion} exitosamente", "oculto": nuevo_estado_oculto}
+
 class ActualizarImagenPromoRequest(BaseModel):
     index: int
     url: str
