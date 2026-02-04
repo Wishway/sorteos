@@ -1242,6 +1242,18 @@ const AdminDashboard = () => {
                               )}
                             </Button>
                           )}
+                          
+                          {/* PUBLISHED / ACTIVO / WAITING: Eliminar (con confirmación si tiene compras) */}
+                          {(sorteo.estado === 'published' || sorteo.estado === 'activo' || sorteo.estado === 'waiting') && (
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => eliminarSorteo(sorteo.id)}
+                              data-testid={`eliminar-sorteo-publicado-${sorteo.id}`}
+                            >
+                              {sorteo.boletos_vendidos > 0 ? `Eliminar (${sorteo.boletos_vendidos} boletos)` : 'Eliminar'}
+                            </Button>
+                          )}
 
                           {/* CAMBIO: Eliminado botón manual "Iniciar Sorteo" - Sistema 100% automático */}
 
