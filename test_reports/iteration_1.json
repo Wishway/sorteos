@@ -1,0 +1,55 @@
+{
+  "summary": "Completed testing of WishWay Sorteos new features: Ocultar Sorteo and Google Drive URL Conversion. All 14 backend tests passed. Frontend UI testing confirmed both features work correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_ocultar_sorteo.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_ocultar_sorteo.py"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "admin_email": "admin@wishway.com",
+    "admin_password": "admin123"
+  },
+  "seed_data_creation": "Used existing sorteo ID: 55516abb-8e79-48e1-860f-e5fa8b61ba56",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Both new features are fully functional: 1) Ocultar Sorteo toggle works correctly - admin can hide/show sorteos from Home without changing state. 2) Google Drive URL conversion patterns are correctly implemented in backend. Test sorteo ID 55516abb-8e79-48e1-860f-e5fa8b61ba56 is in 'completed' state and currently visible on Home.",
+  "features_tested": {
+    "ocultar_sorteo": {
+      "status": "PASSED",
+      "tests": [
+        "POST /api/admin/sorteo/{id}/ocultar toggle endpoint works correctly",
+        "Button changes from 'Ocultar del Home' to 'Mostrar en Home' and vice versa",
+        "Hidden sorteos are excluded from GET /api/sorteos by default",
+        "Hidden sorteos appear with incluir_ocultos=true parameter",
+        "Endpoint requires admin authentication",
+        "Returns 404 for non-existent sorteos"
+      ]
+    },
+    "google_drive_url_conversion": {
+      "status": "PASSED",
+      "tests": [
+        "Pattern /file/d/ID/view correctly extracts file ID",
+        "Pattern /open?id=ID correctly extracts file ID",
+        "Pattern /uc?id=ID correctly extracts file ID",
+        "Non-Google Drive URLs are not modified"
+      ]
+    }
+  }
+}
