@@ -99,15 +99,30 @@ const AdminDashboard = () => {
     try {
       const [sorteosRes, usuariosRes] = await Promise.all([
         axios.get(`${API}/sorteos?incluir_draft=true&incluir_ocultos=true`, { withCredentials: true }), // Admin ve todos incluyendo borradores y ocultos
-        axios.get(`${API}/admin/usuarios`, { withCredentials: true })
+        axios.get(`${API}/admin/usuarios?page=${usuariosPage}&limit=10`, { withCredentials: true })
       ]);
       setSorteos(sorteosRes.data);
-      setUsuarios(usuariosRes.data);
+      setUsuarios(usuariosRes.data.usuarios);
+      setUsuariosTotalPages(usuariosRes.data.total_pages);
+      setUsuariosTotal(usuariosRes.data.total);
     } catch (error) {
       console.error('Error al cargar datos:', error);
       toast.error('Error al cargar datos');
     } finally {
       setLoading(false);
+    }
+  };
+  
+  const fetchUsuarios = async (page = 1) => {
+    try {
+      const response = await axios.get(`${API}/admin/usuarios?page=${page}&limit=10`, { withCredentials: true });
+      setUsuarios(response.data.usuarios);
+      setUsuariosTotalPages(response.data.total_pages);
+      setUsuariosTotal(response.data.total);
+      setUsuariosPage(page);
+    } catch (error) {
+      console.error('Error al cargar usuarios:', error);
+      toast.error('Error al cargar usuarios');
     }
   };
   
