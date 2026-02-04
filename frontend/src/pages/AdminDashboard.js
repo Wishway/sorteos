@@ -375,10 +375,21 @@ const AdminDashboard = () => {
   };
 
   const eliminarSorteo = async (sorteoId) => {
-    if (!window.confirm('¿Estás seguro de eliminar este sorteo? Esta acción no se puede deshacer.')) return;
+    const sorteo = sorteos.find(s => s.id === sorteoId);
+    const boletosVendidos = sorteo?.boletos_vendidos || 0;
+    
+    let mensaje = '¿Estás seguro de eliminar este sorteo? Esta acción no se puede deshacer.';
+    if (boletosVendidos > 0) {
+      mensaje = `⚠️ ADVERTENCIA: Este sorteo tiene ${boletosVendidos} boletos vendidos.\n\n¿Estás seguro de eliminar este sorteo junto con TODOS sus boletos? Esta acción NO se puede deshacer.`;
+    }
+    
+    if (!window.confirm(mensaje)) return;
     
     try {
-      await axios.delete(`${API}/admin/sorteo/${sorteoId}`, { withCredentials: true });
+      const url = boletosVendidos > 0 
+        ? `${API}/admin/sorteo/${sorteoId}?confirmar_con_compras=true`
+        : `${API}/admin/sorteo/${sorteoId}`;
+      await axios.delete(url, { withCredentials: true });
       toast.success('Sorteo eliminado exitosamente');
       fetchData();
     } catch (error) {
