@@ -1773,9 +1773,12 @@ async def actualizar_etapa_premio_imagen(sorteo_id: str, data: ActualizarEtapaPr
     if data.premio_index >= len(premios):
         raise HTTPException(status_code=400, detail="Índice de premio inválido")
     
-    etapas[data.etapa_index]['premios'][data.premio_index]['imagen_url'] = data.imagen_url
+    # Convertir URL de Google Drive si es necesario
+    imagen_url_procesada = convert_google_drive_url(data.imagen_url)
+    
+    etapas[data.etapa_index]['premios'][data.premio_index]['imagen_url'] = imagen_url_procesada
     if 'imagen' in etapas[data.etapa_index]['premios'][data.premio_index]:
-        etapas[data.etapa_index]['premios'][data.premio_index]['imagen'] = data.imagen_url
+        etapas[data.etapa_index]['premios'][data.premio_index]['imagen'] = imagen_url_procesada
     
     await db.sorteos.update_one(
         {'id': sorteo_id},
