@@ -1463,7 +1463,7 @@ async def update_sorteo(sorteo_id: str, data: SorteoCreate, request: Request):
     return {"message": "Sorteo actualizado exitosamente"}
 
 @api_router.delete("/admin/sorteo/{sorteo_id}")
-async def eliminar_sorteo(sorteo_id: str, request: Request):
+async def eliminar_sorteo(sorteo_id: str, request: Request, confirmar_con_compras: bool = False):
     admin = await get_current_user(request)
     if admin.role != UserRole.ADMIN:
         raise HTTPException(status_code=403, detail="Solo admins pueden eliminar sorteos")
@@ -1473,6 +1473,16 @@ async def eliminar_sorteo(sorteo_id: str, request: Request):
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
     estado = sorteo_doc['estado']
+    
+    # Contar boletos asociados
+    boletos_count = await db.boletos.count_documents({'sorteo_id': sorteo_id})
+    
+    # Para sorteos con compras, requerir confirmación explícita
+    if boletos_count > 0 and not confirmar_con_compras:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Este sorteo tiene {boletos_count} boletos vendidos. Para eliminar, confirma con el parámetro confirmar_con_compras=true"
+        )
     
     # Reglas de eliminación según estado
     if estado == 'draft':
@@ -1493,22 +1503,28 @@ async def eliminar_sorteo(sorteo_id: str, request: Request):
         else:
             # Si no tiene fecha_completado, permitir eliminar (sorteos legacy sin fecha)
             pass
-    else:
-        # PUBLISHED, WAITING, LIVE, PAUSADO, ACTIVO: no se pueden eliminar
+    elif estado in ['published', 'activo', 'waiting', 'pausado']:
+        # PUBLISHED, WAITING, PAUSADO, ACTIVO: se pueden eliminar con confirmación
+        # La confirmación ya se verificó arriba si hay boletos
+        pass
+    elif estado == 'live':
+        # LIVE: no se puede eliminar mientras está en vivo
         raise HTTPException(
             status_code=400, 
-            detail=f"No se puede eliminar un sorteo en estado {estado}. Solo se pueden eliminar sorteos en DRAFT o COMPLETED (después de 30 días)."
+            detail="No se puede eliminar un sorteo mientras está en LIVE. Espera a que termine."
         )
     
     # Delete sorteo
     await db.sorteos.delete_one({'id': sorteo_id})
     
-    # Also delete related boletos and comisiones if no tickets (safety check)
-    await db.boletos.delete_many({'sorteo_id': sorteo_id})
+    # Also delete related boletos, comisiones y ganadores
+    deleted_boletos = await db.boletos.delete_many({'sorteo_id': sorteo_id})
     await db.comisiones.delete_many({'sorteo_id': sorteo_id})
     await db.ganadores.delete_many({'sorteo_id': sorteo_id})
     
-    return {"message": "Sorteo eliminado exitosamente"}
+    logger.info(f"Admin {admin.email} eliminó sorteo {sorteo_id} con {deleted_boletos.deleted_count} boletos asociados")
+    
+    return {"message": f"Sorteo eliminado exitosamente junto con {deleted_boletos.deleted_count} boletos asociados"}
 
 @api_router.put("/admin/sorteo/{sorteo_id}/publicar")
 async def publicar_sorteo(sorteo_id: str, request: Request):
