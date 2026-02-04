@@ -1528,9 +1528,9 @@ async def ocultar_sorteo(sorteo_id: str, request: Request):
     if not sorteo_doc:
         raise HTTPException(status_code=404, detail="Sorteo no encontrado")
     
-    # Solo permitir ocultar sorteos publicados o en espera
-    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting']:
-        raise HTTPException(status_code=400, detail="Solo se pueden ocultar sorteos publicados o en espera")
+    # Solo permitir ocultar sorteos publicados, activos, en espera o completados
+    if sorteo_doc['estado'] not in ['published', 'activo', 'waiting', 'completed']:
+        raise HTTPException(status_code=400, detail="Solo se pueden ocultar sorteos publicados, activos, en espera o completados")
     
     # Toggle el estado oculto
     nuevo_estado_oculto = not sorteo_doc.get('oculto', False)
