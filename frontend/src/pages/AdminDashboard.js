@@ -92,7 +92,7 @@ const AdminDashboard = () => {
   const fetchData = async () => {
     try {
       const [sorteosRes, usuariosRes] = await Promise.all([
-        axios.get(`${API}/sorteos?incluir_draft=true`, { withCredentials: true }), // Admin ve todos incluyendo borradores
+        axios.get(`${API}/sorteos?incluir_draft=true&incluir_ocultos=true`, { withCredentials: true }), // Admin ve todos incluyendo borradores y ocultos
         axios.get(`${API}/admin/usuarios`, { withCredentials: true })
       ]);
       setSorteos(sorteosRes.data);
