@@ -22,6 +22,7 @@ class WebSocketService {
     console.log('🔌 Conectando WebSocket a:', backendUrl);
     
     this.socket = io(backendUrl, {
+      path: '/api/socket.io',  // Usar path con prefijo /api para pasar por el ingress
       transports: ['polling', 'websocket'], // polling primero, luego websocket
       reconnection: true,
       reconnectionDelay: 1000,
