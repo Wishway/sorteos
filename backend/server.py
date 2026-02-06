@@ -54,8 +54,8 @@ import vendedor_endpoints
 app = FastAPI()
 api_router = APIRouter(prefix="/api")
 
-# Wrap app with Socket.IO
-socket_app = socketio.ASGIApp(sio, app)
+# Wrap app with Socket.IO - usar path /api/socket.io para pasar por ingress
+socket_app = socketio.ASGIApp(sio, app, socketio_path='/api/socket.io')
 
 # ============ GOOGLE DRIVE IMAGE CONVERSION ============
 import re
