@@ -562,11 +562,6 @@ async def register(data: RegisterRequest):
     if existing_cedula:
         raise HTTPException(status_code=400, detail="La cédula ya está registrada como cliente")
     
-    # Check if celular exists
-    existing_celular = await db.users.find_one({'celular': data.celular})
-    if existing_celular:
-        raise HTTPException(status_code=400, detail="El celular ya está registrado")
-    
     # Create user
     user = User(
         email=data.email,
@@ -599,11 +594,6 @@ async def registro_vendedor(data: RegisterRequest, response: Response):
     existing_cedula = await db.users.find_one({'cedula': data.cedula, 'tipo_usuario': 'vendedor'})
     if existing_cedula:
         raise HTTPException(status_code=400, detail="La cédula ya está registrada como vendedor")
-    
-    # Check if celular exists
-    existing_celular = await db.users.find_one({'celular': data.celular})
-    if existing_celular:
-        raise HTTPException(status_code=400, detail="El celular ya está registrado")
     
     # Generar link único para vendedor
     link_unico = str(uuid.uuid4())[:8]
@@ -986,10 +976,6 @@ async def completar_datos(request: Request, cedula: str, celular: str):
     })
     if existing_cedula:
         raise HTTPException(status_code=400, detail=f"La cédula ya está registrada como {tipo_usuario}")
-    
-    existing_celular = await db.users.find_one({'celular': celular, 'id': {'$ne': user.id}})
-    if existing_celular:
-        raise HTTPException(status_code=400, detail="El celular ya está registrado")
     
     await db.users.update_one(
         {'id': user.id},
