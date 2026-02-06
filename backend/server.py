@@ -595,10 +595,10 @@ async def registro_vendedor(data: RegisterRequest, response: Response):
     if existing_email:
         raise HTTPException(status_code=400, detail="El email ya está registrado")
     
-    # Check if cedula exists
-    existing_cedula = await db.users.find_one({'cedula': data.cedula})
+    # Check if cedula exists SOLO para tipo vendedor
+    existing_cedula = await db.users.find_one({'cedula': data.cedula, 'tipo_usuario': 'vendedor'})
     if existing_cedula:
-        raise HTTPException(status_code=400, detail="La cédula ya está registrada")
+        raise HTTPException(status_code=400, detail="La cédula ya está registrada como vendedor")
     
     # Check if celular exists
     existing_celular = await db.users.find_one({'celular': data.celular})
@@ -616,6 +616,7 @@ async def registro_vendedor(data: RegisterRequest, response: Response):
         cedula=data.cedula,
         celular=data.celular,
         role=UserRole.VENDEDOR,  # VENDEDOR role
+        tipo_usuario='vendedor',  # Marcar como vendedor
         link_unico=link_unico,
         datos_completos=True,
         verification_token=str(uuid.uuid4())
