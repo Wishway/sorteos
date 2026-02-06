@@ -557,10 +557,10 @@ async def register(data: RegisterRequest):
     if existing_email:
         raise HTTPException(status_code=400, detail="El email ya está registrado")
     
-    # Check if cedula exists
-    existing_cedula = await db.users.find_one({'cedula': data.cedula})
+    # Check if cedula exists SOLO para tipo cliente
+    existing_cedula = await db.users.find_one({'cedula': data.cedula, 'tipo_usuario': 'cliente'})
     if existing_cedula:
-        raise HTTPException(status_code=400, detail="La cédula ya está registrada")
+        raise HTTPException(status_code=400, detail="La cédula ya está registrada como cliente")
     
     # Check if celular exists
     existing_celular = await db.users.find_one({'celular': data.celular})
@@ -574,6 +574,7 @@ async def register(data: RegisterRequest):
         password_hash=hash_password(data.password),
         cedula=data.cedula,
         celular=data.celular,
+        tipo_usuario='cliente',  # Marcar como cliente
         datos_completos=True,
         verification_token=str(uuid.uuid4())
     )
