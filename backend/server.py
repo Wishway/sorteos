@@ -975,10 +975,17 @@ async def reset_password(data: dict):
 async def completar_datos(request: Request, cedula: str, celular: str):
     user = await get_current_user(request)
     
-    # Validate cedula and celular are not taken by other users
-    existing_cedula = await db.users.find_one({'cedula': cedula, 'id': {'$ne': user.id}})
+    # Determinar tipo de usuario basado en role
+    tipo_usuario = 'vendedor' if user.role == UserRole.VENDEDOR else 'cliente'
+    
+    # Validate cedula - solo verificar duplicados del mismo tipo
+    existing_cedula = await db.users.find_one({
+        'cedula': cedula, 
+        'tipo_usuario': tipo_usuario,
+        'id': {'$ne': user.id}
+    })
     if existing_cedula:
-        raise HTTPException(status_code=400, detail="La cédula ya está registrada")
+        raise HTTPException(status_code=400, detail=f"La cédula ya está registrada como {tipo_usuario}")
     
     existing_celular = await db.users.find_one({'celular': celular, 'id': {'$ne': user.id}})
     if existing_celular:
@@ -986,7 +993,7 @@ async def completar_datos(request: Request, cedula: str, celular: str):
     
     await db.users.update_one(
         {'id': user.id},
-        {'$set': {'cedula': cedula, 'celular': celular, 'datos_completos': True}}
+        {'$set': {'cedula': cedula, 'celular': celular, 'datos_completos': True, 'tipo_usuario': tipo_usuario}}
     )
     
     return {"message": "Datos completados exitosamente"}
