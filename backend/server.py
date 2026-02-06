@@ -3051,6 +3051,19 @@ app.add_middleware(
 @app.on_event("startup")
 async def startup_event():
     """Inicializar módulos al arrancar"""
+    
+    # Crear índice compuesto para cedula + tipo_usuario (permite misma cédula en diferentes tipos)
+    try:
+        await db.users.create_index(
+            [("cedula", 1), ("tipo_usuario", 1)], 
+            unique=True, 
+            sparse=True,  # Ignora documentos sin estos campos
+            name="cedula_tipo_usuario_unique"
+        )
+        logger.info("Índice cedula_tipo_usuario creado/verificado")
+    except Exception as e:
+        logger.warning(f"Índice cedula_tipo_usuario ya existe o error: {e}")
+    
     # Inicializar state_machine
     state_machine.init_state_machine(db, Sorteo, SorteoEstado, SorteoTipo)
     logger.info("State machine inicializada")
