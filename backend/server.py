@@ -263,6 +263,10 @@ class UserRole(str, Enum):
     VENDEDOR = "vendedor"
     USUARIO = "usuario"
 
+class TipoUsuario(str, Enum):
+    CLIENTE = "cliente"
+    VENDEDOR = "vendedor"
+
 class SorteoTipo(str, Enum):
     ETAPAS = "etapas"
     UNICO = "unico"
