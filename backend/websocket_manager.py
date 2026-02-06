@@ -13,7 +13,8 @@ sio = socketio.AsyncServer(
     async_mode='asgi',
     cors_allowed_origins='*',
     logger=True,
-    engineio_logger=True
+    engineio_logger=True,
+    path='/api/socket.io'  # Usar path con prefijo /api para pasar por el ingress
 )
 
 # Diccionario para rastrear usuarios conectados por sorteo
