@@ -306,6 +306,7 @@ class User(BaseModel):
     picture: Optional[str] = None
     password_hash: Optional[str] = None
     role: UserRole = UserRole.USUARIO
+    tipo_usuario: Optional[str] = None  # "cliente" o "vendedor" - permite misma cédula en tipos diferentes
     wallet_balance: float = 0.0
     link_unico: Optional[str] = None
     email_verified: bool = False
