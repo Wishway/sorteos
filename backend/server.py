@@ -2262,7 +2262,7 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
             etapas_participantes=etapas_participantes,
             estado=BoletoEstado.ACTIVO,
             pago_confirmado=pago_confirmado,
-            comprobante_url=data.comprobante_url
+            numero_comprobante=data.numero_comprobante
         )
         
         boleto_dict = boleto.model_dump()
