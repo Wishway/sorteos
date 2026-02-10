@@ -1819,17 +1819,10 @@ const AdminDashboard = () => {
                         </div>
                         
                         <div className="flex flex-col gap-3">
-                          {boleto.comprobante_url && (
+                          {boleto.numero_comprobante && (
                             <div className="p-3 bg-blue-50 rounded-lg">
-                              <p className="text-sm font-semibold mb-2">Comprobante:</p>
-                              <a 
-                                href={boleto.comprobante_url} 
-                                target="_blank" 
-                                rel="noopener noreferrer"
-                                className="text-blue-600 hover:underline text-sm break-all"
-                              >
-                                Ver comprobante
-                              </a>
+                              <p className="text-sm font-semibold mb-1">Nº Comprobante (usuario):</p>
+                              <p className="text-blue-700 font-mono text-sm">{boleto.numero_comprobante}</p>
                             </div>
                           )}
                           
