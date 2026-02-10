@@ -31,7 +31,7 @@ const SorteoLanding = () => {
   const [comprando, setComprando] = useState(false);
   const [showDatosBancarios, setShowDatosBancarios] = useState(false);
   const [numerosDisponibles, setNumerosDisponibles] = useState([]);
-  const [comprobanteUrl, setComprobanteUrl] = useState('');
+  const [numeroComprobante, setNumeroComprobante] = useState('');
   const [configuracionAdmin, setConfiguracionAdmin] = useState(null);
   const [otrosSorteos, setOtrosSorteos] = useState([]);
   
@@ -265,7 +265,7 @@ const SorteoLanding = () => {
           metodo_pago: 'transferencia',
           vendedor_id: vendedorId,  // Enviar vendedor_id
           vendedor_link: vendedorLink,
-          comprobante_url: comprobanteUrl
+          numero_comprobante: numeroComprobante
         },
         { withCredentials: true }
       );
@@ -281,7 +281,7 @@ const SorteoLanding = () => {
       setShowDatosBancarios(false);
       setCantidad(1);
       setNumerosBoletos(['']);
-      setComprobanteUrl('');
+      setNumeroComprobante('');
       
       // REDIRIGIR AL PANEL DEL USUARIO - BOLETOS PENDIENTES
       toast.info('Redirigiendo a tu panel para ver tus boletos pendientes...');
@@ -922,13 +922,13 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                           </div>
 
                           <div>
-                            <Label htmlFor="comprobante">URL del Comprobante (Opcional)</Label>
+                            <Label htmlFor="comprobante">Número de Comprobante (Opcional)</Label>
                             <Input
                               id="comprobante"
-                              type="url"
-                              value={comprobanteUrl}
-                              onChange={(e) => setComprobanteUrl(e.target.value)}
-                              placeholder="https://..."
+                              type="text"
+                              value={numeroComprobante}
+                              onChange={(e) => setNumeroComprobante(e.target.value)}
+                              placeholder="Ej: 123456789"
                             />
                           </div>
 
