@@ -489,7 +489,7 @@ class BoletoCompra(BaseModel):
     metodo_pago: MetodoPago
     vendedor_id: Optional[str] = None  # ID del vendedor desde el frontend
     vendedor_link: Optional[str] = None
-    comprobante_url: Optional[str] = None
+    numero_comprobante: Optional[str] = None  # Número de comprobante de transferencia
 
 class EjecutarSorteoRequest(BaseModel):
     sorteo_id: str
