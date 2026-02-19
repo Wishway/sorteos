@@ -505,14 +505,19 @@ const AdminDashboard = () => {
   };
 
   const bloquearUsuario = async (userId) => {
-    if (!window.confirm('¿Estás seguro de bloquear este usuario?')) return;
-    try {
-      await axios.put(`${API}/admin/usuario/${userId}/bloquear`, {}, { withCredentials: true });
-      toast.success('Usuario bloqueado exitosamente');
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al bloquear usuario');
-    }
+    showConfirm(
+      'Bloquear Usuario',
+      '¿Estás seguro de bloquear este usuario?',
+      async () => {
+        try {
+          await axios.put(`${API}/admin/usuario/${userId}/bloquear`, {}, { withCredentials: true });
+          toast.success('Usuario bloqueado exitosamente');
+          fetchData();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Error al bloquear usuario');
+        }
+      }
+    );
   };
 
   const desbloquearUsuario = async (userId) => {
@@ -526,14 +531,19 @@ const AdminDashboard = () => {
   };
 
   const eliminarUsuario = async (userId) => {
-    if (!window.confirm('¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.')) return;
-    try {
-      await axios.delete(`${API}/admin/usuario/${userId}`, { withCredentials: true });
-      toast.success('Usuario eliminado exitosamente');
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al eliminar usuario');
-    }
+    showConfirm(
+      'Eliminar Usuario',
+      '¿Estás seguro de eliminar este usuario? Esta acción no se puede deshacer.',
+      async () => {
+        try {
+          await axios.delete(`${API}/admin/usuario/${userId}`, { withCredentials: true });
+          toast.success('Usuario eliminado exitosamente');
+          fetchData();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Error al eliminar usuario');
+        }
+      }
+    );
   };
 
   const fetchBoletosPendientes = async () => {
