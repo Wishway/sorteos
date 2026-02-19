@@ -543,13 +543,19 @@ const AdminDashboard = () => {
     }
     
     try {
-      await axios.put(`${API}/admin/boleto/${boletoAprobar}/aprobar?numero_comprobante=${encodeURIComponent(numeroComprobante)}`, {}, { withCredentials: true });
-      toast.success('Boleto aprobado exitosamente');
+      const response = await axios.put(
+        `${API}/admin/boleto/${boletoAprobar}/aprobar?numero_comprobante=${encodeURIComponent(numeroComprobante)}`, 
+        {}, 
+        { withCredentials: true }
+      );
+      // Usar el mensaje del servidor que indica cuántos boletos se aprobaron
+      toast.success(response.data.message || 'Compra aprobada exitosamente');
       setNumeroComprobante('');
       setBoletoAprobar(null);
       fetchBoletosPendientes();
       fetchData();
     } catch (error) {
+      console.error('Error al aprobar:', error);
       toast.error(error.response?.data?.detail || 'Error al aprobar boleto');
     }
   };
