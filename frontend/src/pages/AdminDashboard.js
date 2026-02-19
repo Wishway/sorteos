@@ -392,32 +392,36 @@ const AdminDashboard = () => {
     const sorteo = sorteos.find(s => s.id === sorteoId);
     const boletosVendidos = sorteo?.boletos_vendidos || 0;
     
+    let titulo = 'Eliminar Sorteo';
     let mensaje = '¿Estás seguro de eliminar este sorteo? Esta acción no se puede deshacer.';
     if (boletosVendidos > 0) {
-      mensaje = `⚠️ ADVERTENCIA: Este sorteo tiene ${boletosVendidos} boletos vendidos.\n\n¿Estás seguro de eliminar este sorteo junto con TODOS sus boletos? Esta acción NO se puede deshacer.`;
+      titulo = '⚠️ Eliminar Sorteo con Boletos';
+      mensaje = `Este sorteo tiene ${boletosVendidos} boletos vendidos.\n\n¿Estás seguro de eliminar este sorteo junto con TODOS sus boletos? Esta acción NO se puede deshacer.`;
     }
     
-    if (!window.confirm(mensaje)) return;
-    
-    try {
-      const url = boletosVendidos > 0 
-        ? `${API}/admin/sorteo/${sorteoId}?confirmar_con_compras=true`
-        : `${API}/admin/sorteo/${sorteoId}`;
-      await axios.delete(url, { withCredentials: true });
-      toast.success('Sorteo eliminado exitosamente');
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al eliminar sorteo');
-    }
+    showConfirm(titulo, mensaje, async () => {
+      try {
+        const url = boletosVendidos > 0 
+          ? `${API}/admin/sorteo/${sorteoId}?confirmar_con_compras=true`
+          : `${API}/admin/sorteo/${sorteoId}`;
+        await axios.delete(url, { withCredentials: true });
+        toast.success('Sorteo eliminado exitosamente');
+        fetchData();
+      } catch (error) {
+        toast.error(error.response?.data?.detail || 'Error al eliminar sorteo');
+      }
+    });
   };
 
   const publicarSorteo = async (sorteoId) => {
-    if (!window.confirm('¿Deseas publicar este sorteo? Una vez publicado, no podrá ser editado.')) return;
-    
-    try {
-      await axios.put(`${API}/admin/sorteo/${sorteoId}/publicar`, {}, { withCredentials: true });
-      toast.success('¡Sorteo publicado exitosamente!');
-      fetchData();
+    showConfirm(
+      'Publicar Sorteo',
+      '¿Deseas publicar este sorteo? Una vez publicado, no podrá ser editado.',
+      async () => {
+        try {
+          await axios.put(`${API}/admin/sorteo/${sorteoId}/publicar`, {}, { withCredentials: true });
+          toast.success('¡Sorteo publicado exitosamente!');
+          fetchData();
     } catch (error) {
       toast.error(error.response?.data?.detail || 'Error al publicar sorteo');
     }
