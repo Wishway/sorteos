@@ -1905,11 +1905,14 @@ const AdminDashboard = () => {
                                 </div>
                               )}
                               
-                              <Dialog>
+                              <Dialog open={dialogAprobarOpen && boletoAprobar === primerBoleto.id} onOpenChange={setDialogAprobarOpen}>
                                 <DialogTrigger asChild>
                                   <Button
                                     className="w-full bg-green-600 hover:bg-green-700"
-                                    onClick={() => setBoletoAprobar(primerBoleto.id)}
+                                    onClick={() => {
+                                      setBoletoAprobar(primerBoleto.id);
+                                      setDialogAprobarOpen(true);
+                                    }}
                                     data-testid={`aprobar-boleto-${primerBoleto.id}`}
                                   >
                                     <CheckCircle className="w-4 h-4 mr-2" />
