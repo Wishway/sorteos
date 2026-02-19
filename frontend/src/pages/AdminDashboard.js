@@ -553,6 +553,7 @@ const AdminDashboard = () => {
       toast.success(response.data.message || 'Compra aprobada exitosamente');
       setNumeroComprobante('');
       setBoletoAprobar(null);
+      setDialogAprobarOpen(false); // Cerrar el diálogo
       fetchBoletosPendientes();
       fetchData();
     } catch (error) {
