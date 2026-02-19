@@ -58,7 +58,7 @@ async def registrar_movimiento_ingreso(
         "tipo": TipoMovimiento.INGRESO,
         "monto": monto,
         "descripcion": f"Comisión por venta - Sorteo: {sorteo_titulo}",
-        "fecha": datetime.now(timezone.utc),
+        "fecha": datetime.now(timezone.utc).isoformat(),  # Convertir a ISO string
         "sorteo_id": sorteo_id,
         "sorteo_titulo": sorteo_titulo,
         "boleto_id": boleto_id,
