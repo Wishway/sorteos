@@ -1951,14 +1951,10 @@ const AdminDashboard = () => {
                                       />
                                     </div>
                                     <div className="flex gap-2 justify-end">
-                                      <DialogTrigger asChild>
-                                        <Button variant="outline">Cancelar</Button>
-                                      </DialogTrigger>
-                                      <Button 
-                                        onClick={async () => {
-                                          await handleAprobarBoleto();
-                                        }}
-                                      >
+                                      <Button variant="outline" onClick={() => setDialogAprobarOpen(false)}>
+                                        Cancelar
+                                      </Button>
+                                      <Button onClick={handleAprobarBoleto}>
                                         {esGrupo ? `Aprobar ${boletos.length} Boletos` : 'Aprobar Boleto'}
                                       </Button>
                                     </div>
