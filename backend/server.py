@@ -2776,80 +2776,106 @@ async def aprobar_boleto(boleto_id: str, numero_comprobante: str, request: Reque
             detail="Este boleto ya ha sido aprobado anteriormente."
         )
     
-    # VALIDACIÓN 2: Verificar que el número de boleto sigue disponible
-    numero_boleto = boleto_doc.get('numero_boleto')
+    # Determinar modo de aprobación
+    approval_mode = boleto_doc.get('approval_mode', 'individual')  # Default: individual (boletos antiguos)
+    purchase_id = boleto_doc.get('purchase_id')
+    
+    # Lista de boletos a aprobar
+    boletos_a_aprobar = []
+    
+    if approval_mode == 'grouped' and purchase_id:
+        # NUEVO: Aprobación masiva por purchase_id
+        # Obtener todos los boletos de la misma compra que no estén aprobados
+        boletos_grupo = await db.boletos.find({
+            'purchase_id': purchase_id,
+            'pago_confirmado': False
+        }).to_list(1000)
+        boletos_a_aprobar = boletos_grupo
+        logger.info(f"Aprobación masiva: {len(boletos_a_aprobar)} boletos del purchase_id {purchase_id}")
+    else:
+        # ANTIGUO: Aprobación individual
+        boletos_a_aprobar = [boleto_doc]
+        logger.info(f"Aprobación individual del boleto {boleto_id}")
+    
+    # Verificar disponibilidad de TODOS los boletos antes de aprobar
     sorteo_id = boleto_doc.get('sorteo_id')
-    
-    # Verificar si existe otro boleto CON PAGO CONFIRMADO para el mismo número
-    boleto_existente = await db.boletos.find_one({
-        'sorteo_id': sorteo_id,
-        'numero_boleto': numero_boleto,
-        'pago_confirmado': True,
-        'id': {'$ne': boleto_id}  # Excluir el boleto actual
-    })
-    
-    if boleto_existente:
-        raise HTTPException(
-            status_code=400, 
-            detail=f"El boleto #{numero_boleto} ya no está disponible. Fue adquirido por otro usuario."
-        )
-    
-    result = await db.boletos.update_one(
-        {'id': boleto_id},
-        {'$set': {
+    for b in boletos_a_aprobar:
+        numero_boleto = b.get('numero_boleto')
+        # Verificar si existe otro boleto CON PAGO CONFIRMADO para el mismo número
+        boleto_existente = await db.boletos.find_one({
+            'sorteo_id': sorteo_id,
+            'numero_boleto': numero_boleto,
             'pago_confirmado': True,
-            'numero_comprobante': numero_comprobante.strip()
-        }}
-    )
-    
-    # ACREDITAR COMISIÓN AL VENDEDOR si existe
-    if boleto_doc.get('vendedor_id'):
-        # Buscar comisión pendiente
-        comision = await db.comisiones.find_one({
-            'boleto_id': boleto_id,
-            'estado': ComisionEstado.PENDIENTE
+            'id': {'$ne': b['id']}
         })
+        if boleto_existente:
+            raise HTTPException(
+                status_code=400, 
+                detail=f"El boleto #{numero_boleto} ya no está disponible. Fue adquirido por otro usuario."
+            )
+    
+    # Aprobar todos los boletos
+    boletos_aprobados = 0
+    for boleto in boletos_a_aprobar:
+        # Actualizar boleto
+        await db.boletos.update_one(
+            {'id': boleto['id']},
+            {'$set': {
+                'pago_confirmado': True,
+                'numero_comprobante': numero_comprobante.strip()
+            }}
+        )
+        boletos_aprobados += 1
         
-        if comision:
-            # Marcar comisión como pagada
-            await db.comisiones.update_one(
-                {'id': comision['id']},
-                {'$set': {'estado': ComisionEstado.PAGADO}}
-            )
+        # ACREDITAR COMISIÓN AL VENDEDOR si existe
+        if boleto.get('vendedor_id'):
+            comision = await db.comisiones.find_one({
+                'boleto_id': boleto['id'],
+                'estado': ComisionEstado.PENDIENTE
+            })
             
-            # Acreditar a la wallet del vendedor
-            await db.users.update_one(
-                {'id': boleto_doc['vendedor_id']},
-                {'$inc': {'wallet_balance': comision['monto']}}
-            )
-            
-            # Registrar movimiento de ingreso
-            from movimientos_vendedor import registrar_movimiento_ingreso
-            sorteo_doc = await db.sorteos.find_one({'id': boleto_doc['sorteo_id']}, {"_id": 0})
-            comprador_doc = await db.users.find_one({'id': boleto_doc['usuario_id']}, {"_id": 0})
-            
-            await registrar_movimiento_ingreso(
-                db=db,
-                vendedor_id=boleto_doc['vendedor_id'],
-                monto=comision['monto'],
-                sorteo_id=boleto_doc['sorteo_id'],
-                sorteo_titulo=sorteo_doc.get('titulo', 'Sorteo') if sorteo_doc else 'Sorteo',
-                boleto_id=boleto_id,
-                numero_boleto=boleto_doc.get('numero_boleto', 0),
-                comprador_id=boleto_doc['usuario_id'],
-                comprador_nombre=comprador_doc.get('name', 'Usuario') if comprador_doc else 'Usuario'
-            )
-            
-            logger.info(f"Comisión de ${comision['monto']} acreditada a vendedor {boleto_doc['vendedor_id']}")
+            if comision:
+                # Marcar comisión como pagada
+                await db.comisiones.update_one(
+                    {'id': comision['id']},
+                    {'$set': {'estado': ComisionEstado.PAGADO}}
+                )
+                
+                # Acreditar a la wallet del vendedor
+                await db.users.update_one(
+                    {'id': boleto['vendedor_id']},
+                    {'$inc': {'wallet_balance': comision['monto']}}
+                )
+                
+                # Registrar movimiento de ingreso
+                from movimientos_vendedor import registrar_movimiento_ingreso
+                sorteo_doc_temp = await db.sorteos.find_one({'id': boleto['sorteo_id']}, {"_id": 0})
+                comprador_doc = await db.users.find_one({'id': boleto['usuario_id']}, {"_id": 0})
+                
+                await registrar_movimiento_ingreso(
+                    db=db,
+                    vendedor_id=boleto['vendedor_id'],
+                    monto=comision['monto'],
+                    sorteo_id=boleto['sorteo_id'],
+                    sorteo_titulo=sorteo_doc_temp.get('titulo', 'Sorteo') if sorteo_doc_temp else 'Sorteo',
+                    boleto_id=boleto['id'],
+                    numero_boleto=boleto.get('numero_boleto', 0),
+                    comprador_id=boleto['usuario_id'],
+                    comprador_nombre=comprador_doc.get('name', 'Usuario') if comprador_doc else 'Usuario'
+                )
+                
+                logger.info(f"Comisión de ${comision['monto']} acreditada a vendedor {boleto['vendedor_id']}")
     
     # Actualizar progreso del sorteo y verificar transiciones
-    sorteo_id = boleto_doc['sorteo_id']
     await actualizar_progreso_sorteo(sorteo_id)
     resultado = await state_machine.verificar_transicion_estado_nuevo(sorteo_id)
     if resultado == 'live':
         asyncio.create_task(live_animation_service.iniciar_animacion_live(sorteo_id))
     
-    return {"message": "Boleto aprobado exitosamente"}
+    if boletos_aprobados > 1:
+        return {"message": f"✅ {boletos_aprobados} boletos aprobados exitosamente (compra completa)"}
+    else:
+        return {"message": "Boleto aprobado exitosamente"}
 
 @api_router.put("/admin/boleto/{boleto_id}/rechazar")
 async def rechazar_boleto(boleto_id: str, request: Request):
