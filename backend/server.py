@@ -2250,6 +2250,9 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     if sorteo.tipo == SorteoTipo.ETAPAS:
         etapas_participantes = [e.numero for e in sorteo.etapas]
     
+    # Generar ID único de compra para aprobación masiva
+    purchase_id = str(uuid.uuid4())
+    
     # Create boletos
     boletos_creados = []
     pago_confirmado = data.metodo_pago == MetodoPago.PAYPHONE
@@ -2265,7 +2268,9 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
             etapas_participantes=etapas_participantes,
             estado=BoletoEstado.ACTIVO,
             pago_confirmado=pago_confirmado,
-            numero_comprobante=data.numero_comprobante
+            numero_comprobante=data.numero_comprobante,
+            purchase_id=purchase_id,  # Nuevo: agrupa boletos de la misma compra
+            approval_mode='grouped'   # Nuevo: modo de aprobación masiva
         )
         
         boleto_dict = boleto.model_dump()
