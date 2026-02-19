@@ -600,15 +600,20 @@ const AdminDashboard = () => {
   };
 
   const handleRechazarBoleto = async (boletoId) => {
-    if (!window.confirm('¿Estás seguro de rechazar este boleto? Se eliminará permanentemente.')) return;
-    try {
-      await axios.put(`${API}/admin/boleto/${boletoId}/rechazar`, {}, { withCredentials: true });
-      toast.success('Boleto rechazado');
-      fetchBoletosPendientes();
-      fetchData();
-    } catch (error) {
-      toast.error('Error al rechazar boleto');
-    }
+    showConfirm(
+      'Rechazar Boleto',
+      '¿Estás seguro de rechazar este boleto? Se eliminará permanentemente.',
+      async () => {
+        try {
+          await axios.put(`${API}/admin/boleto/${boletoId}/rechazar`, {}, { withCredentials: true });
+          toast.success('Boleto rechazado');
+          fetchBoletosPendientes();
+          fetchData();
+        } catch (error) {
+          toast.error('Error al rechazar boleto');
+        }
+      }
+    );
   };
 
   const handleChangePassword = async (e) => {
