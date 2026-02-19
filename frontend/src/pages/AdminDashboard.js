@@ -2328,6 +2328,33 @@ const AdminDashboard = () => {
         </DialogContent>
       </Dialog>
 
+      {/* Dialog de Confirmación Genérico (reemplaza window.confirm) */}
+      <Dialog open={confirmDialog.open} onOpenChange={(open) => setConfirmDialog({ ...confirmDialog, open })}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{confirmDialog.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600 whitespace-pre-line">{confirmDialog.message}</p>
+            <div className="flex gap-2 justify-end">
+              <Button variant="outline" onClick={() => setConfirmDialog({ ...confirmDialog, open: false })}>
+                Cancelar
+              </Button>
+              <Button 
+                onClick={async () => {
+                  setConfirmDialog({ ...confirmDialog, open: false });
+                  if (confirmDialog.onConfirm) {
+                    await confirmDialog.onConfirm();
+                  }
+                }}
+              >
+                Confirmar
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 };
