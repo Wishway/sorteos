@@ -1780,15 +1780,38 @@ const AdminDashboard = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {boletosPendientes.map((boleto) => (
+                {boletosPendientes.map((boleto) => {
+                  // Contar boletos de la misma compra
+                  const boletosGrupo = boleto.purchase_id 
+                    ? boletosPendientes.filter(b => b.purchase_id === boleto.purchase_id)
+                    : [boleto];
+                  const esGrupo = boletosGrupo.length > 1;
+                  const numerosGrupo = boletosGrupo.map(b => b.numero_boleto).sort((a,b) => a-b);
+                  
+                  return (
                   <Card key={boleto.id} className="sorteo-card">
                     <CardContent className="p-6">
                       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
                         <div className="lg:col-span-2">
-                          <div className="flex items-center gap-2 mb-3">
+                          <div className="flex items-center gap-2 mb-3 flex-wrap">
                             <Badge variant="secondary">Boleto #{boleto.numero_boleto}</Badge>
                             <Badge className="bg-yellow-100 text-yellow-700">Pendiente</Badge>
+                            {esGrupo && (
+                              <Badge className="bg-purple-100 text-purple-700">
+                                📦 Compra de {boletosGrupo.length} boletos
+                              </Badge>
+                            )}
                           </div>
+                          
+                          {esGrupo && (
+                            <div className="mb-3 p-2 bg-purple-50 rounded-lg text-sm">
+                              <span className="font-semibold">Boletos en esta compra: </span>
+                              <span className="font-mono">#{numerosGrupo.join(', #')}</span>
+                              <p className="text-xs text-purple-600 mt-1">
+                                ✨ Al aprobar se aprobarán todos los boletos de esta compra
+                              </p>
+                            </div>
+                          )}
                           
                           <div className="space-y-2">
                             <div>
@@ -1812,8 +1835,10 @@ const AdminDashboard = () => {
                               <p className="text-gray-700">{formatDateTime(boleto.fecha_compra)}</p>
                             </div>
                             <div>
-                              <span className="text-sm font-semibold">Monto:</span>
-                              <p className="text-lg font-bold text-primary">{formatCurrency(boleto.precio_pagado)}</p>
+                              <span className="text-sm font-semibold">Monto{esGrupo ? ' total' : ''}:</span>
+                              <p className="text-lg font-bold text-primary">
+                                {formatCurrency(esGrupo ? boleto.precio_pagado * boletosGrupo.length : boleto.precio_pagado)}
+                              </p>
                             </div>
                           </div>
                         </div>
