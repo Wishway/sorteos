@@ -1949,11 +1949,13 @@ const AdminDashboard = () => {
                                       <DialogTrigger asChild>
                                         <Button variant="outline">Cancelar</Button>
                                       </DialogTrigger>
-                                      <DialogTrigger asChild>
-                                        <Button onClick={handleAprobarBoleto}>
-                                          {esGrupo ? `Aprobar ${boletos.length} Boletos` : 'Aprobar Boleto'}
-                                        </Button>
-                                      </DialogTrigger>
+                                      <Button 
+                                        onClick={async () => {
+                                          await handleAprobarBoleto();
+                                        }}
+                                      >
+                                        {esGrupo ? `Aprobar ${boletos.length} Boletos` : 'Aprobar Boleto'}
+                                      </Button>
                                     </div>
                                   </div>
                                 </DialogContent>
