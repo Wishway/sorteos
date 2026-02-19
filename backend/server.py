@@ -397,6 +397,9 @@ class Boleto(BaseModel):
     pago_confirmado: bool = False
     comprobante_url: Optional[str] = None
     numero_comprobante: Optional[str] = None
+    # Nuevos campos para aprobación masiva
+    purchase_id: Optional[str] = None  # ID único de la compra (agrupa boletos)
+    approval_mode: Optional[str] = None  # 'individual' (antiguo) o 'grouped' (nuevo)
 
 class Ganador(BaseModel):
     model_config = ConfigDict(extra="ignore")
