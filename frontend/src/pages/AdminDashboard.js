@@ -1780,135 +1780,203 @@ const AdminDashboard = () => {
               </Card>
             ) : (
               <div className="grid gap-4">
-                {boletosPendientes.map((boleto) => {
-                  // Contar boletos de la misma compra
-                  const boletosGrupo = boleto.purchase_id 
-                    ? boletosPendientes.filter(b => b.purchase_id === boleto.purchase_id)
-                    : [boleto];
-                  const esGrupo = boletosGrupo.length > 1;
-                  const numerosGrupo = boletosGrupo.map(b => b.numero_boleto).sort((a,b) => a-b);
+                {(() => {
+                  // Agrupar boletos por purchase_id
+                  const comprasMap = new Map();
+                  const boletosIndividuales = [];
                   
-                  return (
-                  <Card key={boleto.id} className="sorteo-card">
-                    <CardContent className="p-6">
-                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2">
-                          <div className="flex items-center gap-2 mb-3 flex-wrap">
-                            <Badge variant="secondary">Boleto #{boleto.numero_boleto}</Badge>
-                            <Badge className="bg-yellow-100 text-yellow-700">Pendiente</Badge>
-                            {esGrupo && (
-                              <Badge className="bg-purple-100 text-purple-700">
-                                📦 Compra de {boletosGrupo.length} boletos
-                              </Badge>
-                            )}
-                          </div>
-                          
-                          {esGrupo && (
-                            <div className="mb-3 p-2 bg-purple-50 rounded-lg text-sm">
-                              <span className="font-semibold">Boletos en esta compra: </span>
-                              <span className="font-mono">#{numerosGrupo.join(', #')}</span>
-                              <p className="text-xs text-purple-600 mt-1">
-                                ✨ Al aprobar se aprobarán todos los boletos de esta compra
-                              </p>
-                            </div>
-                          )}
-                          
-                          <div className="space-y-2">
-                            <div>
-                              <span className="text-sm font-semibold">Sorteo:</span>
-                              <p className="text-gray-700">{boleto.sorteo?.titulo}</p>
-                            </div>
-                            <div>
-                              <span className="text-sm font-semibold">Usuario:</span>
-                              <p className="text-gray-700">{boleto.usuario?.name} ({boleto.usuario?.email})</p>
-                            </div>
-                            <div>
-                              <span className="text-sm font-semibold">Cédula:</span>
-                              <p className="text-gray-700">{boleto.usuario?.cedula}</p>
-                            </div>
-                            <div>
-                              <span className="text-sm font-semibold">Celular:</span>
-                              <p className="text-gray-700">{boleto.usuario?.celular}</p>
-                            </div>
-                            <div>
-                              <span className="text-sm font-semibold">Fecha de compra:</span>
-                              <p className="text-gray-700">{formatDateTime(boleto.fecha_compra)}</p>
-                            </div>
-                            <div>
-                              <span className="text-sm font-semibold">Monto{esGrupo ? ' total' : ''}:</span>
-                              <p className="text-lg font-bold text-primary">
-                                {formatCurrency(esGrupo ? boleto.precio_pagado * boletosGrupo.length : boleto.precio_pagado)}
-                              </p>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="flex flex-col gap-3">
-                          {boleto.numero_comprobante && (
-                            <div className="p-3 bg-blue-50 rounded-lg">
-                              <p className="text-sm font-semibold mb-1">Nº Comprobante (usuario):</p>
-                              <p className="text-blue-700 font-mono text-sm">{boleto.numero_comprobante}</p>
-                            </div>
-                          )}
-                          
-                          <Dialog>
-                            <DialogTrigger asChild>
-                              <Button
-                                className="w-full bg-green-600 hover:bg-green-700"
-                                onClick={() => setBoletoAprobar(boleto.id)}
-                                data-testid={`aprobar-boleto-${boleto.id}`}
-                              >
-                                <CheckCircle className="w-4 h-4 mr-2" />
-                                Aprobar
-                              </Button>
-                            </DialogTrigger>
-                            <DialogContent>
-                              <DialogHeader>
-                                <DialogTitle>Aprobar Boleto</DialogTitle>
-                              </DialogHeader>
-                              <div className="space-y-4">
-                                <p className="text-sm text-gray-600">
-                                  Ingresa el número de comprobante bancario para aprobar este boleto
+                  boletosPendientes.forEach(boleto => {
+                    if (boleto.purchase_id) {
+                      if (!comprasMap.has(boleto.purchase_id)) {
+                        comprasMap.set(boleto.purchase_id, []);
+                      }
+                      comprasMap.get(boleto.purchase_id).push(boleto);
+                    } else {
+                      // Boletos antiguos sin purchase_id
+                      boletosIndividuales.push(boleto);
+                    }
+                  });
+                  
+                  // Convertir a array de compras agrupadas
+                  const comprasAgrupadas = Array.from(comprasMap.values());
+                  
+                  // Combinar: primero compras agrupadas, luego individuales
+                  const todasLasCompras = [
+                    ...comprasAgrupadas.map(boletos => ({ tipo: 'grupo', boletos })),
+                    ...boletosIndividuales.map(boleto => ({ tipo: 'individual', boletos: [boleto] }))
+                  ];
+                  
+                  return todasLasCompras.map((compra, index) => {
+                    const boletos = compra.boletos;
+                    const primerBoleto = boletos[0];
+                    const esGrupo = boletos.length > 1;
+                    const numerosOrdenados = boletos.map(b => b.numero_boleto).sort((a, b) => a - b);
+                    const montoTotal = boletos.reduce((sum, b) => sum + b.precio_pagado, 0);
+                    
+                    return (
+                      <Card key={primerBoleto.purchase_id || primerBoleto.id} className="sorteo-card">
+                        <CardContent className="p-6">
+                          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                            <div className="lg:col-span-2">
+                              {/* Header con badges */}
+                              <div className="flex items-center gap-2 mb-3 flex-wrap">
+                                {esGrupo ? (
+                                  <Badge className="bg-purple-600 text-white">
+                                    📦 Compra de {boletos.length} boletos
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="secondary">Boleto #{primerBoleto.numero_boleto}</Badge>
+                                )}
+                                <Badge className="bg-yellow-100 text-yellow-700">Pendiente</Badge>
+                              </div>
+                              
+                              {/* Lista de números de boletos */}
+                              <div className="mb-4 p-3 bg-gray-50 rounded-lg">
+                                <p className="text-sm font-semibold mb-2">
+                                  {esGrupo ? `Boletos (${boletos.length}):` : 'Boleto:'}
                                 </p>
-                                <div>
-                                  <Label htmlFor="numero-comprobante">Número de Comprobante *</Label>
-                                  <Input
-                                    id="numero-comprobante"
-                                    value={numeroComprobante}
-                                    onChange={(e) => setNumeroComprobante(e.target.value)}
-                                    placeholder="Ej: 123456789"
-                                    required
-                                  />
-                                </div>
-                                <div className="flex gap-2 justify-end">
-                                  <DialogTrigger asChild>
-                                    <Button variant="outline">Cancelar</Button>
-                                  </DialogTrigger>
-                                  <DialogTrigger asChild>
-                                    <Button onClick={handleAprobarBoleto}>
-                                      Aprobar Boleto
-                                    </Button>
-                                  </DialogTrigger>
+                                <div className="flex flex-wrap gap-1">
+                                  {numerosOrdenados.map(num => (
+                                    <span key={num} className="inline-block px-2 py-1 bg-white border rounded text-sm font-mono">
+                                      #{num}
+                                    </span>
+                                  ))}
                                 </div>
                               </div>
-                            </DialogContent>
-                          </Dialog>
-                          
-                          <Button
-                            variant="destructive"
-                            className="w-full"
-                            onClick={() => handleRechazarBoleto(boleto.id)}
-                            data-testid={`rechazar-boleto-${boleto.id}`}
-                          >
-                            <XCircle className="w-4 h-4 mr-2" />
-                            Rechazar
-                          </Button>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                  );
-                })}
+                              
+                              {/* Información de la compra */}
+                              <div className="space-y-2">
+                                <div>
+                                  <span className="text-sm font-semibold">Sorteo:</span>
+                                  <p className="text-gray-700">{primerBoleto.sorteo?.titulo}</p>
+                                </div>
+                                <div>
+                                  <span className="text-sm font-semibold">Usuario:</span>
+                                  <p className="text-gray-700">{primerBoleto.usuario?.name} ({primerBoleto.usuario?.email})</p>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                  <div>
+                                    <span className="text-sm font-semibold">Cédula:</span>
+                                    <p className="text-gray-700">{primerBoleto.usuario?.cedula || '-'}</p>
+                                  </div>
+                                  <div>
+                                    <span className="text-sm font-semibold">Celular:</span>
+                                    <p className="text-gray-700">{primerBoleto.usuario?.celular || '-'}</p>
+                                  </div>
+                                </div>
+                                <div>
+                                  <span className="text-sm font-semibold">Fecha de compra:</span>
+                                  <p className="text-gray-700">{formatDateTime(primerBoleto.fecha_compra)}</p>
+                                </div>
+                                <div className="pt-2 border-t">
+                                  <span className="text-sm font-semibold">Monto total:</span>
+                                  <p className="text-2xl font-bold text-primary">{formatCurrency(montoTotal)}</p>
+                                  {esGrupo && (
+                                    <p className="text-xs text-gray-500">
+                                      ({formatCurrency(primerBoleto.precio_pagado)} × {boletos.length} boletos)
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            
+                            {/* Panel de acciones */}
+                            <div className="flex flex-col gap-3">
+                              {primerBoleto.numero_comprobante && (
+                                <div className="p-3 bg-blue-50 rounded-lg">
+                                  <p className="text-sm font-semibold mb-1">Nº Comprobante (usuario):</p>
+                                  <p className="text-blue-700 font-mono text-sm">{primerBoleto.numero_comprobante}</p>
+                                </div>
+                              )}
+                              
+                              {esGrupo && (
+                                <div className="p-3 bg-green-50 rounded-lg text-center">
+                                  <p className="text-sm text-green-700">
+                                    ✨ Al aprobar se aprobarán los <strong>{boletos.length} boletos</strong>
+                                  </p>
+                                </div>
+                              )}
+                              
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button
+                                    className="w-full bg-green-600 hover:bg-green-700"
+                                    onClick={() => setBoletoAprobar(primerBoleto.id)}
+                                    data-testid={`aprobar-boleto-${primerBoleto.id}`}
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-2" />
+                                    {esGrupo ? `Aprobar ${boletos.length} Boletos` : 'Aprobar'}
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>
+                                      {esGrupo ? `Aprobar Compra (${boletos.length} boletos)` : 'Aprobar Boleto'}
+                                    </DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <p className="text-sm text-gray-600">
+                                      {esGrupo 
+                                        ? `Ingresa el número de comprobante para aprobar los ${boletos.length} boletos de esta compra`
+                                        : 'Ingresa el número de comprobante bancario para aprobar este boleto'
+                                      }
+                                    </p>
+                                    {esGrupo && (
+                                      <div className="p-3 bg-purple-50 rounded-lg">
+                                        <p className="text-sm font-semibold">Boletos a aprobar:</p>
+                                        <p className="text-sm text-purple-700 font-mono">
+                                          #{numerosOrdenados.join(', #')}
+                                        </p>
+                                      </div>
+                                    )}
+                                    <div>
+                                      <Label htmlFor="numero-comprobante">Número de Comprobante *</Label>
+                                      <Input
+                                        id="numero-comprobante"
+                                        value={numeroComprobante}
+                                        onChange={(e) => setNumeroComprobante(e.target.value)}
+                                        placeholder="Ej: 123456789"
+                                        required
+                                      />
+                                    </div>
+                                    <div className="flex gap-2 justify-end">
+                                      <DialogTrigger asChild>
+                                        <Button variant="outline">Cancelar</Button>
+                                      </DialogTrigger>
+                                      <DialogTrigger asChild>
+                                        <Button onClick={handleAprobarBoleto}>
+                                          {esGrupo ? `Aprobar ${boletos.length} Boletos` : 'Aprobar Boleto'}
+                                        </Button>
+                                      </DialogTrigger>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
+                              
+                              <Button
+                                variant="destructive"
+                                className="w-full"
+                                onClick={() => {
+                                  if (esGrupo) {
+                                    if (window.confirm(`¿Rechazar los ${boletos.length} boletos de esta compra?`)) {
+                                      boletos.forEach(b => handleRechazarBoleto(b.id));
+                                    }
+                                  } else {
+                                    handleRechazarBoleto(primerBoleto.id);
+                                  }
+                                }}
+                                data-testid={`rechazar-boleto-${primerBoleto.id}`}
+                              >
+                                <XCircle className="w-4 h-4 mr-2" />
+                                {esGrupo ? `Rechazar ${boletos.length} Boletos` : 'Rechazar'}
+                              </Button>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    );
+                  });
+                })()}
               </div>
             )}
           </TabsContent>
