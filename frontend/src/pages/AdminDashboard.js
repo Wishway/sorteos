@@ -463,27 +463,35 @@ const AdminDashboard = () => {
   // Función removida - reemplazada por la sección expandible de edición de imágenes
 
   const iniciarSorteo = async (sorteoId) => {
-    if (!window.confirm('¿Iniciar el sorteo en LIVE ahora? Esto iniciará la animación de 2 minutos.')) return;
-    
-    try {
-      await axios.put(`${API}/admin/sorteo/${sorteoId}/iniciar-live`, {}, { withCredentials: true });
-      toast.success('¡Sorteo iniciado en LIVE! La animación durará 2 minutos');
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al iniciar sorteo');
-    }
+    showConfirm(
+      'Iniciar Sorteo LIVE',
+      '¿Iniciar el sorteo en LIVE ahora? Esto iniciará la animación de 2 minutos.',
+      async () => {
+        try {
+          await axios.put(`${API}/admin/sorteo/${sorteoId}/iniciar-live`, {}, { withCredentials: true });
+          toast.success('¡Sorteo iniciado en LIVE! La animación durará 2 minutos');
+          fetchData();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Error al iniciar sorteo');
+        }
+      }
+    );
   };
 
   const finalizarSorteo = async (sorteoId) => {
-    if (!window.confirm('¿Forzar finalización del sorteo?')) return;
-    
-    try {
-      await axios.put(`${API}/admin/sorteo/${sorteoId}/estado?nuevo_estado=completed`, {}, { withCredentials: true });
-      toast.success('Sorteo finalizado');
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al finalizar sorteo');
-    }
+    showConfirm(
+      'Finalizar Sorteo',
+      '¿Forzar finalización del sorteo?',
+      async () => {
+        try {
+          await axios.put(`${API}/admin/sorteo/${sorteoId}/estado?nuevo_estado=completed`, {}, { withCredentials: true });
+          toast.success('Sorteo finalizado');
+          fetchData();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Error al finalizar sorteo');
+        }
+      }
+    );
   };
 
   const cambiarRoleUsuario = async (userId, newRole) => {
