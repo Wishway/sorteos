@@ -322,18 +322,28 @@ const AdminDashboard = () => {
     }
   };
 
+  // Función helper para mostrar diálogos de confirmación (reemplaza window.confirm)
+  const showConfirm = (title, message, onConfirm) => {
+    setConfirmDialog({ open: true, title, message, onConfirm });
+  };
+
   const ejecutarSorteo = async (sorteoId, etapaNumero = null) => {
-    if (!window.confirm('¿Estás seguro de ejecutar este sorteo?')) return;
-    try {
-      await axios.post(`${API}/admin/ejecutar-sorteo`, 
-        { sorteo_id: sorteoId, etapa_numero: etapaNumero },
-        { withCredentials: true }
-      );
-      toast.success('¡Sorteo ejecutado exitosamente!');
-      fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al ejecutar sorteo');
-    }
+    showConfirm(
+      'Ejecutar Sorteo',
+      '¿Estás seguro de ejecutar este sorteo?',
+      async () => {
+        try {
+          await axios.post(`${API}/admin/ejecutar-sorteo`, 
+            { sorteo_id: sorteoId, etapa_numero: etapaNumero },
+            { withCredentials: true }
+          );
+          toast.success('¡Sorteo ejecutado exitosamente!');
+          fetchData();
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Error al ejecutar sorteo');
+        }
+      }
+    );
   };
 
   const editarSorteo = async (sorteoId) => {
