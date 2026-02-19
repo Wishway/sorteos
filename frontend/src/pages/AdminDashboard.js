@@ -38,6 +38,7 @@ const AdminDashboard = () => {
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [numeroComprobante, setNumeroComprobante] = useState('');
   const [boletoAprobar, setBoletoAprobar] = useState(null);
+  const [dialogAprobarOpen, setDialogAprobarOpen] = useState(false);
   
   // Estados para retiros
   const [retiros, setRetiros] = useState([]);
