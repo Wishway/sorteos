@@ -2009,9 +2009,22 @@ const AdminDashboard = () => {
                                 className="w-full"
                                 onClick={() => {
                                   if (esGrupo) {
-                                    if (window.confirm(`¿Rechazar los ${boletos.length} boletos de esta compra?`)) {
-                                      boletos.forEach(b => handleRechazarBoleto(b.id));
-                                    }
+                                    showConfirm(
+                                      'Rechazar Compra',
+                                      `¿Rechazar los ${boletos.length} boletos de esta compra? Se eliminarán permanentemente.`,
+                                      async () => {
+                                        for (const b of boletos) {
+                                          try {
+                                            await axios.put(`${API}/admin/boleto/${b.id}/rechazar`, {}, { withCredentials: true });
+                                          } catch (error) {
+                                            console.error('Error al rechazar boleto:', error);
+                                          }
+                                        }
+                                        toast.success(`${boletos.length} boletos rechazados`);
+                                        fetchBoletosPendientes();
+                                        fetchData();
+                                      }
+                                    );
                                   } else {
                                     handleRechazarBoleto(primerBoleto.id);
                                   }
