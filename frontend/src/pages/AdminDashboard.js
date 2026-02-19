@@ -40,6 +40,9 @@ const AdminDashboard = () => {
   const [boletoAprobar, setBoletoAprobar] = useState(null);
   const [dialogAprobarOpen, setDialogAprobarOpen] = useState(false);
   
+  // Estados para diálogos de confirmación (reemplaza window.confirm)
+  const [confirmDialog, setConfirmDialog] = useState({ open: false, title: '', message: '', onConfirm: null });
+  
   // Estados para retiros
   const [retiros, setRetiros] = useState([]);
   const [loadingRetiros, setLoadingRetiros] = useState(false);
