@@ -2712,10 +2712,17 @@ async def get_boletos_pendientes(request: Request, sorteo_id: Optional[str] = No
     
     # Get user info for each boleto
     for boleto in boletos:
-        if isinstance(boleto['fecha_compra'], str):
-            boleto['fecha_compra'] = datetime.fromisoformat(boleto['fecha_compra'])
+        # Convertir fecha_compra a ISO string para serialización JSON
+        if 'fecha_compra' in boleto:
+            if isinstance(boleto['fecha_compra'], datetime):
+                boleto['fecha_compra'] = boleto['fecha_compra'].isoformat()
+            elif isinstance(boleto['fecha_compra'], str):
+                pass  # Ya es string
         
         user_doc = await db.users.find_one({'id': boleto['usuario_id']}, {"_id": 0, "password_hash": 0})
+        if user_doc and 'created_at' in user_doc:
+            if isinstance(user_doc['created_at'], datetime):
+                user_doc['created_at'] = user_doc['created_at'].isoformat()
         boleto['usuario'] = user_doc
         
         sorteo_doc = await db.sorteos.find_one({'id': boleto['sorteo_id']}, {"_id": 0})
