@@ -422,9 +422,11 @@ const AdminDashboard = () => {
           await axios.put(`${API}/admin/sorteo/${sorteoId}/publicar`, {}, { withCredentials: true });
           toast.success('¡Sorteo publicado exitosamente!');
           fetchData();
-    } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al publicar sorteo');
-    }
+        } catch (error) {
+          toast.error(error.response?.data?.detail || 'Error al publicar sorteo');
+        }
+      }
+    );
   };
 
   const pausarDespausarVentas = async (sorteoId, pausar) => {
