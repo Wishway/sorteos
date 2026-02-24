@@ -2125,7 +2125,11 @@ async def validar_numero_boleto(sorteo_id: str, request: ValidarNumeroRequest):
 @api_router.post("/sorteos/{sorteo_id}/validar-numeros-bulk")
 async def validar_numeros_bulk(sorteo_id: str, request: Request):
     """Validar disponibilidad de multiples numeros en una sola consulta"""
-    body = await request.json()
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(status_code=400, detail="JSON invalido")
+    
     numeros = body.get('numeros', [])
     
     if not numeros:
