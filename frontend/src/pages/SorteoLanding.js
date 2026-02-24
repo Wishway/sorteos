@@ -967,7 +967,14 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                             disabled={comprando}
                             data-testid="confirmar-compra-btn"
                           >
-                            {comprando ? 'Procesando...' : 'Confirmar Compra'}
+                            {comprando ? (
+                              <>
+                                <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                                Procesando compra...
+                              </>
+                            ) : (
+                              'Confirmar Compra'
+                            )}
                           </Button>
 
                           {configuracionAdmin?.numero_whatsapp && (
