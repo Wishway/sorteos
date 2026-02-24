@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import axios from 'axios';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import { formatCurrency, formatDate, formatDateTime } from '@/lib/utils';
-import { Ticket, Trophy, LogOut, Home, Key, Calendar as CalendarIcon, User } from 'lucide-react';
+import { Ticket, Trophy, LogOut, Home, Key, Calendar as CalendarIcon, User, ChevronLeft, ChevronRight, Eye, Layers } from 'lucide-react';
 import { toast } from 'sonner';
 
 const BACKEND_URL = process.env.REACT_APP_BACKEND_URL;
@@ -20,22 +20,30 @@ const UsuarioDashboard = () => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const [boletos, setBoletos] = useState([]);
-  const [loading, setLoading] = useState(true);
+
+  // Summary view state
+  const [resumen, setResumen] = useState([]);
+  const [loadingResumen, setLoadingResumen] = useState(true);
+
+  // Detail view state (per-sorteo paginated)
+  const [sorteoDetalle, setSorteoDetalle] = useState(null); // which sorteo is expanded
+  const [boletosDetalle, setBoletosDetalle] = useState([]);
+  const [detalleInfo, setDetalleInfo] = useState({ total: 0, page: 1, total_pages: 1, sorteo: null });
+  const [loadingDetalle, setLoadingDetalle] = useState(false);
+  const [filtroEstado, setFiltroEstado] = useState('todos');
+
+  // Premios state
+  const [premiosGanados, setPremiosGanados] = useState([]);
+  const [loadingPremios, setLoadingPremios] = useState(false);
+
+  // Password change
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [passwordActual, setPasswordActual] = useState('');
   const [passwordNueva, setPasswordNueva] = useState('');
   const [passwordConfirm, setPasswordConfirm] = useState('');
   const [changingPassword, setChangingPassword] = useState(false);
-  const [filtroFecha, setFiltroFecha] = useState('todos');
-  const [filtroSorteo, setFiltroSorteo] = useState('todos');
-  const [filtroNumeroBoleto, setFiltroNumeroBoleto] = useState('');
-  const [sorteos, setSorteos] = useState([]);
-  const [premiosGanados, setPremiosGanados] = useState([]);
-  const [loadingPremios, setLoadingPremios] = useState(false);
-  
-  // Determinar tab inicial basado en parámetro de URL
-  const tabInicial = searchParams.get('tab') === 'boletos' ? 'pendientes' : 'activos';
+
+  const tabInicial = searchParams.get('tab') === 'boletos' ? 'sorteos' : 'sorteos';
   const [activeTab, setActiveTab] = useState(tabInicial);
 
   useEffect(() => {
@@ -43,29 +51,45 @@ const UsuarioDashboard = () => {
       navigate('/login');
       return;
     }
-    fetchMisBoletos();
+    fetchResumen();
     fetchMisPremios();
   }, [user]);
 
-  const fetchMisBoletos = async () => {
+  const fetchResumen = async () => {
+    setLoadingResumen(true);
     try {
-      const response = await axios.get(`${API}/boletos/mis-boletos`, { withCredentials: true });
-      // Ordenar por fecha de compra descendente (más recientes primero)
-      const boletosOrdenados = response.data.sort((a, b) => 
-        new Date(b.fecha_compra) - new Date(a.fecha_compra)
-      );
-      setBoletos(boletosOrdenados);
-      
-      // Extraer sorteos únicos
-      const sorteosUnicos = [...new Set(boletosOrdenados.map(b => b.sorteo_titulo))];
-      setSorteos(sorteosUnicos);
+      const response = await axios.get(`${API}/boletos/mis-boletos/resumen`, { withCredentials: true });
+      setResumen(response.data);
     } catch (error) {
-      console.error('Error al cargar boletos:', error);
-      toast.error('Error al cargar tus boletos');
+      console.error('Error al cargar resumen:', error);
+      toast.error('Error al cargar resumen de boletos');
     } finally {
-      setLoading(false);
+      setLoadingResumen(false);
     }
   };
+
+  const fetchBoletosDetalle = useCallback(async (sorteoId, page = 1, estado = 'todos') => {
+    setLoadingDetalle(true);
+    try {
+      const params = new URLSearchParams({ page, limit: 15, estado });
+      const response = await axios.get(
+        `${API}/boletos/mis-boletos/sorteo/${sorteoId}?${params}`,
+        { withCredentials: true }
+      );
+      setBoletosDetalle(response.data.boletos);
+      setDetalleInfo({
+        total: response.data.total,
+        page: response.data.page,
+        total_pages: response.data.total_pages,
+        sorteo: response.data.sorteo
+      });
+    } catch (error) {
+      console.error('Error al cargar boletos:', error);
+      toast.error('Error al cargar boletos del sorteo');
+    } finally {
+      setLoadingDetalle(false);
+    }
+  }, []);
 
   const fetchMisPremios = async () => {
     setLoadingPremios(true);
@@ -74,37 +98,30 @@ const UsuarioDashboard = () => {
       setPremiosGanados(response.data);
     } catch (error) {
       console.error('Error al cargar premios ganados:', error);
-      // No mostrar toast error si no hay premios
     } finally {
       setLoadingPremios(false);
     }
   };
-  
-  const boletosFiltrados = () => {
-    let resultado = [...boletos];
-    
-    // Filtrar por sorteo
-    if (filtroSorteo !== 'todos') {
-      resultado = resultado.filter(b => b.sorteo_titulo === filtroSorteo);
-    }
-    
-    // Filtrar por número de boleto
-    if (filtroNumeroBoleto) {
-      const numero = parseInt(filtroNumeroBoleto);
-      resultado = resultado.filter(b => b.numero_boleto === numero);
-    }
-    
-    // Filtrar por fecha (ya existe en el código original)
-    const ahora = new Date();
-    if (filtroFecha === '7dias') {
-      const hace7Dias = new Date(ahora.getTime() - 7 * 24 * 60 * 60 * 1000);
-      resultado = resultado.filter(b => new Date(b.fecha_compra) >= hace7Dias);
-    } else if (filtroFecha === '30dias') {
-      const hace30Dias = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
-      resultado = resultado.filter(b => new Date(b.fecha_compra) >= hace30Dias);
-    }
-    
-    return resultado;
+
+  const handleVerBoletos = (sorteoId) => {
+    setSorteoDetalle(sorteoId);
+    setFiltroEstado('todos');
+    fetchBoletosDetalle(sorteoId, 1, 'todos');
+  };
+
+  const handleVolverResumen = () => {
+    setSorteoDetalle(null);
+    setBoletosDetalle([]);
+    setDetalleInfo({ total: 0, page: 1, total_pages: 1, sorteo: null });
+  };
+
+  const handlePageChange = (newPage) => {
+    fetchBoletosDetalle(sorteoDetalle, newPage, filtroEstado);
+  };
+
+  const handleEstadoChange = (nuevoEstado) => {
+    setFiltroEstado(nuevoEstado);
+    fetchBoletosDetalle(sorteoDetalle, 1, nuevoEstado);
   };
 
   const handleLogout = async () => {
@@ -112,58 +129,39 @@ const UsuarioDashboard = () => {
     navigate('/');
   };
 
-  const boletosFiltradosData = boletosFiltrados();
-  const boletosActivos = boletosFiltradosData.filter(b => b.estado === 'activo' || b.estado === 'ganador');
-  const boletosGanadores = boletosFiltradosData.filter(b => b.estado === 'ganador' || b.etapa_ganada !== null);
-  const boletosPendientes = boletosFiltradosData.filter(b => !b.pago_confirmado);
-  
   const handleChangePassword = async (e) => {
     e.preventDefault();
-    
     if (passwordNueva !== passwordConfirm) {
-      toast.error('Las contraseñas no coinciden');
+      toast.error('Las contrasenas no coinciden');
       return;
     }
-    
     if (passwordNueva.length < 6) {
-      toast.error('La contraseña debe tener al menos 6 caracteres');
+      toast.error('La contrasena debe tener al menos 6 caracteres');
       return;
     }
-    
     setChangingPassword(true);
-    
     try {
       await axios.put(
         `${API}/auth/cambiar-password?password_actual=${passwordActual}&password_nueva=${passwordNueva}`,
         {},
         { withCredentials: true }
       );
-      toast.success('Contraseña cambiada exitosamente');
+      toast.success('Contrasena cambiada exitosamente');
       setShowChangePassword(false);
       setPasswordActual('');
       setPasswordNueva('');
       setPasswordConfirm('');
     } catch (error) {
-      toast.error(error.response?.data?.detail || 'Error al cambiar contraseña');
+      toast.error(error.response?.data?.detail || 'Error al cambiar contrasena');
     } finally {
       setChangingPassword(false);
     }
   };
-  
-  const filtrarBoletosPorFecha = (boletosList) => {
-    if (filtroFecha === 'todos') return boletosList;
-    
-    const ahora = new Date();
-    const hace30Dias = new Date(ahora.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const hace90Dias = new Date(ahora.getTime() - 90 * 24 * 60 * 60 * 1000);
-    
-    return boletosList.filter(b => {
-      const fecha = new Date(b.fecha_compra);
-      if (filtroFecha === '30dias') return fecha >= hace30Dias;
-      if (filtroFecha === '90dias') return fecha >= hace90Dias;
-      return true;
-    });
-  };
+
+  // Calculate totals from resumen
+  const totalBoletos = resumen.reduce((sum, r) => sum + r.total, 0);
+  const totalActivos = resumen.reduce((sum, r) => sum + r.activos, 0);
+  const totalPendientes = resumen.reduce((sum, r) => sum + r.pendientes, 0);
 
   return (
     <div className="min-h-screen gradient-background">
@@ -185,52 +183,30 @@ const UsuarioDashboard = () => {
                 <DialogTrigger asChild>
                   <Button variant="outline" data-testid="change-password-btn" className="flex-1 md:flex-none">
                     <Key className="w-4 h-4 mr-2" />
-                    <span className="hidden sm:inline">Cambiar Contraseña</span>
-                    <span className="sm:hidden">Contraseña</span>
+                    <span className="hidden sm:inline">Cambiar Contrasena</span>
+                    <span className="sm:hidden">Contrasena</span>
                   </Button>
                 </DialogTrigger>
                 <DialogContent>
                   <DialogHeader>
-                    <DialogTitle>Cambiar Contraseña</DialogTitle>
+                    <DialogTitle>Cambiar Contrasena</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleChangePassword} className="space-y-4">
                     <div>
-                      <Label htmlFor="password-actual">Contraseña Actual</Label>
-                      <Input
-                        id="password-actual"
-                        type="password"
-                        value={passwordActual}
-                        onChange={(e) => setPasswordActual(e.target.value)}
-                        required
-                      />
+                      <Label htmlFor="password-actual">Contrasena Actual</Label>
+                      <Input id="password-actual" type="password" value={passwordActual} onChange={(e) => setPasswordActual(e.target.value)} required />
                     </div>
                     <div>
-                      <Label htmlFor="password-nueva">Nueva Contraseña</Label>
-                      <Input
-                        id="password-nueva"
-                        type="password"
-                        value={passwordNueva}
-                        onChange={(e) => setPasswordNueva(e.target.value)}
-                        required
-                      />
+                      <Label htmlFor="password-nueva">Nueva Contrasena</Label>
+                      <Input id="password-nueva" type="password" value={passwordNueva} onChange={(e) => setPasswordNueva(e.target.value)} required />
                     </div>
                     <div>
-                      <Label htmlFor="password-confirm">Confirmar Nueva Contraseña</Label>
-                      <Input
-                        id="password-confirm"
-                        type="password"
-                        value={passwordConfirm}
-                        onChange={(e) => setPasswordConfirm(e.target.value)}
-                        required
-                      />
+                      <Label htmlFor="password-confirm">Confirmar Nueva Contrasena</Label>
+                      <Input id="password-confirm" type="password" value={passwordConfirm} onChange={(e) => setPasswordConfirm(e.target.value)} required />
                     </div>
                     <div className="flex gap-2 justify-end">
-                      <Button type="button" variant="outline" onClick={() => setShowChangePassword(false)}>
-                        Cancelar
-                      </Button>
-                      <Button type="submit" disabled={changingPassword}>
-                        {changingPassword ? 'Guardando...' : 'Cambiar Contraseña'}
-                      </Button>
+                      <Button type="button" variant="outline" onClick={() => setShowChangePassword(false)}>Cancelar</Button>
+                      <Button type="submit" disabled={changingPassword}>{changingPassword ? 'Guardando...' : 'Cambiar Contrasena'}</Button>
                     </div>
                   </form>
                 </DialogContent>
@@ -253,18 +229,18 @@ const UsuarioDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 py-8">
-        {/* Mensaje especial si ganó */}
+        {/* Winner banner */}
         {!loadingPremios && premiosGanados.length > 0 && (
-          <Card className="mb-8 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400">
+          <Card className="mb-8 bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400" data-testid="winner-banner">
             <CardContent className="p-6">
               <div className="flex items-center gap-4">
                 <Trophy className="w-16 h-16 text-yellow-600 flex-shrink-0" />
                 <div>
-                  <h2 className="text-3xl font-bold text-gray-900 mb-2">
-                    🎉 ¡Felicidades! {premiosGanados.length === 1 ? 'Has ganado un premio' : 'Tienes premios ganados'}
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">
+                    Felicidades! {premiosGanados.length === 1 ? 'Has ganado un premio' : 'Tienes premios ganados'}
                   </h2>
-                  <p className="text-lg text-gray-700">
-                    Has ganado {premiosGanados.length} premio{premiosGanados.length !== 1 ? 's' : ''}. Revisa la sección &quot;Premios Ganados&quot; para más detalles.
+                  <p className="text-base sm:text-lg text-gray-700">
+                    Has ganado {premiosGanados.length} premio{premiosGanados.length !== 1 ? 's' : ''}. Revisa la seccion "Premios Ganados" para mas detalles.
                   </p>
                 </div>
               </div>
@@ -273,28 +249,26 @@ const UsuarioDashboard = () => {
         )}
 
         {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <Card className="sorteo-card">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+          <Card data-testid="stat-total-boletos">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Boletos</CardTitle>
               <Ticket className="h-4 w-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{boletos.length}</div>
+              <div className="text-2xl font-bold">{totalBoletos}</div>
             </CardContent>
           </Card>
-
-          <Card className="sorteo-card">
+          <Card data-testid="stat-activos">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Boletos Activos</CardTitle>
               <Ticket className="h-4 w-4 text-blue-500" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{boletosActivos.length}</div>
+              <div className="text-2xl font-bold">{totalActivos}</div>
             </CardContent>
           </Card>
-
-          <Card className="sorteo-card">
+          <Card data-testid="stat-premios">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Premios Ganados</CardTitle>
               <Trophy className="h-4 w-4 text-yellow-500" />
@@ -306,201 +280,85 @@ const UsuarioDashboard = () => {
         </div>
 
         {/* Main Content */}
-        {/* Filtros */}
-        <Card className="mb-4">
-          <CardHeader>
-            <CardTitle className="text-lg">Filtros</CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              {/* Filtro por sorteo */}
-              <div>
-                <Label htmlFor="filtro-sorteo">Sorteo</Label>
-                <select
-                  id="filtro-sorteo"
-                  value={filtroSorteo}
-                  onChange={(e) => setFiltroSorteo(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                >
-                  <option value="todos">Todos los sorteos</option>
-                  {sorteos.map((sorteo, idx) => (
-                    <option key={idx} value={sorteo}>{sorteo}</option>
-                  ))}
-                </select>
-              </div>
-              
-              {/* Filtro por número de boleto */}
-              <div>
-                <Label htmlFor="filtro-numero">Número de Boleto</Label>
-                <Input
-                  id="filtro-numero"
-                  type="number"
-                  placeholder="Ej: 123"
-                  value={filtroNumeroBoleto}
-                  onChange={(e) => setFiltroNumeroBoleto(e.target.value)}
-                />
-              </div>
-              
-              {/* Filtro por fecha */}
-              <div>
-                <Label htmlFor="filtro-fecha">Fecha</Label>
-                <select
-                  id="filtro-fecha"
-                  value={filtroFecha}
-                  onChange={(e) => setFiltroFecha(e.target.value)}
-                  className="w-full p-2 border rounded-md"
-                >
-                  <option value="todos">Todas las fechas</option>
-                  <option value="7dias">Últimos 7 días</option>
-                  <option value="30dias">Últimos 30 días</option>
-                </select>
-              </div>
-            </div>
-            
-            {/* Botón para limpiar filtros */}
-            {(filtroSorteo !== 'todos' || filtroNumeroBoleto || filtroFecha !== 'todos') && (
-              <Button 
-                variant="outline" 
-                className="mt-4"
-                onClick={() => {
-                  setFiltroSorteo('todos');
-                  setFiltroNumeroBoleto('');
-                  setFiltroFecha('todos');
-                }}
-              >
-                Limpiar Filtros
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-
         <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-2 sm:grid-cols-4 h-auto">
-            <TabsTrigger value="pendientes" data-testid="tab-pendientes" className="text-xs sm:text-sm py-2">
-              <span className="hidden sm:inline">Boletos </span>Pendientes {boletosPendientes.length > 0 && `(${boletosPendientes.length})`}
+          <TabsList className="grid w-full grid-cols-2 h-auto">
+            <TabsTrigger value="sorteos" data-testid="tab-sorteos" className="text-xs sm:text-sm py-2">
+              <Layers className="w-4 h-4 mr-1" />
+              Mis Sorteos
             </TabsTrigger>
-            <TabsTrigger value="activos" data-testid="tab-activos" className="text-xs sm:text-sm py-2">
-              <span className="hidden sm:inline">Boletos </span>Activos
-            </TabsTrigger>
-            <TabsTrigger value="ganadores" data-testid="tab-ganadores" className="text-xs sm:text-sm py-2">
-              <span className="hidden sm:inline">Premios </span>Ganados
-            </TabsTrigger>
-            <TabsTrigger value="historial" data-testid="tab-historial" className="text-xs sm:text-sm py-2">
-              Historial
+            <TabsTrigger value="premios" data-testid="tab-premios" className="text-xs sm:text-sm py-2">
+              <Trophy className="w-4 h-4 mr-1" />
+              Premios Ganados
             </TabsTrigger>
           </TabsList>
 
-          {/* TAB: BOLETOS PENDIENTES DE APROBACIÓN */}
-          <TabsContent value="pendientes" className="space-y-4">
-            {loading ? (
+          {/* TAB: MIS SORTEOS */}
+          <TabsContent value="sorteos" className="space-y-4">
+            {loadingResumen ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+                <p className="mt-4 text-gray-600">Cargando tus sorteos...</p>
               </div>
-            ) : boletosPendientes.length === 0 ? (
-              <Card className="p-12 text-center">
+            ) : sorteoDetalle ? (
+              /* DETAIL VIEW - Paginated tickets for a specific sorteo */
+              <DetailView
+                detalleInfo={detalleInfo}
+                boletosDetalle={boletosDetalle}
+                loadingDetalle={loadingDetalle}
+                filtroEstado={filtroEstado}
+                onVolverResumen={handleVolverResumen}
+                onPageChange={handlePageChange}
+                onEstadoChange={handleEstadoChange}
+              />
+            ) : resumen.length === 0 ? (
+              <Card className="p-12 text-center" data-testid="no-sorteos-message">
                 <Ticket className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-xl font-semibold mb-2">No tienes boletos pendientes</h3>
-                <p className="text-gray-600 mb-4">Todos tus boletos han sido aprobados</p>
-                <Button onClick={() => navigate('/')}>Ver Sorteos</Button>
+                <h3 className="text-xl font-semibold mb-2">No tienes boletos aun</h3>
+                <p className="text-gray-600 mb-4">Participa en los sorteos disponibles</p>
+                <Button onClick={() => navigate('/')} data-testid="ver-sorteos-btn">Ver Sorteos</Button>
               </Card>
             ) : (
-              <div className="space-y-4">
-                <Card className="p-4 bg-yellow-50 border-yellow-200">
-                  <p className="text-yellow-800 text-sm">
-                    ⏳ Estos boletos están pendientes de aprobación. Una vez que el administrador verifique tu pago, aparecerán en &quot;Boletos Activos&quot;.
-                  </p>
-                </Card>
-                <div className="grid gap-4">
-                  {boletosPendientes.map((boleto) => (
-                    <Card key={boleto.id} className="sorteo-card border-yellow-300">
-                      <CardContent className="p-6">
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-3">
-                              <Badge>Boleto #{boleto.numero_boleto}</Badge>
-                              <Badge variant="secondary" className="bg-yellow-100 text-yellow-700">
-                                ⏳ Pendiente de Aprobación
-                              </Badge>
-                            </div>
-                            
-                            {boleto.sorteo && (
-                              <div className="mb-2">
-                                <p className="font-semibold text-lg">{boleto.sorteo.titulo}</p>
-                                <p className="text-xs text-gray-500">Código: {boleto.sorteo.landing_slug}</p>
-                              </div>
-                            )}
-                            
-                            <div className="text-sm text-gray-600 space-y-1">
-                              <p>Fecha de compra: {formatDateTime(boleto.fecha_compra)}</p>
-                              <p>Monto: {formatCurrency(boleto.precio_pagado)}</p>
-                            </div>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
-              </div>
-            )}
-          </TabsContent>
-
-          <TabsContent value="activos" className="space-y-4">
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              </div>
-            ) : boletosActivos.length === 0 ? (
-              <Card className="p-12 text-center">
-                <Ticket className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-xl font-semibold mb-2">No tienes boletos activos</h3>
-                <p className="text-gray-600 mb-4">Comienza a participar en los sorteos disponibles</p>
-                <Button onClick={() => navigate('/')}>Ver Sorteos</Button>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {boletosActivos.map((boleto) => (
-                  <Card key={boleto.id} className="sorteo-card">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
+              /* SUMMARY VIEW - Cards grouped by raffle */
+              <div className="grid gap-4" data-testid="resumen-sorteos">
+                {resumen.map((item) => (
+                  <Card key={item.sorteo_id} className="hover:shadow-md transition-shadow" data-testid={`sorteo-card-${item.sorteo_id}`}>
+                    <CardContent className="p-5">
+                      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                         <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-3">
-                            <Badge>Boleto #{boleto.numero_boleto}</Badge>
-                            <Badge variant={boleto.pago_confirmado ? 'default' : 'secondary'}>
-                              {boleto.pago_confirmado ? 'Confirmado' : 'Pendiente'}
+                          <h3 className="font-bold text-lg mb-2">{item.sorteo_titulo}</h3>
+                          <div className="flex flex-wrap gap-2 mb-2">
+                            <Badge variant="outline" data-testid={`badge-estado-${item.sorteo_id}`}>
+                              {item.sorteo_estado === 'published' ? 'Publicado' :
+                               item.sorteo_estado === 'waiting' ? 'En espera' :
+                               item.sorteo_estado === 'live' ? 'EN VIVO' :
+                               item.sorteo_estado === 'completed' ? 'Completado' :
+                               item.sorteo_estado}
+                            </Badge>
+                            <Badge className="bg-blue-100 text-blue-800" data-testid={`badge-total-${item.sorteo_id}`}>
+                              {item.total} boleto{item.total !== 1 ? 's' : ''}
                             </Badge>
                           </div>
-                          
-                          {boleto.sorteo && (
-                            <div className="mb-2">
-                              <p className="font-semibold text-lg">{boleto.sorteo.titulo}</p>
-                              <p className="text-xs text-gray-500">Código: {boleto.sorteo.landing_slug}</p>
-                            </div>
-                          )}
-                          
-                          <p className="text-sm text-gray-600 mb-1">
-                            Método: {boleto.metodo_pago}
-                          </p>
-                          <p className="text-sm text-gray-600">
-                            Comprado: {formatDateTime(boleto.fecha_compra)}
-                          </p>
-                          
-                          {boleto.numero_comprobante && (
-                            <p className="text-sm text-green-700 mt-2 font-semibold">
-                              Comprobante: {boleto.numero_comprobante}
-                            </p>
-                          )}
-                          
-                          {boleto.etapas_participantes.length > 0 && (
-                            <p className="text-sm text-gray-600 mt-2">
-                              Participa en {boleto.etapas_participantes.length} etapa(s)
-                            </p>
-                          )}
+                          <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                            <span className="flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full bg-green-500 inline-block"></span>
+                              Activos: {item.activos}
+                            </span>
+                            {item.pendientes > 0 && (
+                              <span className="flex items-center gap-1">
+                                <span className="w-2 h-2 rounded-full bg-yellow-500 inline-block"></span>
+                                Pendientes: {item.pendientes}
+                              </span>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-right">
-                          <p className="text-2xl font-bold text-primary">
-                            {formatCurrency(boleto.precio_pagado)}
-                          </p>
-                        </div>
+                        <Button
+                          onClick={() => handleVerBoletos(item.sorteo_id)}
+                          data-testid={`ver-boletos-btn-${item.sorteo_id}`}
+                          className="w-full sm:w-auto"
+                        >
+                          <Eye className="w-4 h-4 mr-2" />
+                          Ver boletos
+                        </Button>
                       </div>
                     </CardContent>
                   </Card>
@@ -509,29 +367,29 @@ const UsuarioDashboard = () => {
             )}
           </TabsContent>
 
-          <TabsContent value="ganadores" className="space-y-4">
+          {/* TAB: PREMIOS GANADOS */}
+          <TabsContent value="premios" className="space-y-4">
             {loadingPremios ? (
               <div className="text-center py-12">
                 <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
                 <p className="mt-4 text-gray-600">Cargando premios ganados...</p>
               </div>
             ) : premiosGanados.length === 0 ? (
-              <Card className="p-12 text-center">
+              <Card className="p-12 text-center" data-testid="no-premios-message">
                 <Trophy className="w-16 h-16 mx-auto mb-4 text-gray-400" />
-                <h3 className="text-xl font-semibold mb-2">Aún no has ganado premios</h3>
-                <p className="text-gray-600">¡Sigue participando y buena suerte!</p>
+                <h3 className="text-xl font-semibold mb-2">Aun no has ganado premios</h3>
+                <p className="text-gray-600">Sigue participando y buena suerte!</p>
               </Card>
             ) : (
-              <div className="grid gap-4">
+              <div className="grid gap-4" data-testid="premios-list">
                 {premiosGanados.map((premio, index) => (
                   <Card key={premio.id || index} className="bg-gradient-to-r from-yellow-50 to-amber-50 border-2 border-yellow-400">
                     <CardContent className="p-6">
                       <div className="flex items-start gap-4">
-                        {/* Imagen del premio o sorteo */}
                         {(premio.premio?.imagen || premio.sorteo?.imagenes?.[0]) ? (
                           <div className="w-24 h-24 rounded-lg overflow-hidden flex-shrink-0 bg-gray-100">
-                            <img 
-                              src={premio.premio?.imagen || premio.sorteo.imagenes[0]} 
+                            <img
+                              src={premio.premio?.imagen || premio.sorteo.imagenes[0]}
                               alt={premio.premio?.nombre || 'Premio'}
                               className="w-full h-full object-cover"
                             />
@@ -539,23 +397,16 @@ const UsuarioDashboard = () => {
                         ) : (
                           <Trophy className="w-24 h-24 text-yellow-600 flex-shrink-0 p-4 bg-white rounded-lg" />
                         )}
-                        
                         <div className="flex-1">
-                          <Badge className="mb-2 bg-yellow-600">¡Ganador!</Badge>
-                          
-                          {/* Nombre del sorteo */}
+                          <Badge className="mb-2 bg-yellow-600">Ganador!</Badge>
                           <h3 className="font-bold text-lg mb-1">{premio.sorteo?.titulo || 'Sorteo'}</h3>
-                          
-                          {/* Premio ganado */}
                           <div className="mb-2">
                             <p className="text-sm font-semibold text-yellow-700">Premio:</p>
-                            <p className="font-bold text-md">{premio.premio?.nombre || 'Premio Principal'}</p>
+                            <p className="font-bold">{premio.premio?.nombre || 'Premio Principal'}</p>
                             {premio.premio?.etapa_numero && (
                               <Badge variant="outline" className="mt-1">Etapa {premio.premio.etapa_numero}</Badge>
                             )}
                           </div>
-                          
-                          {/* Información del boleto */}
                           <div className="flex items-center gap-3 text-sm text-gray-700 mt-3">
                             <div className="flex items-center gap-1">
                               <Ticket className="w-4 h-4" />
@@ -568,15 +419,8 @@ const UsuarioDashboard = () => {
                               </div>
                             )}
                           </div>
-                          
-                          {/* Botón para ver sorteo */}
                           {premio.sorteo?.landing_slug && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
-                              className="mt-3"
-                              onClick={() => navigate(`/sorteo/${premio.sorteo.landing_slug}`)}
-                            >
+                            <Button variant="outline" size="sm" className="mt-3" onClick={() => navigate(`/sorteo/${premio.sorteo.landing_slug}`)}>
                               Ver Sorteo
                             </Button>
                           )}
@@ -588,87 +432,107 @@ const UsuarioDashboard = () => {
               </div>
             )}
           </TabsContent>
-
-          <TabsContent value="historial" className="space-y-4">
-            {/* Filtro por fechas */}
-            <div className="flex gap-2 mb-4">
-              <Button
-                variant={filtroFecha === 'todos' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFiltroFecha('todos')}
-              >
-                Todos
-              </Button>
-              <Button
-                variant={filtroFecha === '30dias' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFiltroFecha('30dias')}
-              >
-                <CalendarIcon className="w-4 h-4 mr-1" />
-                Últimos 30 días
-              </Button>
-              <Button
-                variant={filtroFecha === '90dias' ? 'default' : 'outline'}
-                size="sm"
-                onClick={() => setFiltroFecha('90dias')}
-              >
-                <CalendarIcon className="w-4 h-4 mr-1" />
-                Últimos 90 días
-              </Button>
-            </div>
-
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
-              </div>
-            ) : boletos.length === 0 ? (
-              <Card className="p-12 text-center">
-                <p className="text-gray-600">No tienes historial de participaciones</p>
-              </Card>
-            ) : (
-              <div className="grid gap-4">
-                {filtrarBoletosPorFecha(boletos).map((boleto) => (
-                  <Card key={boleto.id} className="sorteo-card">
-                    <CardContent className="p-6">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-2">
-                            <Badge>Boleto #{boleto.numero_boleto}</Badge>
-                            <Badge variant={
-                              boleto.estado === 'ganador' ? 'default' : 
-                              boleto.estado === 'activo' ? 'secondary' : 
-                              'outline'
-                            }>
-                              {boleto.estado}
-                            </Badge>
-                          </div>
-                          
-                          {boleto.sorteo && (
-                            <p className="font-semibold text-gray-900 mb-1">{boleto.sorteo.titulo}</p>
-                          )}
-                          
-                          <p className="text-sm text-gray-600">
-                            {formatDateTime(boleto.fecha_compra)} - {boleto.metodo_pago}
-                          </p>
-                          
-                          {boleto.numero_comprobante && (
-                            <p className="text-xs text-green-700 mt-1">
-                              Comp: {boleto.numero_comprobante}
-                            </p>
-                          )}
-                        </div>
-                        <div className="text-right">
-                          <p className="text-xl font-bold">{formatCurrency(boleto.precio_pagado)}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            )}
-          </TabsContent>
         </Tabs>
       </div>
+    </div>
+  );
+};
+
+/* ---- Detail View Component ---- */
+const DetailView = ({ detalleInfo, boletosDetalle, loadingDetalle, filtroEstado, onVolverResumen, onPageChange, onEstadoChange }) => {
+  return (
+    <div className="space-y-4" data-testid="detalle-view">
+      {/* Back button + Title */}
+      <div className="flex items-center gap-3">
+        <Button variant="outline" size="sm" onClick={onVolverResumen} data-testid="volver-resumen-btn">
+          <ChevronLeft className="w-4 h-4 mr-1" />
+          Volver
+        </Button>
+        <div>
+          <h2 className="text-lg font-bold">{detalleInfo.sorteo?.titulo || 'Sorteo'}</h2>
+          <p className="text-sm text-gray-500">{detalleInfo.total} boleto{detalleInfo.total !== 1 ? 's' : ''} en total</p>
+        </div>
+      </div>
+
+      {/* Estado filter */}
+      <div className="flex gap-2 flex-wrap">
+        {['todos', 'activos', 'pendientes'].map((estado) => (
+          <Button
+            key={estado}
+            variant={filtroEstado === estado ? 'default' : 'outline'}
+            size="sm"
+            onClick={() => onEstadoChange(estado)}
+            data-testid={`filtro-${estado}-btn`}
+          >
+            {estado === 'todos' ? 'Todos' : estado === 'activos' ? 'Activos' : 'Pendientes'}
+          </Button>
+        ))}
+      </div>
+
+      {/* Tickets list */}
+      {loadingDetalle ? (
+        <div className="text-center py-12">
+          <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+        </div>
+      ) : boletosDetalle.length === 0 ? (
+        <Card className="p-8 text-center" data-testid="no-boletos-detalle">
+          <Ticket className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+          <p className="text-gray-600">No hay boletos con este filtro</p>
+        </Card>
+      ) : (
+        <>
+          <div className="grid gap-3" data-testid="boletos-list">
+            {boletosDetalle.map((boleto) => (
+              <Card key={boleto.id} className={`${boleto.pago_confirmado ? '' : 'border-yellow-300 bg-yellow-50/50'}`} data-testid={`boleto-card-${boleto.numero_boleto}`}>
+                <CardContent className="p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Badge data-testid={`boleto-numero-${boleto.numero_boleto}`}>#{boleto.numero_boleto}</Badge>
+                      <Badge variant={boleto.pago_confirmado ? 'default' : 'secondary'} className={boleto.pago_confirmado ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+                        {boleto.pago_confirmado ? 'Activo' : 'Pendiente'}
+                      </Badge>
+                    </div>
+                    <div className="text-right text-sm text-gray-600">
+                      <p className="font-semibold">{formatCurrency(boleto.precio_pagado)}</p>
+                      <p className="text-xs">{formatDateTime(boleto.fecha_compra)}</p>
+                    </div>
+                  </div>
+                  {boleto.numero_comprobante && (
+                    <p className="text-xs text-green-700 mt-2">Comprobante: {boleto.numero_comprobante}</p>
+                  )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+
+          {/* Pagination */}
+          {detalleInfo.total_pages > 1 && (
+            <div className="flex items-center justify-center gap-4 mt-6" data-testid="pagination-controls">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={detalleInfo.page <= 1}
+                onClick={() => onPageChange(detalleInfo.page - 1)}
+                data-testid="prev-page-btn"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </Button>
+              <span className="text-sm text-gray-600" data-testid="page-indicator">
+                Pagina {detalleInfo.page} de {detalleInfo.total_pages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={detalleInfo.page >= detalleInfo.total_pages}
+                onClick={() => onPageChange(detalleInfo.page + 1)}
+                data-testid="next-page-btn"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </Button>
+            </div>
+          )}
+        </>
+      )}
     </div>
   );
 };

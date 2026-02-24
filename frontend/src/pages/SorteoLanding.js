@@ -132,6 +132,8 @@ const SorteoLanding = () => {
     return numerosAsignados;
   };
 
+  const LIMITE_POR_COMPRA = 500;
+
   const handleCantidadChange = (nuevaCantidad) => {
     const num = parseInt(nuevaCantidad) || 1;
     const minimo = sorteo?.cantidad_minima_boletos || 1;
@@ -139,6 +141,12 @@ const SorteoLanding = () => {
     // No permitir menos del mínimo
     if (num < minimo) {
       toast.error(`La compra mínima es de ${minimo} boletos`);
+      return;
+    }
+    
+    // No permitir más del límite por compra
+    if (num > LIMITE_POR_COMPRA) {
+      toast.error(`El máximo permitido por compra es ${LIMITE_POR_COMPRA} boletos`);
       return;
     }
     
