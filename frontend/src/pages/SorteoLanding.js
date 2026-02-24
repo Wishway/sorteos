@@ -893,10 +893,17 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                         className="w-full mb-2"
                         style={{ backgroundColor: sorteo.color_primario }}
                         onClick={handleVerDatosBancarios}
-                        disabled={numerosBoletos.some(n => !n)}
+                        disabled={numerosBoletos.some(n => !n) || validandoBoletos}
                         data-testid="ver-datos-bancarios-btn"
                       >
-                        Ver Datos Bancarios
+                        {validandoBoletos ? (
+                          <>
+                            <span className="inline-block w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></span>
+                            Validando boletos...
+                          </>
+                        ) : (
+                          'Ver Datos Bancarios'
+                        )}
                       </Button>
 
                       <p className="text-xs text-center text-gray-600 mt-2">
