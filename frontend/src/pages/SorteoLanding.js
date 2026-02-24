@@ -164,7 +164,6 @@ const SorteoLanding = () => {
   };
   
   const validarTodosLosNumeros = async () => {
-    // Validar todos los números antes de proceder con la compra
     const errores = [];
     
     // Validar cantidad mínima
@@ -174,44 +173,46 @@ const SorteoLanding = () => {
       return errores;
     }
     
+    // Validaciones locales rapidas
+    const numerosParseados = [];
     for (let i = 0; i < numerosBoletos.length; i++) {
       const numero = parseInt(numerosBoletos[i]);
-      
-      // Validar que se haya ingresado un número
       if (!numero) {
         errores.push(`Debe ingresar un número para el boleto ${i + 1}`);
         continue;
       }
-      
-      // Validar rango
       if (numero < 1 || numero > sorteo.cantidad_total_boletos) {
         errores.push(`El boleto ${i + 1} debe estar entre 1 y ${sorteo.cantidad_total_boletos}`);
         continue;
       }
-      
-      // Validar duplicados en la misma compra
-      for (let j = i + 1; j < numerosBoletos.length; j++) {
-        if (parseInt(numerosBoletos[j]) === numero) {
-          errores.push(`El número ${numero} está repetido en la compra`);
-          break;
-        }
+      numerosParseados.push(numero);
+    }
+    
+    // Validar duplicados localmente
+    const setNumeros = new Set();
+    for (const num of numerosParseados) {
+      if (setNumeros.has(num)) {
+        errores.push(`El número ${num} está repetido en la compra`);
       }
+      setNumeros.add(num);
+    }
+    
+    if (errores.length > 0) return errores;
+    
+    // Validacion bulk en backend (1 sola llamada)
+    try {
+      const response = await axios.post(
+        `${API}/sorteos/${sorteo.id}/validar-numeros-bulk`,
+        { numeros: numerosParseados },
+        { withCredentials: true }
+      );
       
-      // Validar disponibilidad en backend
-      try {
-        const response = await axios.post(
-          `${API}/sorteos/${sorteo.id}/validar-numero`,
-          { numero },
-          { withCredentials: true }
-        );
-        
-        if (!response.data.disponible) {
-          errores.push(response.data.mensaje);
-        }
-      } catch (error) {
-        console.error('Error al validar número:', error);
-        errores.push(`Error al validar el número ${numero}`);
+      if (!response.data.todos_disponibles) {
+        errores.push(response.data.mensaje);
       }
+    } catch (error) {
+      console.error('Error al validar números:', error);
+      errores.push('Error al validar disponibilidad. Intenta nuevamente.');
     }
     
     return errores;
