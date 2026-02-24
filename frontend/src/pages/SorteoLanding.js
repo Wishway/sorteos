@@ -911,7 +911,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                       </p>
                     </div>
 
-                    <Dialog open={showDatosBancarios} onOpenChange={setShowDatosBancarios}>
+                    <Dialog open={showDatosBancarios} onOpenChange={(open) => { if (!comprando) setShowDatosBancarios(open); }}>
                       <DialogContent>
                         <DialogHeader>
                           <DialogTitle>Datos para Transferencia</DialogTitle>
