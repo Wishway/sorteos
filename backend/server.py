@@ -2178,6 +2178,14 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     if boletos_disponibles <= 0:
         raise HTTPException(status_code=400, detail="No hay boletos disponibles")
     
+    # VALIDACIÓN: Máximo 500 boletos por transacción
+    LIMITE_POR_COMPRA = 500
+    if len(data.numeros_boletos) > LIMITE_POR_COMPRA:
+        raise HTTPException(
+            status_code=400, 
+            detail=f"El máximo permitido por compra es {LIMITE_POR_COMPRA} boletos."
+        )
+    
     if len(data.numeros_boletos) > boletos_disponibles:
         raise HTTPException(
             status_code=400, 
