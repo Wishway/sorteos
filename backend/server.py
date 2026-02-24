@@ -2244,34 +2244,30 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
             detail=f"La compra mínima es de {sorteo.compra_minima} boleto(s). Seleccionaste {len(data.numeros_boletos)}"
         )
     
-    # Validate all numbers
-    numeros_invalidos = []
-    numeros_ocupados = []
-    
-    for numero in data.numeros_boletos:
-        # Validate range
-        if numero < 1 or numero > sorteo.cantidad_total_boletos:
-            numeros_invalidos.append(numero)
-            continue
-        
-        # Check if already taken (including pending ones from last 24 hours)
-        hace_24h = datetime.now(timezone.utc) - timedelta(hours=24)
-        existing = await db.boletos.find_one({
-            'sorteo_id': sorteo.id,
-            'numero_boleto': numero,
-            '$or': [
-                {'pago_confirmado': True},
-                {'fecha_compra': {'$gte': hace_24h}}
-            ]
-        })
-        if existing:
-            numeros_ocupados.append(numero)
+    # Validate all numbers - BULK query instead of individual queries
+    numeros_invalidos = [n for n in data.numeros_boletos if n < 1 or n > sorteo.cantidad_total_boletos]
     
     if numeros_invalidos:
         raise HTTPException(
             status_code=400, 
             detail=f"Los siguientes números no están en el rango válido (1-{sorteo.cantidad_total_boletos}): {', '.join(map(str, numeros_invalidos))}"
         )
+    
+    # Check all occupied numbers in a single query
+    hace_24h = datetime.now(timezone.utc) - timedelta(hours=24)
+    ocupados_cursor = db.boletos.find(
+        {
+            'sorteo_id': sorteo.id,
+            'numero_boleto': {'$in': data.numeros_boletos},
+            '$or': [
+                {'pago_confirmado': True},
+                {'fecha_compra': {'$gte': hace_24h.isoformat()}}
+            ]
+        },
+        {'numero_boleto': 1, '_id': 0}
+    )
+    ocupados = await ocupados_cursor.to_list(None)
+    numeros_ocupados = [b['numero_boleto'] for b in ocupados]
     
     if numeros_ocupados:
         raise HTTPException(
