@@ -218,19 +218,26 @@ const SorteoLanding = () => {
   };
 
   const handleVerDatosBancarios = async () => {
-    // Validar todos los números antes de mostrar los datos bancarios
-    const errores = await validarTodosLosNumeros();
-    
-    if (errores.length > 0) {
-      // Mostrar todos los errores al usuario
-      errores.forEach(error => {
-        toast.error(error);
-      });
-      return;
+    setValidandoBoletos(true);
+    try {
+      // Validar todos los números antes de mostrar los datos bancarios
+      const errores = await validarTodosLosNumeros();
+      
+      if (errores.length > 0) {
+        errores.forEach(error => {
+          toast.error(error);
+        });
+        return;
+      }
+      
+      // Si no hay errores, mostrar el diálogo de datos bancarios
+      setShowDatosBancarios(true);
+    } catch (error) {
+      console.error('Error al validar boletos:', error);
+      toast.error('Ocurrio un error al procesar la solicitud. Intenta nuevamente.');
+    } finally {
+      setValidandoBoletos(false);
     }
-    
-    // Si no hay errores, mostrar el diálogo de datos bancarios
-    setShowDatosBancarios(true);
   };
 
   const handleComprar = async () => {
