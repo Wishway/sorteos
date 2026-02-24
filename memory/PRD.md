@@ -27,6 +27,7 @@ WishWay Sorteos is a full-stack digital raffle platform that enables administrat
 
 ### User Features
 - Purchase tickets for raffles (max 500 per transaction)
+- Purchase flow with loading indicators, double-click prevention, error handling
 - View purchased tickets - summary by raffle + paginated detail (15/page)
 - Google OAuth login
 - View won prizes ("Mis Premios Ganados") - VERIFIED
@@ -51,31 +52,28 @@ WishWay Sorteos is a full-stack digital raffle platform that enables administrat
 
 ## Recent Updates
 
-### February 2026: Client Dashboard Overhaul
+### February 2026
+
+#### Purchase Flow UX Improvements
 **Completed:**
-1. **Removed 1000-ticket display limit** - Backend `to_list(None)` instead of `to_list(1000)`
-2. **500-ticket purchase limit** - Server-side validation + client-side UI limit
-3. **New Dashboard Structure:**
-   - Summary view: Cards grouped by raffle (activos/pendientes counts)
-   - Detail view: Paginated tickets (15/page) with estado filter (todos/activos/pendientes)
-   - Pagination controls with page indicator
-   - Back button to return to summary
-4. **New Backend Endpoints:**
-   - `GET /api/boletos/mis-boletos/resumen` - Summary grouped by raffle
-   - `GET /api/boletos/mis-boletos/sorteo/{sorteo_id}?page=1&limit=15&estado=todos` - Paginated per-raffle
+1. **Loading indicator on "Ver datos bancarios"** - Spinner + "Validando boletos..." text
+2. **Double-click prevention** - Both buttons disabled during processing
+3. **Error handling** - Toast messages on validation/purchase failure, buttons re-enable
+4. **Dialog close prevention** - Cannot close bank data dialog during purchase
+5. **Success confirmation** - Toast + redirect to user panel
+
+#### Client Dashboard Overhaul
+**Completed:**
+1. Removed 1000-ticket display limit (to_list(None))
+2. 500-ticket purchase limit (server + client validation)
+3. New dashboard: Summary view by raffle + paginated detail (15/page)
+4. New endpoints: `/resumen`, `/sorteo/{id}` (paginated)
 
 ### December 2025
-- WebSocket fix (`/api/socket.io` path)
-- "Mis Premios Ganados" verification
-- User pagination, delete sorteos with purchases
-- Hide raffle feature, Google Drive URL support
-- Dual user registration (client/vendor)
-- Phone number uniqueness removed
-- Password reset email (SMTP fix)
-- Voucher number field (replaced URL)
-- Branding & Open Graph meta tags
-- Grouped ticket approval (purchase_id)
-- Custom confirmation modals (replaced window.confirm)
+- WebSocket fix, Premios Ganados, User pagination, Delete sorteos
+- Hide raffle, Google Drive URLs, Dual user registration
+- Password reset, Voucher number, Branding/meta tags
+- Grouped ticket approval, Custom confirmation modals
 
 ## Test Credentials
 - **Admin:** admin@wishway.com / admin123
@@ -90,15 +88,13 @@ WishWay Sorteos is a full-stack digital raffle platform that enables administrat
 - `GET /api/boletos/mis-boletos` - All user tickets (no limit)
 - `GET /api/boletos/mis-boletos/resumen` - Summary grouped by raffle
 - `GET /api/boletos/mis-boletos/sorteo/{id}?page=1&limit=15&estado=todos` - Paginated per-raffle
-- `POST /api/boletos/comprar` - Purchase tickets (max 500 per transaction)
+- `POST /api/boletos/comprar` - Purchase tickets (max 500)
 
 ### User - Premios
 - `GET /api/usuario/mis-premios` - Get user's won prizes
 
-### Admin - Users
+### Admin
 - `GET /api/admin/usuarios?page=1&limit=10` - Paginated user list
-
-### Admin - Sorteos
 - `DELETE /api/admin/sorteo/{id}?confirmar_con_compras=true` - Delete with purchases
 - `PUT /api/admin/sorteo/{id}/ocultar` - Toggle visibility
 
