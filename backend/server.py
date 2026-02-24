@@ -2311,12 +2311,16 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
 
 @api_router.get("/boletos/mis-boletos")
 async def get_mis_boletos(request: Request):
+    """Obtener todos los boletos del usuario (sin límite)"""
     user = await get_current_user(request)
     
-    boletos = await db.boletos.find({'usuario_id': user.id}, {"_id": 0}).to_list(1000)
+    # Sin límite - obtener todos los boletos del usuario
+    boletos = await db.boletos.find({'usuario_id': user.id}, {"_id": 0}).to_list(None)
     for boleto in boletos:
-        if isinstance(boleto['fecha_compra'], str):
-            boleto['fecha_compra'] = datetime.fromisoformat(boleto['fecha_compra'])
+        # Convertir fecha a ISO string
+        if 'fecha_compra' in boleto:
+            if isinstance(boleto['fecha_compra'], datetime):
+                boleto['fecha_compra'] = boleto['fecha_compra'].isoformat()
         
         # Get sorteo info
         sorteo_doc = await db.sorteos.find_one({'id': boleto['sorteo_id']}, {"_id": 0})
@@ -2328,6 +2332,108 @@ async def get_mis_boletos(request: Request):
             }
     
     return boletos
+
+@api_router.get("/boletos/mis-boletos/resumen")
+async def get_mis_boletos_resumen(request: Request):
+    """Obtener resumen de boletos agrupados por sorteo"""
+    user = await get_current_user(request)
+    
+    # Agregación para contar boletos por sorteo y estado
+    pipeline = [
+        {'$match': {'usuario_id': user.id}},
+        {'$group': {
+            '_id': {
+                'sorteo_id': '$sorteo_id',
+                'pago_confirmado': '$pago_confirmado'
+            },
+            'count': {'$sum': 1}
+        }}
+    ]
+    
+    resultados = await db.boletos.aggregate(pipeline).to_list(None)
+    
+    # Organizar por sorteo
+    sorteos_dict = {}
+    for r in resultados:
+        sorteo_id = r['_id']['sorteo_id']
+        pago_confirmado = r['_id']['pago_confirmado']
+        count = r['count']
+        
+        if sorteo_id not in sorteos_dict:
+            sorteos_dict[sorteo_id] = {'pendientes': 0, 'activos': 0}
+        
+        if pago_confirmado:
+            sorteos_dict[sorteo_id]['activos'] = count
+        else:
+            sorteos_dict[sorteo_id]['pendientes'] = count
+    
+    # Obtener info de cada sorteo
+    resumen = []
+    for sorteo_id, counts in sorteos_dict.items():
+        sorteo_doc = await db.sorteos.find_one({'id': sorteo_id}, {"_id": 0})
+        if sorteo_doc:
+            resumen.append({
+                'sorteo_id': sorteo_id,
+                'sorteo_titulo': sorteo_doc.get('titulo', ''),
+                'sorteo_estado': sorteo_doc.get('estado', ''),
+                'landing_slug': sorteo_doc.get('landing_slug', ''),
+                'pendientes': counts['pendientes'],
+                'activos': counts['activos'],
+                'total': counts['pendientes'] + counts['activos']
+            })
+    
+    return resumen
+
+@api_router.get("/boletos/mis-boletos/sorteo/{sorteo_id}")
+async def get_mis_boletos_por_sorteo(
+    sorteo_id: str, 
+    request: Request, 
+    estado: str = "todos",  # "pendientes", "activos", "todos"
+    page: int = 1, 
+    limit: int = 15
+):
+    """Obtener boletos del usuario para un sorteo específico con paginación"""
+    user = await get_current_user(request)
+    
+    query = {'usuario_id': user.id, 'sorteo_id': sorteo_id}
+    
+    if estado == "pendientes":
+        query['pago_confirmado'] = False
+    elif estado == "activos":
+        query['pago_confirmado'] = True
+    
+    # Contar total
+    total = await db.boletos.count_documents(query)
+    total_pages = (total + limit - 1) // limit
+    
+    # Obtener boletos paginados
+    skip = (page - 1) * limit
+    boletos = await db.boletos.find(query, {"_id": 0}).skip(skip).limit(limit).to_list(limit)
+    
+    # Procesar cada boleto
+    for boleto in boletos:
+        if 'fecha_compra' in boleto:
+            if isinstance(boleto['fecha_compra'], datetime):
+                boleto['fecha_compra'] = boleto['fecha_compra'].isoformat()
+    
+    # Obtener info del sorteo
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id}, {"_id": 0})
+    sorteo_info = None
+    if sorteo_doc:
+        sorteo_info = {
+            'titulo': sorteo_doc.get('titulo', ''),
+            'id': sorteo_doc.get('id', ''),
+            'landing_slug': sorteo_doc.get('landing_slug', '')
+        }
+    
+    return {
+        'boletos': boletos,
+        'sorteo': sorteo_info,
+        'total': total,
+        'page': page,
+        'limit': limit,
+        'total_pages': total_pages
+    }
 
 # ============ GANADORES ENDPOINTS ============
 @api_router.get("/ganadores/sorteo/{sorteo_id}", response_model=List[Ganador])
