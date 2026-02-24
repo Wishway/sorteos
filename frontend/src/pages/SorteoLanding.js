@@ -245,6 +245,12 @@ const SorteoLanding = () => {
       return;
     }
 
+    // Validate maximum purchase limit
+    if (cantidad > LIMITE_POR_COMPRA) {
+      toast.error(`El máximo permitido por compra es ${LIMITE_POR_COMPRA} boletos`);
+      return;
+    }
+
     // Validate all numbers are filled
     const numerosValidos = numerosBoletos.filter(n => n.trim() !== '').map(n => parseInt(n));
     if (numerosValidos.length !== cantidad) {
@@ -830,7 +836,7 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                         id="cantidad"
                         type="number"
                         min={sorteo.cantidad_minima_boletos || 1}
-                        max={Math.min(boletosDisponibles, 50)}
+                        max={Math.min(boletosDisponibles, LIMITE_POR_COMPRA)}
                         value={cantidad}
                         onChange={(e) => handleCantidadChange(e.target.value)}
                         className="w-full"
@@ -838,8 +844,8 @@ Cédula/RUC: ${configuracionAdmin.cedula_ruc}`;
                       />
                       <p className="text-xs text-gray-600 mt-1">
                         {sorteo.cantidad_minima_boletos > 1 
-                          ? `Mínimo ${sorteo.cantidad_minima_boletos} boletos`
-                          : `Puedes comprar hasta ${Math.min(boletosDisponibles, 50)} boletos`
+                          ? `Mínimo ${sorteo.cantidad_minima_boletos} boletos | Máximo ${LIMITE_POR_COMPRA} por compra`
+                          : `Puedes comprar hasta ${Math.min(boletosDisponibles, LIMITE_POR_COMPRA)} boletos`
                         }
                       </p>
                     </div>
