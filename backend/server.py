@@ -2122,6 +2122,51 @@ async def validar_numero_boleto(sorteo_id: str, request: ValidarNumeroRequest):
     # Si pasaron más de 24 horas y está pendiente, está disponible
     return {"disponible": True, "mensaje": "Número disponible"}
 
+@api_router.post("/sorteos/{sorteo_id}/validar-numeros-bulk")
+async def validar_numeros_bulk(sorteo_id: str, request: Request):
+    """Validar disponibilidad de multiples numeros en una sola consulta"""
+    body = await request.json()
+    numeros = body.get('numeros', [])
+    
+    if not numeros:
+        return {"no_disponibles": [], "todos_disponibles": True}
+    
+    sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
+    if not sorteo_doc:
+        raise HTTPException(status_code=404, detail="Sorteo no encontrado")
+    
+    # Validar rango
+    total_boletos = sorteo_doc['cantidad_total_boletos']
+    fuera_de_rango = [n for n in numeros if n < 1 or n > total_boletos]
+    if fuera_de_rango:
+        return {
+            "no_disponibles": fuera_de_rango,
+            "todos_disponibles": False,
+            "mensaje": f"Numeros fuera de rango (1-{total_boletos}): {', '.join(map(str, fuera_de_rango))}"
+        }
+    
+    # Buscar todos los ocupados en una sola query con $in
+    hace_24h = datetime.now(timezone.utc) - timedelta(hours=24)
+    ocupados_cursor = db.boletos.find(
+        {
+            'sorteo_id': sorteo_id,
+            'numero_boleto': {'$in': numeros},
+            '$or': [
+                {'pago_confirmado': True},
+                {'fecha_compra': {'$gte': hace_24h.isoformat()}}
+            ]
+        },
+        {'numero_boleto': 1, '_id': 0}
+    )
+    ocupados = await ocupados_cursor.to_list(None)
+    numeros_ocupados = [b['numero_boleto'] for b in ocupados]
+    
+    return {
+        "no_disponibles": numeros_ocupados,
+        "todos_disponibles": len(numeros_ocupados) == 0,
+        "mensaje": f"Numeros ocupados: {', '.join(map(str, numeros_ocupados))}" if numeros_ocupados else "Todos disponibles"
+    }
+
 @api_router.get("/sorteos/{sorteo_id}/numeros-disponibles")
 async def get_numeros_disponibles(sorteo_id: str):
     sorteo_doc = await db.sorteos.find_one({'id': sorteo_id})
