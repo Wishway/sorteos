@@ -29,6 +29,7 @@ const SorteoLanding = () => {
   const [cantidad, setCantidad] = useState(1);
   const [numerosBoletos, setNumerosBoletos] = useState(['']);
   const [comprando, setComprando] = useState(false);
+  const [validandoBoletos, setValidandoBoletos] = useState(false);
   const [showDatosBancarios, setShowDatosBancarios] = useState(false);
   const [numerosDisponibles, setNumerosDisponibles] = useState([]);
   const [numeroComprobante, setNumeroComprobante] = useState('');
