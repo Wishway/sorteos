@@ -1,156 +1,168 @@
 <analysis>**original_problem_statement:**
-The user's goal is to build a comprehensive digital raffle platform. The initial focus was on two complex features: an automated, real-time raffle lifecycle driven by WebSockets, and a complete seller/referral system.
-
-Over time, the user's requests shifted to refining and fixing the core live raffle experience. Recent critical requests included:
-1.  **Fixing the Live Raffle:** Ensuring each prize draw lasts exactly 2 minutes, the countdown is synchronized in real-time across all clients via WebSockets, and the raffle correctly transitions through states.
-2.  **Fixing Google Authentication:** Resolving errors that prevented users from registering or logging in with their Google accounts.
-3.  **UI/UX Enhancements:** Making the entire platform responsive, increasing logo sizes, fixing UI layout bugs in the admin dashboard, and simplifying the live animation display.
-4.  **Admin Functionality:** Adding features for admins to bypass rules (like adjusting minimum ticket purchases for a published raffle) and to edit visual media (images/videos) on raffles that are already in the  state.
-5.  **New Core Features:** Implementing random ticket assignment for buyers, allowing multiple prizes per stage in multi-stage raffles, and removing manual admin actions to enforce the system's automated nature.
+The user's primary goal is to build and enhance a full-stack digital raffle platform. Over the session, the user made several requests:
+1.  **Admin Features:**
+    *   Implement a hide raffle button for admins to control raffle visibility on the home page.
+    *   Allow admins to delete raffles even if they have associated purchases, which should also delete the tickets.
+    *   Implement pagination for the user list in the admin dashboard.
+2.  **Core Logic & Data:**
+    *   Support Google Drive links for raffle images by converting them to a direct, embeddable format.
+    *   Implement a dual registration system where a user can register as both a cliente (client) and vendedor (vendor) with the same ID card (), but prevent duplicates within the same user type.
+    *   Remove the unique constraint on the user's phone number ().
+    *   Fix the non-functional password reset feature by configuring SMTP credentials.
+3.  **User Experience (UX) & Purchase Flow:**
+    *   Replace the Voucher URL input with a Voucher Number text field during ticket purchase.
+    *   Update the application's branding (title, favicon) and add meta tags for better link sharing on WhatsApp/social media.
+    *   Implement a mass approval system for new ticket purchases, where an admin approves an entire purchase (all tickets bought in one transaction) with a single click.
+    *   Fix a visual bug where approving a ticket purchase showed an error toast despite the backend operation being successful.
+    *   Replace all  dialogs (which are blocked in the preview environment) with a custom UI modal.
+4.  **Client Dashboard (Latest Request):**
+    *   Remove a hidden backend limit that only displayed a maximum of 1000 tickets to a user.
+    *   Introduce a new rule limiting a single purchase transaction to a maximum of 500 tickets.
+    *   Restructure the client dashboard to group tickets by raffle (summary view) and add pagination (15 tickets per page) to the detailed view.
+5.  **Critical Bug Fixes:**
+    *   Resolve a long-standing WebSocket connectivity issue that prevented the real-time countdown from working.
 
 **User's preferred language**: Spanish (español)
 
 **what currently exists?**
-The application is a full-stack platform using React, FastAPI, and MongoDB. It has a complete authentication system for admins, users, and sellers. The core logic for multi-stage raffles is in place, using background services (, ) and WebSockets () for real-time state management.
-
-In this session, numerous critical bugs were fixed, including the logic for raffle state transitions and Google authentication. New features were added, such as allowing admins to adjust ticket minimums and edit media on published raffles. The UI has been made significantly more responsive, and many user-requested layout adjustments have been implemented.
+The application is a full-stack raffle platform using React, FastAPI, and MongoDB. The agent successfully implemented a vast number of features and fixes in this session. Key accomplishments include: implementing the hide raffle feature, adding Google Drive image support, creating a dual-role user system (client/vendor), fixing password reset emails, overhauling the ticket purchase and approval flow (voucher number, mass approval), and resolving a critical WebSocket connectivity bug. The UI has been improved by replacing native confirmation dialogs and updating the app's branding for social sharing. The agent was in the middle of a major rework of the client-side dashboard as per the user's final request.
 
 **Last working item**:
-- **Last item agent was working:** The user reported that while inline editing for prize images/videos was working, there was no input to edit or add the main promotional images for a raffle, especially if none existed initially. The agent understood the issue and was about to add this functionality.
+- **Last item agent was working:** The agent was implementing a major overhaul of the **Client Dashboard** based on the user's latest request. This involved three main parts:
+    1.  Removing a hidden 1000-ticket display limit in the backend.
+    2.  Adding a new validation to limit single purchases to 500 tickets.
+    3.  Restructuring the client dashboard UI to group tickets by raffle and add pagination.
 - **Status:** IN PROGRESS
 - **Agent Testing Done:** N
-- **Which testing method agent to use?** Frontend testing agent. The agent must log in as an admin, navigate to a  raffle's expanded details, and verify that they can now see an input to add a new promotional image URL and save it successfully.
-- **User Testing Done:** Y (User provided a screenshot showing the missing input).
+- **Which testing method agent to use?** Both. The backend testing agent should verify the new paginated endpoints for fetching user tickets and the new 500-ticket purchase limit. The frontend testing agent should validate the new UI structure of the , ensuring the raffle summary view and the paginated detailed views work correctly.
+- **User Testing Done:** N
 
 **All Pending/In progress Issue list**:
-*   **Issue 1 (P0):** Add/Edit Promotional Images in Published Raffles.
-*   **Issue 2 (P1):** Real-time WebSocket countdown for live raffles is still unreliable and not synchronized.
-*   **Issue 3 (P2):** User dashboard Mis Premios Ganados tab is functionally complete but has never been tested or verified by the user.
+-   **Issue 1 (P0):** Client Dashboard Overhaul and Purchase Limits.
 
 **Issues Detail:**
-- **Issue 1: Add/Edit Promotional Images in Published Raffles.**
-    - **Attempted fixes:** The agent successfully implemented inline editing for *prize* images/videos but missed doing the same for the raffle's main promotional images.
-    - **Next debug checklist:**
-        1.  In , find the collapsible details section for  raffles.
-        2.  Modify the logic to always show an input field for adding/editing promotional image URLs, similar to how prize images are handled.
-        3.  Ensure the  handler uses the existing backend endpoint .
-    - **Why fix this issue and what will be achieved with the fix?** To complete the user's request to allow editing of all visual media for  raffles.
-    - **Status:** IN PROGRESS
-    - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?** Frontend.
-    - **Blocked on other issue:** None.
-
-- **Issue 2: Real-time WebSocket countdown is unreliable.**
-    - **Attempted fixes:** The agent correctly identified that  was not starting the  and fixed it in . Despite this, browser logs show WebSocket is closed before the connection is established, indicating a persistent connection failure.
-    - **Next debug checklist:**
-        1.  **Verify Proxy Configuration:** The problem is likely a reverse proxy (Nginx) not configured for WebSocket connections. Investigate proxy settings for WebSocket headers (, ).
-        2.  **Check Backend CORS:** Double-check CORS origins in  and the  initialization.
-        3.  **Isolate with Minimal Test:** Create a simple HTML page with a vanilla  script to connect directly to the backend WebSocket, bypassing the React app to confirm if the issue is app-specific or server-wide.
-    - **Why fix this issue and what will be achieved with the fix?** This is a core feature for the live raffle experience and a major source of user frustration. Fixing it is critical for platform credibility.
-    - **Status:** BLOCKED (Potentially on platform/proxy configuration).
-    - **Is recurring issue?** Y
-    - **Should Test frontend/backend/both after fix?** Both.
-    - **Blocked on other issue:** None.
-
-- **Issue 3: User dashboard Mis Premios Ganados tab is incomplete.**
-    - **Attempted fixes:** The backend endpoint () was created, and the frontend logic was added to . However, it was never fully tested.
-    - **Next debug checklist:**
-        1.  Create a test scenario where a user wins a prize.
-        2.  Log in as that user and navigate to the dashboard.
-        3.  Use the frontend testing agent to verify that the Premios Ganados tab correctly displays the prize details.
-    - **Why fix this issue and what will be achieved with the fix?** This completes a long-pending user requirement to provide users with a history of their winnings.
-    - **Status:** USER VERIFICATION PENDING
-    - **Is recurring issue?** N
-    - **Should Test frontend/backend/both after fix?** Both.
-    - **Blocked on other issue:** None.
+-   **Issue 1: Client Dashboard Overhaul and Purchase Limits.**
+    -   **Attempted fixes:** The agent correctly identified the hardcoded  limit in the  endpoint in . The agent began scaffolding a new paginated endpoint () to resolve this.
+    -   **Next debug checklist:**
+        1.  **Backend:**
+            *   Complete the implementation of the new paginated endpoint  to accept  and  parameters.
+            *   Create a new summary endpoint  to efficiently feed the new UI structure.
+            *   Modify the purchase endpoint () to add server-side validation: .
+        2.  **Frontend ():**
+            *   Refactor the component to first fetch data from the new summary endpoint.
+            *   Implement the two-level view: render summary cards for each raffle, and upon clicking Ver boletos, fetch and display the corresponding tickets in a paginated list (15 per page).
+            *   Add a client-side check on the purchase form in  to prevent users from selecting more than 500 tickets.
+    -   **Why fix this issue and what will be achieved with the fix?** This will fix a critical data integrity issue where users couldn't see all their tickets, improve the user experience for users with many tickets, and enforce a new business rule for purchase limits.
+    -   **Status:** IN PROGRESS
+    -   **Is recurring issue?** N
+    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Blocked on other issue:** None.
 
 **In progress Task List**:
-- None that are distinct from the pending issues.
+-   **Task 1: Implement Client Dashboard Overhaul** (P0)
+    -   **Where to resume:** Resume work in . The agent has already started creating the new paginated endpoint. The next step is to finalize the backend endpoints (paginated list and summary) and the purchase limit validation before moving to the frontend refactor of .
+    -   **What will be achieved with this?** A scalable, performant, and user-friendly client dashboard that accurately reflects user data and enforces new business rules.
+    -   **Status:** IN PROGRESS
+    -   **Should Test frontend/backend/both after fix?** Both.
+    -   **Blocked on something:** None.
 
 **Upcoming and Future Tasks**
-*   **Task (P1):** Full End-to-End Test of the Raffle Lifecycle. After the WebSocket issue is fixed, a comprehensive test of the entire multi-stage raffle flow is mandatory to ensure all recent fixes work together seamlessly.
+*   **Future Tasks:**
+    *   (P1) Add email notifications for raffle winners.
+    *   (P1) Conduct a full end-to-end regression test of the entire multi-stage raffle lifecycle to ensure all recent fixes work together seamlessly.
 
 **Completed work in this session**
-- **Resolved - Live Raffle Logic:** Fixed timezone comparison errors that prevented raffles from starting automatically. Corrected the live animation duration to 2 minutes per prize and ensured raffles transition to  afterward.
-- **Resolved - Google Login/Registration:** Created the missing backend callback endpoint and fixed a  enum mismatch, making Google Auth fully functional.
-- **Feature - Admin Raffle Management:**
-    - Implemented a feature for admins to adjust the minimum ticket purchase on  raffles.
-    - Implemented inline editing of prize images/videos for  raffles.
-    - Removed the manual Sortear (Draw) button to enforce automation.
-- **Feature - New User Requests:**
-    - Implemented random ticket assignment in the purchase form.
-    - Enabled multiple prizes per stage in multi-stage raffles.
-    - Adjusted the home page raffle cards to show a percentage progress bar instead of tickets left.
-- **UI/UX Fixes:**
-    - Made the Admin, User, and Seller dashboards fully responsive.
-    - Fixed UI bugs in the Admin Dashboard related to tab overflow and form width.
-    - Increased the WishWay logo size on the Home and Login pages.
-    - Simplified the live animation display per the user's latest request.
+- **Ocultar Sorteo (Hide Raffle):** Implemented and tested a feature for admins to hide/show raffles from the public home page.
+- **Google Drive Image Links:** Implemented a backend utility to convert Google Drive share links into directly embeddable image URLs.
+- **User Management Pagination:** Added pagination (10 users per page) to the admin user list.
+- **Delete Raffles with Purchases:** Enabled admins to delete raffles with associated purchases, including a confirmation step.
+- **Dual User Registration (Client/Vendor):** Reworked the user model and registration logic to allow a user to be both a client and a vendor with the same ID, preventing duplicates only within the same user type.
+- **Phone Number Uniqueness Removed:** The  field is no longer required to be unique across users.
+- **Password Reset Email (SMTP Fix):** Successfully configured SMTP credentials and fixed the password reset functionality.
+- **Purchase Flow Update:** Replaced the Voucher URL with a Voucher Number field in the purchase and approval flow.
+- **Branding & Social Sharing:** Updated the app's title, favicon, and added Open Graph meta tags for professional link sharing.
+- **Grouped Ticket Approval:** Implemented logic to group tickets by a , allowing admins to approve an entire purchase with one click. This included UI changes to group tickets visually.
+- **Bug Fixes:**
+    - Fixed a bug where approving a ticket group showed an error toast despite a successful backend operation by correcting  serialization issues.
+    - Replaced all browser-native  calls with a custom UI modal to ensure functionality in the sandboxed preview environment.
+- **WebSocket Connectivity (Critical Fix):** Resolved a long-standing, critical bug by reconfiguring the backend and frontend to use the  path, finally enabling a stable WebSocket connection.
+- **Mis Premios Ganados Verification:** Successfully tested and verified the functionality of the My Won Prizes tab in the user dashboard.
 
 **Earlier issues found/mentioned but not fixed**
-*   The core WebSocket connectivity issue, which prevents the real-time synchronized countdown, remains unresolved and is the most critical blocker.
+- None. All issues raised during the session were either resolved or are currently in progress.
 
 **Known issue recurrence from previous fork**
-*   **Issue:**  animation functionality.
-    *   **Recurrence count:** High.
-    - **Status:** RESOLVED (The initial bug was fixed, and the component was later simplified per a new user request).
-*   **Issue:** Winner's name not displayed correctly.
-    *   **Recurrence count:** Medium.
-    - **Status:** RESOLVED (Verified to be working correctly).
+-   **Issue:** WebSocket connection for  countdown functionality.
+-   **Recurrence count:** High (mentioned in the initial handoff).
+-   **Status:** RESOLVED. The agent successfully fixed the connection issue by correcting the path. While the initial handoff cited this as a major blocker, the agent's work has resolved the connectivity aspect.
 
 **Code Architecture**
-server:socket_app
+/api/socket.io/api/socket.io
 
 **Key Technical Concepts**
-*   **Backend:** FastAPI, , Motor (async MongoDB), APScheduler.
-*   **Frontend:** React, , , , .
-*   **Architecture:** The system relies on WebSockets for real-time updates. A critical, unresolved issue with the WebSocket connection itself, likely at the proxy/server configuration level, is preventing key features from working as intended.
+-   **Backend:** FastAPI, Motor (async MongoDB), Pydantic, WebSockets (python-socketio)
+-   **Frontend:** React, TailwindCSS, shadcn/ui, Axios, socket.io-client
+-   **Database:** MongoDB
+-   **Architecture:** The agent performed significant refactoring of core business logic (user registration, ticket approval), fixed critical infrastructure bugs (WebSockets), and was in the process of implementing a more scalable, paginated data-fetching pattern for the client dashboard.
 
 **key DB schema**
-*   **sorteos**:  and  were identified as separate fields, causing a bug that was fixed. Logic for  and prize  was added for the new editing feature.
-*   **usuarios**: Logic for creating users via Google OAuth was fixed.
+-   **users**:
+    -   Added  ('cliente' or 'vendedor').
+    -   Replaced unique index on  with a compound unique index on .
+    -   Removed the unique constraint on the  field.
+-   **boletos**:
+    -   Added  (UUID) to group tickets from the same transaction.
+    -   Added  ('individual' or 'grouped') to differentiate between old and new approval logic.
+-   **sorteos**:
+    -    was previously added to control visibility.
 
 **All files of reference**
-*   : Contains numerous new endpoints and fixes related to admin functions and authentication.
-*   : The hub for most new features and UI fixes in this session.
-*   : Contains refactored code to improve WebSocket connection reliability.
-*   : Contains the critical configuration change to enable the WebSocket server.
+-   : The core backend file, extensively modified for new features, business logic changes, and bug fixes.
+-   : The main admin interface, updated for pagination, new dialogs, and grouped ticket display.
+-   : The client dashboard, verified existing features and slated for a major structural overhaul.
+-   : The public purchase page, updated to use a voucher number instead of a URL.
+-   : Updated for branding and social media sharing.
+-   : Updated with SMTP credentials.
 
 **Critical Info for New Agent**
-*   **WEBSOCKET CONNECTION IS THE #1 BLOCKER:** The most significant and user-frustrating problem is the unreliable WebSocket connection. The previous agent correctly fixed the  startup command but the connection still fails, pointing to a problem outside the application code (likely Nginx proxy configuration). The next agent **MUST** prioritize debugging this. Do not fall back to local timers, as the user has explicitly rejected this.
-*   **User Frustration:** The user is justifiably frustrated with recurring issues, especially the live countdown. Be direct, acknowledge their concerns, and focus on permanently solving the core WebSocket problem.
-*   **Respect Existing Code:** The user has explicitly warned not to refactor or change logic that is already working. When adding features, reuse existing data structures and component patterns.
+-   **User Registration Logic:** The  collection has been fundamentally changed to support dual roles (client/vendor). The  is now unique only in combination with . Do not re-introduce a simple unique check on .
+-   **Ticket Approval Logic:** Ticket approval is now dual-mode. New purchases generate a  and have . The approval endpoint in  handles this logic conditionally. Do not alter this, as it protects data from before this change.
+-   **WebSocket Path:** The WebSocket connection is now stable and configured to use the  path on both frontend and backend. This is crucial for real-time features.
+-   **Dialogs vs. :** All native  calls have been replaced with a custom Shadcn  component in  to avoid issues in the sandboxed preview environment. Continue this pattern if new confirmations are needed.
 
-**Last 10 User Messages and any pending user messages**
-1.  **User:** Admin dashboard UI is not responsive and has layout bugs. (Status: **COMPLETED**)
-2.  **User:** Google registration is failing for new users. (Status: **COMPLETED**)
-3.  **User:** As an admin, I need a way to bypass the minimum ticket purchase rule to unblock a sale. (Status: **COMPLETED**)
-4.  **User:** The new adjust minimum feature is throwing an error. (Status: **COMPLETED**)
-5.  **User:** After adjusting the minimum, the purchase form still shows the old value. (Status: **COMPLETED**)
-6.  **User (Major Request):** Add random ticket assignment, multiple prizes per stage, update home card UI, allow editing media on published raffles, and remove the manual draw button. (Status: **COMPLETED**)
-7.  **User:** The progress bar shows 5/10 instead of 50%, the stage info is gone, and I still can't edit images on published raffles. (Status: **COMPLETED**)
-8.  **User (Major Request):** Implement inline editing for image/video URLs on published raffles. (Status: **COMPLETED**)
-9.  **User:** The promotional image section is missing an input for editing. (Status: **PENDING - Current 
-wtmp begins Thu Dec 11 17:41:31 2025**)
-10. **User (Multiple Times):** The live countdown is not working and is not synchronized. (Status: **PENDING - Critical recurring issue**)
+**documents and test reports created in this job**
+-   
+-   
+-   
+
+**Last 10 User Messages and any pending HUMAN messages**
+1.  **User:** Requested fix for a visual bug during ticket approval where an error was shown despite success. (Status: **COMPLETED**)
+2.  **User:** Reported an error when trying to publish a raffle ( blocked in sandbox). (Status: **COMPLETED**)
+3.  **User:** Reported an Axios 400 error and a  serialization error when approving tickets. (Status: **COMPLETED**)
+4.  **User:** Requested final adjustments to the Client Dashboard. (Status: **IN PROGRESS**)
+5.  **Agent:** Started implementing the client dashboard changes by identifying the 1000-ticket limit. (Status: **IN PROGRESS**)
+6.  **Agent:** Started creating new paginated endpoints in the backend. (Status: **IN PROGRESS**)
+7.  **Agent:** Was about to add the 500-ticket purchase limit validation. (Status: **IN PROGRESS**)
+8.  **User:** Provided feedback that  was not working. (Status: **COMPLETED**)
+9.  **User:** Provided error logs from the browser console regarding the approval failure. (Status: **COMPLETED**)
+10. **User:** Provided the final, detailed order for the Client Dashboard changes, purchase limits, and data protection. (Status: **IN PROGRESS**)
 
 **Project Health Check:**
-*   **Broken:** The core real-time functionality (live countdown) via WebSockets is fundamentally broken due to a persistent connection issue. This is the highest priority to fix.
-*   **Mocked:** None.
+-   **Broken:** None. The most critical issue (WebSocket) was resolved.
+-   **Mocked:** None.
 
 **3rd Party Integrations**
-*   **Google OAuth** (via ) - Handles user login/registration. No user-provided keys are required.
+-   **Google OAuth** (via Emergent-managed service) - Handles user login/registration.
 
 **Testing status**
-*   **Testing agent used after significant changes:** YES, to verify the Google Login button functionality.
-*   **Troubleshoot agent used after agent stuck in loop:** NO.
-*   **Test files created:** None.
-*   **Known regressions:** The WebSocket-driven countdown is a recurring failure that has never been fully and permanently resolved.
+-   **Testing agent used after significant changes:** YES. It was used twice to validate feature batches successfully.
+-   **Troubleshoot agent used after agent stuck in loop:** NO.
+-   **Test files created:** None.
+-   **Known regressions:** None in this session. The major recurring issue with WebSockets was fixed.
 
 **Credentials to test flow:**
-*   **Admin:**  / 
-*   **Vendedor:**  / 
+-   **Admin:**  / 
+-   **User:**  / 
 
 **What agent forgot to execute**
-*   The agent has consistently failed to permanently solve the WebSocket connection issue, which is the root cause of the broken live countdown. While multiple application-level fixes were attempted, the agent did not investigate the likely underlying cause in the server/proxy configuration.
-*   The agent initially forgot to implement editing for *promotional* images when adding the inline editing feature, requiring the user to point out the omission.</analysis>
+-   The agent was actively working on the user's latest request and had not forgotten any tasks. All prior requests in the session were completed.</analysis>
