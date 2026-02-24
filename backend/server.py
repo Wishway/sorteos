@@ -3262,6 +3262,16 @@ async def startup_event():
     except Exception as e:
         logger.warning(f"Índice cedula_tipo_usuario ya existe o error: {e}")
     
+    # Indices para optimizar consultas de boletos
+    try:
+        await db.boletos.create_index([("sorteo_id", 1), ("numero_boleto", 1)], name="boletos_sorteo_numero")
+        await db.boletos.create_index([("sorteo_id", 1), ("pago_confirmado", 1)], name="boletos_sorteo_pago")
+        await db.boletos.create_index([("usuario_id", 1)], name="boletos_usuario")
+        await db.boletos.create_index([("purchase_id", 1)], name="boletos_purchase")
+        logger.info("Indices de boletos creados/verificados")
+    except Exception as e:
+        logger.warning(f"Error creando indices de boletos: {e}")
+    
     # Inicializar state_machine
     state_machine.init_state_machine(db, Sorteo, SorteoEstado, SorteoTipo)
     logger.info("State machine inicializada")
