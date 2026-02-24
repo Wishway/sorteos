@@ -2302,8 +2302,10 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
     # Generar ID único de compra para aprobación masiva
     purchase_id = str(uuid.uuid4())
     
-    # Create boletos
+    # Create boletos - BATCH insert
     boletos_creados = []
+    boletos_dicts = []
+    comisiones_dicts = []
     pago_confirmado = data.metodo_pago == MetodoPago.PAYPHONE
     
     for numero in data.numeros_boletos:
@@ -2318,16 +2320,15 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
             estado=BoletoEstado.ACTIVO,
             pago_confirmado=pago_confirmado,
             numero_comprobante=data.numero_comprobante,
-            purchase_id=purchase_id,  # Nuevo: agrupa boletos de la misma compra
-            approval_mode='grouped'   # Nuevo: modo de aprobación masiva
+            purchase_id=purchase_id,
+            approval_mode='grouped'
         )
         
         boleto_dict = boleto.model_dump()
         boleto_dict['fecha_compra'] = boleto_dict['fecha_compra'].isoformat()
-        await db.boletos.insert_one(boleto_dict)
+        boletos_dicts.append(boleto_dict)
         boletos_creados.append(boleto)
         
-        # Create comision if vendedor
         if vendedor_id:
             comision = Comision(
                 vendedor_id=vendedor_id,
@@ -2337,7 +2338,15 @@ async def comprar_boletos(data: BoletoCompra, request: Request):
             )
             comision_dict = comision.model_dump()
             comision_dict['fecha'] = comision_dict['fecha'].isoformat()
-            await db.comisiones.insert_one(comision_dict)
+            comisiones_dicts.append(comision_dict)
+    
+    # Batch insert all boletos at once
+    if boletos_dicts:
+        await db.boletos.insert_many(boletos_dicts)
+    
+    # Batch insert all comisiones at once
+    if comisiones_dicts:
+        await db.comisiones.insert_many(comisiones_dicts)
     
     # Actualizar progreso del sorteo basado en boletos aprobados
     # Si el pago es por Payphone, está aprobado automáticamente
