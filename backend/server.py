@@ -876,7 +876,8 @@ async def logout(request: Request, response: Response):
     if session_token:
         await db.user_sessions.delete_one({'session_token': session_token})
     
-    response.delete_cookie(key='session_token', path='/')
+    # Delete cookie with all attributes matching set_cookie for Safari/iOS compatibility
+    response.delete_cookie(key='session_token', path='/', samesite='none', secure=True)
     return {"message": "Sesión cerrada"}
 
 @api_router.post("/auth/forgot-password")
