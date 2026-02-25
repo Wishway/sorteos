@@ -3250,6 +3250,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# Middleware to fix CORS with credentials - Safari/iOS requires explicit origin
+@app.middleware("http")
+async def fix_cors_credentials(request: Request, call_next):
+    response = await call_next(request)
+    origin = request.headers.get("origin")
+    if origin:
+        response.headers["Access-Control-Allow-Origin"] = origin
+        response.headers["Access-Control-Allow-Credentials"] = "true"
+    return response
+
 @app.on_event("startup")
 async def startup_event():
     """Inicializar módulos al arrancar"""
