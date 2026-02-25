@@ -7,7 +7,7 @@ WishWay Sorteos is a full-stack digital raffle platform that enables administrat
 - **Backend:** FastAPI + Motor (async MongoDB)
 - **Frontend:** React + TailwindCSS + shadcn/ui
 - **Database:** MongoDB
-- **Auth:** JWT + Google OAuth (Emergent-managed)
+- **Auth:** JWT + Google OAuth (Emergent-managed) + Dual-transport (Cookie + Bearer token)
 - **Real-time:** Socket.IO (WebSocket) - WORKING
 
 ## Core Features (Implemented)
@@ -35,6 +35,13 @@ WishWay Sorteos is a full-stack digital raffle platform that enables administrat
 - Change password
 - Dual registration (cliente/vendedor with same cedula)
 
+### Authentication (Mobile-compatible)
+- CORS: `allow_origin_regex` reflects actual Origin (Safari/iOS compatible)
+- Dual-transport auth: Cookie (primary) + Bearer token via localStorage (fallback)
+- Stale session cleanup on login
+- Consistent cookie config: `secure=True, samesite='none', path='/'`
+- Axios interceptor auto-adds Bearer header from localStorage
+
 ### Seller Features
 - Earn commissions on ticket sales
 - Request withdrawals
@@ -45,39 +52,25 @@ WishWay Sorteos is a full-stack digital raffle platform that enables administrat
 - Live countdown synchronization
 - Real-time state updates
 
-### Automated System
-- State machine for automatic raffle transitions
-- Automatic winner selection for each prize in multi-prize stages
-- 5-minute countdown before LIVE state
-- 2-minute LIVE animation with prize drawings
-
 ## Recent Updates
 
 ### February 2026
 
+#### Mobile Auth Fix (CRITICAL)
+**Problem:** Users on iPhone Safari and old Android sessions got false "Email o contrasena incorrectos" error.
+**Root causes fixed:**
+1. CORS: `allow_origins=['*']` + `allow_credentials=True` invalid per spec, Safari blocks it. Fixed with `allow_origin_regex=r'.*'`
+2. Inconsistent cookie settings across endpoints (vendor reg used `samesite='lax'` without `secure`). All standardized to `secure=True, samesite='none', path='/'`
+3. No stale session cleanup on login. Now deletes old cookie + expired sessions before creating new.
+4. No fallback for mobile browsers that block cookies. Added localStorage token storage + axios Bearer header interceptor.
+
 #### Bulk Purchase Performance Optimization
-**Completed:**
-1. **Bulk validation endpoint** - `/sorteos/{id}/validar-numeros-bulk` validates all numbers in 1 query using `$in`
-2. **Optimized purchase** - Uses `$in` for availability check + `insert_many` for batch insertion
-3. **Database indexes** - Added indexes on boletos (sorteo_id+numero_boleto, sorteo_id+pago_confirmado, usuario_id, purchase_id)
-4. **Frontend optimization** - 1 bulk API call instead of N individual calls
+- Bulk validation endpoint, $in queries, insert_many, database indexes
+- 500-ticket validation: 0.087s, purchase: 0.6s (12.7x faster)
 
-**Performance results:**
-- 500-number validation: 0.087s (was ~30-60s with 500 individual calls)
-- 500-ticket purchase: 0.6s (was ~30s+ with individual inserts)
-- 12.7x faster than previous implementation
-
-#### Purchase Flow UX Improvements
-- Loading indicators, double-click prevention, error handling, dialog close prevention
-
-#### Client Dashboard Overhaul
+#### Purchase Flow UX + Client Dashboard Overhaul
+- Loading indicators, double-click prevention, error handling
 - Summary view by raffle + paginated detail (15/page)
-- 500-ticket purchase limit, removed 1000-ticket display limit
-
-### December 2025
-- WebSocket fix, Premios Ganados, User pagination, Delete sorteos
-- Hide raffle, Google Drive URLs, Dual user registration
-- Password reset, Voucher number, Branding/meta tags, Grouped ticket approval
 
 ## Test Credentials
 - **Admin:** admin@wishway.com / admin123
@@ -85,24 +78,17 @@ WishWay Sorteos is a full-stack digital raffle platform that enables administrat
 
 ## API Endpoints Summary
 
-### Ticket Validation
-- `POST /api/sorteos/{id}/validar-numero` - Single number validation (legacy)
-- `POST /api/sorteos/{id}/validar-numeros-bulk` - Bulk validation (optimized)
-- `GET /api/sorteos/{id}/numeros-disponibles` - Get available numbers
+### Auth
+- `POST /api/auth/login` - Login (cleans stale sessions, sets cookie + returns token)
+- `GET /api/auth/me` - Get current user (supports cookie + Bearer)
+- `POST /api/auth/logout` - Logout (clears session + cookie + localStorage)
+- `POST /api/auth/google/callback` - Google OAuth callback
 
-### User - Boletos
-- `GET /api/boletos/mis-boletos` - All user tickets
-- `GET /api/boletos/mis-boletos/resumen` - Summary grouped by raffle
-- `GET /api/boletos/mis-boletos/sorteo/{id}?page=1&limit=15&estado=todos` - Paginated per-raffle
-- `POST /api/boletos/comprar` - Purchase tickets (max 500, batch insert)
-
-### User - Premios
-- `GET /api/usuario/mis-premios` - Get user's won prizes
-
-### Admin
-- `GET /api/admin/usuarios?page=1&limit=10` - Paginated user list
-- `DELETE /api/admin/sorteo/{id}?confirmar_con_compras=true` - Delete with purchases
-- `PUT /api/admin/sorteo/{id}/ocultar` - Toggle visibility
+### Tickets
+- `POST /api/sorteos/{id}/validar-numeros-bulk` - Bulk validation
+- `POST /api/boletos/comprar` - Purchase (max 500, batch insert)
+- `GET /api/boletos/mis-boletos/resumen` - Summary by raffle
+- `GET /api/boletos/mis-boletos/sorteo/{id}` - Paginated per-raffle
 
 ## Database Indexes
 - **users**: `(cedula, tipo_usuario)` unique sparse
