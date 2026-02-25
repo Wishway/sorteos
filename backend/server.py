@@ -3260,20 +3260,10 @@ app.include_router(api_router)
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
-    allow_origins=os.environ.get('CORS_ORIGINS', '*').split(','),
+    allow_origin_regex=r".*",
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-# Middleware to fix CORS with credentials - Safari/iOS requires explicit origin
-@app.middleware("http")
-async def fix_cors_credentials(request: Request, call_next):
-    response = await call_next(request)
-    origin = request.headers.get("origin")
-    if origin:
-        response.headers["Access-Control-Allow-Origin"] = origin
-        response.headers["Access-Control-Allow-Credentials"] = "true"
-    return response
 
 @app.on_event("startup")
 async def startup_event():
