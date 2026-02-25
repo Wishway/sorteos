@@ -636,8 +636,10 @@ async def registro_vendedor(data: RegisterRequest, response: Response):
         key="session_token",
         value=session_token,
         httponly=True,
+        secure=True,
+        samesite="none",
         max_age=JWT_EXPIRATION_DAYS * 24 * 60 * 60,
-        samesite="lax"
+        path="/"
     )
     
     logger.info(f"Nuevo vendedor registrado: {user.email} con link {link_unico}")
