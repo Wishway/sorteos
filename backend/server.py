@@ -656,7 +656,7 @@ async def registro_vendedor(data: RegisterRequest, response: Response):
     }
 
 @api_router.post("/auth/login")
-async def login(data: LoginRequest, response: Response):
+async def login(data: LoginRequest, request: Request, response: Response):
     # Find user
     user_doc = await db.users.find_one({'email': data.email})
     if not user_doc:
@@ -667,6 +667,17 @@ async def login(data: LoginRequest, response: Response):
     # Verify password
     if not user.password_hash or not verify_password(data.password, user.password_hash):
         raise HTTPException(status_code=401, detail="Credenciales inválidas")
+    
+    # Clean up old session if exists (prevents stale cookie issues on mobile)
+    old_token = request.cookies.get('session_token')
+    if old_token:
+        await db.user_sessions.delete_one({'session_token': old_token})
+    
+    # Clean expired sessions for this user
+    await db.user_sessions.delete_many({
+        'user_id': user.id,
+        'expires_at': {'$lt': datetime.now(timezone.utc).isoformat()}
+    })
     
     # Create session
     session_token = str(uuid.uuid4())
@@ -681,7 +692,8 @@ async def login(data: LoginRequest, response: Response):
     session_dict['expires_at'] = session_dict['expires_at'].isoformat()
     await db.user_sessions.insert_one(session_dict)
     
-    # Set cookie
+    # Delete old cookie first, then set new one (fixes Safari/iOS stale cookie issue)
+    response.delete_cookie(key='session_token', path='/')
     response.set_cookie(
         key='session_token',
         value=session_token,
