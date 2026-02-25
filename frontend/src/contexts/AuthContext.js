@@ -5,6 +5,18 @@ const API = process.env.REACT_APP_BACKEND_URL + '/api';
 
 const AuthContext = createContext();
 
+// Session token storage key
+const SESSION_TOKEN_KEY = 'ww_session_token';
+
+// Configure axios interceptor to always send session token as Bearer header (fallback for mobile)
+axios.interceptors.request.use((config) => {
+  const token = localStorage.getItem(SESSION_TOKEN_KEY);
+  if (token && !config.headers['Authorization']) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+  }
+  return config;
+});
+
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {
@@ -36,6 +48,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       if (isMounted.current) {
         setUser(null);
+        // Clear stale token if auth check fails
+        localStorage.removeItem(SESSION_TOKEN_KEY);
       }
     } finally {
       if (isMounted.current) {
@@ -46,10 +60,17 @@ export const AuthProvider = ({ children }) => {
 
   const login = async (email, password) => {
     const response = await axios.post(`${API}/auth/login`, { email, password }, { withCredentials: true });
-    if (isMounted.current) {
-      setUser(response.data);
+    const data = response.data;
+    
+    // Store session token in localStorage as fallback for mobile browsers that block cookies
+    if (data.session_token) {
+      localStorage.setItem(SESSION_TOKEN_KEY, data.session_token);
     }
-    return response.data;
+    
+    if (isMounted.current) {
+      setUser(data);
+    }
+    return data;
   };
 
   const register = async (email, password, name, cedula, celular) => {
@@ -72,14 +93,21 @@ export const AuthProvider = ({ children }) => {
         { withCredentials: true }
       );
 
+      const data = response.data;
+      
+      // Store session token as fallback
+      if (data.session_token) {
+        localStorage.setItem(SESSION_TOKEN_KEY, data.session_token);
+      }
+
       if (isMounted.current) {
-        setUser(response.data);
+        setUser(data);
       }
       
       // Limpiar el hash de la URL
       window.history.replaceState(null, '', window.location.pathname);
       
-      return response.data;
+      return data;
     } catch (error) {
       console.error('Error en Google callback:', error);
       throw error;
@@ -88,21 +116,16 @@ export const AuthProvider = ({ children }) => {
 
   const logout = async () => {
     try {
-      // Hacer la llamada de logout al backend
       await axios.post(`${API}/auth/logout`, {}, { withCredentials: true });
     } catch (error) {
-      console.error('Error al cerrar sesión:', error);
+      console.error('Error al cerrar sesion:', error);
     } finally {
-      // Solo actualizar estado si el componente sigue montado
+      // Clear session token from localStorage
+      localStorage.removeItem(SESSION_TOKEN_KEY);
+      localStorage.removeItem('vendedor_id');
+      
       if (isMounted.current) {
         setUser(null);
-      }
-      
-      // Limpiar localStorage independientemente
-      try {
-        localStorage.removeItem('vendedor_id');
-      } catch (e) {
-        // Ignorar errores de localStorage
       }
     }
   };
