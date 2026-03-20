@@ -642,7 +642,7 @@ const AdminDashboard = () => {
             <div className="flex items-center gap-4">
               <div className="w-12 h-12 rounded-full bg-red-600 text-white flex items-center justify-center font-bold text-xl">A</div>
               <div>
-                <h1 className="text-xl md:text-2xl font-bold">Panel de Administración</h1>
+                <h1 className="text-xl md:text-2xl font-bold">Panel de Administración WishWay</h1>
                 <p className="text-sm text-gray-600">{user?.email}</p>
               </div>
             </div>
